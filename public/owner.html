@@ -13,7 +13,8 @@ let schools=[];
 const api=async(url,opt={})=>{
   const headers=Object.assign({'Authorization':'Bearer '+token},opt.headers||{});
   if(opt.body&&typeof opt.body!=='string'&&!(opt.body instanceof FormData)){headers['Content-Type']='application/json';opt.body=JSON.stringify(opt.body);}
-  const r=await fetch(url,{...opt,headers}); const raw=await r.text(); let d={};
+  const method=String(opt.method||'GET').toUpperCase();
+  const r=await fetch(url,{...opt,cache:method==='GET'?'no-store':opt.cache,headers}); const raw=await r.text(); let d={};
   if(raw.trim()){try{d=JSON.parse(raw)}catch{throw Error(`Server returned an invalid response (HTTP ${r.status}).`);}}
   if(r.status===401){localStorage.clear();location.href='/login.html';throw Error('Session expired. Please sign in again.');}
   if(!r.ok)throw Error(d.error||`Request failed (HTTP ${r.status}).`);

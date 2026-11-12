@@ -43,7 +43,7 @@
       headers['Content-Type'] = 'application/json';
       opt.body = JSON.stringify(opt.body);
     }
-    return fetch(path, Object.assign({}, opt, { headers: headers })).then(function (res) {
+    return fetch(path, Object.assign({}, opt, { headers: headers, cache: method === 'GET' ? 'no-store' : opt.cache })).then(function (res) {
       return res.text().then(function (raw) {
         var data = {};
         if (raw && raw.trim()) {
@@ -151,7 +151,7 @@
   }
 
   function download(path) {
-    return fetch(path, { headers: { Authorization: 'Bearer ' + token } }).then(function (res) {
+    return fetch(path, { cache: 'no-store', headers: { Authorization: 'Bearer ' + token } }).then(function (res) {
       if (!res.ok) {
         return res.text().then(function (raw) {
           var msg = 'Download failed';

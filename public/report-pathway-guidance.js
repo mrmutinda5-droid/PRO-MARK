@@ -23,7 +23,8 @@
  const form=$('pathwayGuidanceForm'),status=$('pathwayGuidanceStatus');
  const request=async(url,options={})=>{
   const headers={'Authorization':'Bearer '+token(),...(options.body?{'Content-Type':'application/json'}:{})};
-  const response=await fetch(url,{...options,headers});let data={};
+  const method=String(options.method||'GET').toUpperCase();
+  const response=await fetch(url,{...options,cache:method==='GET'?'no-store':options.cache,headers});let data={};
   try{data=await response.json();}catch{}
   if(!response.ok)throw new Error(data.error||`Request failed (${response.status})`);
   return data;

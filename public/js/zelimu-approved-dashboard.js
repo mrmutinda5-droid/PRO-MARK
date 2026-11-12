@@ -293,7 +293,7 @@ function make(){
    const node=$(id);if(node)node.innerHTML=`<div class="z7-empty${isError?' z7-error':''}">${esc(message)}</div>`;
   };
   const request=async(path)=>{
-   const response=await fetch(path,{headers:{Authorization:'Bearer '+(localStorage.getItem('token')||'')}});
+   const response=await fetch(path,{cache:'no-store',headers:{Authorization:'Bearer '+(localStorage.getItem('token')||'')}});
    const result=await response.json();
    if(!response.ok)throw new Error(result.error||`Request failed (${response.status})`);
    return result;

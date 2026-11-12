@@ -12,7 +12,7 @@ const school=()=>session().school_id||new URLSearchParams(location.search).get('
 const canEdit=()=>['SCHOOL_ADMIN','ADMIN','HEADTEACHER'].includes(session().role);
 const context=()=>{const c={academic_year_id:$('anYear')?.value,term_id:$('anTerm')?.value,class_id:$('anClass')?.value};if(!school()||Object.values(c).some(v=>!v))throw Error('Select an academic year, term and a specific class in Analytics first.');return c};
 const auth=()=>localStorage.getItem('token')||'';
-async function api(path,options={}){const r=await fetch(path,{...options,headers:{Authorization:'Bearer '+auth(),...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})}});const data=await r.json().catch(()=>({}));if(!r.ok)throw Error(data.error||data.message||`Request failed (${r.status})`);return data;}
+async function api(path,options={}){const method=String(options.method||'GET').toUpperCase();const r=await fetch(path,{...options,cache:method==='GET'?'no-store':options.cache,headers:{Authorization:'Bearer '+auth(),...(options.body?{'Content-Type':'application/json'}:{}),...(options.headers||{})}});const data=await r.json().catch(()=>({}));if(!r.ok)throw Error(data.error||data.message||`Request failed (${r.status})`);return data;}
 let loaded=null,dirty=false;
 function status(s,error=false){msg.textContent=s;msg.style.color=error?'#b42318':'#17623d';}
 function reset(){loaded=null;dirty=false;assess.textContent='';results.textContent='';status('Filters changed. Load class assessments again.');}
