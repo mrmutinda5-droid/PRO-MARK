@@ -63,6 +63,7 @@ router.post('/:schoolId/generate',schoolBoundary,admin,async(req,res)=>{
     blocked:b.blocked ?? (b.settings&&b.settings.blocked) ?? [],
     teacher_unavailable:[...unavailableTeachers,...(b.teacher_unavailable ?? (b.settings&&b.settings.teacher_unavailable) ?? [])],
     room_unavailable:[...unavailableRooms,...(b.room_unavailable ?? (b.settings&&b.settings.room_unavailable) ?? [])],
+    teacher_limits:b.teacher_limits ?? (b.settings&&b.settings.teacher_limits) ?? [],
     locked
    }
   };

@@ -3,9 +3,14 @@ const crypto=require('crypto');
 const db=require('../db');
 const {authenticate,roles,schoolBoundary}=require('../middleware/auth');
 const {allocateAvailablePayments,money}=require('../services/school-finance-ledger');
+const {validateExpenseInput,assertTransition}=require('../services/school-finance-expenses');
 const router=express.Router();
 router.use(authenticate);
 const FINANCE_ROLES=['SCHOOL_ADMIN','ADMIN'];
+const FINANCE_ACCESS=[...FINANCE_ROLES,'BURSAR'];
+const FINANCE_READ=[...FINANCE_ACCESS,'HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER'];
+const EXPENSE_APPROVERS=['SCHOOL_ADMIN','ADMIN','HEADTEACHER'];
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const validDate=value=>{
  if(value===undefined||value===null||value==='')return true;
@@ -20,7 +25,7 @@ const validMoney=value=>
  Math.round(Number(value)*100)/100===Number(value);
 
 
-router.get('/:schoolId/overview',schoolBoundary,roles(...FINANCE_ROLES,'HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER'),async(req,res)=>{
+router.get('/:schoolId/overview',schoolBoundary,roles(...FINANCE_READ),async(req,res)=>{
  try{
   const sid=req.params.schoolId;
   const [structures,learners,charges,payments,summary,balances]=await Promise.all([
@@ -35,7 +40,7 @@ router.get('/:schoolId/overview',schoolBoundary,roles(...FINANCE_ROLES,'HEADTEAC
  }catch(e){console.error('School finance overview failed:',e);res.status(500).json({error:'Unable to load school finance records. Apply database migrations 028_school_finance_core.sql and 033_school_fee_ledger_integrity.sql if they have not been applied.'});}
 });
 
-router.post('/:schoolId/structures',schoolBoundary,roles(...FINANCE_ROLES),async(req,res)=>{
+router.post('/:schoolId/structures',schoolBoundary,roles(...FINANCE_ACCESS),async(req,res)=>{
  let c;
  try{
   const sid=req.params.schoolId,b=req.body||{};
@@ -57,7 +62,7 @@ router.post('/:schoolId/structures',schoolBoundary,roles(...FINANCE_ROLES),async
  finally{if(c)c.release();}
 });
 
-router.patch('/:schoolId/structures/:structureId',schoolBoundary,roles(...FINANCE_ROLES),async(req,res)=>{
+router.patch('/:schoolId/structures/:structureId',schoolBoundary,roles(...FINANCE_ACCESS),async(req,res)=>{
  let c;
  try{
   const sid=req.params.schoolId,b=req.body||{};
@@ -90,7 +95,7 @@ router.patch('/:schoolId/structures/:structureId',schoolBoundary,roles(...FINANC
  finally{if(c)c.release();}
 });
 
-router.delete('/:schoolId/structures/:structureId',schoolBoundary,roles(...FINANCE_ROLES),async(req,res)=>{
+router.delete('/:schoolId/structures/:structureId',schoolBoundary,roles(...FINANCE_ACCESS),async(req,res)=>{
  let c;
  try{
   const sid=req.params.schoolId;
@@ -114,7 +119,7 @@ router.delete('/:schoolId/structures/:structureId',schoolBoundary,roles(...FINAN
  finally{if(c)c.release();}
 });
 
-router.post('/:schoolId/structures/:structureId/assign',schoolBoundary,roles(...FINANCE_ROLES),async(req,res)=>{
+router.post('/:schoolId/structures/:structureId/assign',schoolBoundary,roles(...FINANCE_ACCESS),async(req,res)=>{
  const sid=req.params.schoolId,c=await db.pool.connect();
  try{
   await c.query('BEGIN');
@@ -142,7 +147,7 @@ router.post('/:schoolId/structures/:structureId/assign',schoolBoundary,roles(...
  }catch(e){await c.query('ROLLBACK').catch(()=>{});res.status(e.status||400).json({error:e.message||'Unable to assign fee structure.'});}finally{c.release();}
 });
 
-router.post('/:schoolId/payments',schoolBoundary,roles(...FINANCE_ROLES),async(req,res)=>{
+router.post('/:schoolId/payments',schoolBoundary,roles(...FINANCE_ACCESS),async(req,res)=>{
  const sid=req.params.schoolId,b=req.body||{},amount=Number(b.amount),c=await db.pool.connect();
  try{
   if(!b.learner_id||!validMoney(b.amount))throw Object.assign(new Error('Learner and payment amount greater than zero are required.'),{status:400});
@@ -150,7 +155,7 @@ router.post('/:schoolId/payments',schoolBoundary,roles(...FINANCE_ROLES),async(r
     throw Object.assign(new Error('Invalid payment date.'),{status:400});
   const rawMethod=String(b.payment_method||'CASH').trim().toUpperCase();
   const method=({'M-PESA':'MPESA','BANK_DEPOSIT':'BANK'})[rawMethod]||rawMethod;
-  if(!['CASH','MPESA','BANK','CHEQUE'].includes(method))
+  if(!['CASH','MPESA','BANK','CHEQUE','OTHER'].includes(method))
     throw Object.assign(new Error('Unsupported payment method.'),{status:400});
   const currency=String(b.currency||'KES').toUpperCase();if(currency!=='KES')throw Object.assign(new Error('This first school-finance release supports KES only.'),{status:400});
   const receipt=`ZFC-${new Date().getUTCFullYear()}-${crypto.randomBytes(8).toString('hex').toUpperCase()}`;
@@ -171,7 +176,7 @@ router.post('/:schoolId/payments',schoolBoundary,roles(...FINANCE_ROLES),async(r
  }catch(e){await c.query('ROLLBACK').catch(()=>{});res.status(e.status||400).json({error:e.message||'Unable to record payment.'});}finally{c.release();}
 });
 
-router.post('/:schoolId/payments/:paymentId/reversals',schoolBoundary,roles(...FINANCE_ROLES),async(req,res)=>{
+router.post('/:schoolId/payments/:paymentId/reversals',schoolBoundary,roles(...FINANCE_ACCESS),async(req,res)=>{
  const sid=req.params.schoolId,b=req.body||{},reason=String(b.reason||'').trim(),c=await db.pool.connect();
  try{
   if(reason.length<4||reason.length>500)throw Object.assign(new Error('Provide a reversal reason between 4 and 500 characters.'),{status:400});
@@ -187,5 +192,212 @@ router.post('/:schoolId/payments/:paymentId/reversals',schoolBoundary,roles(...F
   await c.query('COMMIT');res.status(201).json({reversal,payment:{id:payment.id,receipt_no:payment.receipt_no,amount:payment.amount}});
  }catch(e){await c.query('ROLLBACK').catch(()=>{});res.status(e.status||400).json({error:e.message||'Unable to reverse receipt.'});}finally{c.release();}
 });
+
+router.get('/:schoolId/expense-categories',schoolBoundary,roles(...FINANCE_READ),async(req,res)=>{
+ try{
+  await db.query(`INSERT INTO school_finance_expense_categories(school_id,name)
+   SELECT $1,name FROM unnest($2::text[]) AS defaults(name)
+   ON CONFLICT(school_id,name) DO NOTHING`,[req.params.schoolId,['Salaries','Utilities','Food and catering','Transport','Fuel','Learning materials','Stationery','Maintenance','Repairs','Administration','Other approved expenses']]);
+  const rows=await db.query(`SELECT id,name,is_active FROM school_finance_expense_categories WHERE school_id=$1 ORDER BY is_active DESC,name`,[req.params.schoolId]);
+  res.json(rows.rows);
+ }catch(e){console.error('Load expense categories failed:',e);res.status(500).json({error:'Unable to load expense categories. Apply migration 039_bursar_expense_management.sql.'});}
+});
+
+router.post('/:schoolId/expense-categories',schoolBoundary,roles(...FINANCE_ROLES),async(req,res)=>{
+ const name=String(req.body?.name||'').trim();
+ if(!name||name.length>100)return res.status(400).json({error:'Category name is required and must be 100 characters or fewer.'});
+ const client=await db.pool.connect();
+ try{
+  await client.query('BEGIN');
+  const row=await client.query(`INSERT INTO school_finance_expense_categories(school_id,name,created_by) VALUES($1,$2,$3) RETURNING id,name,is_active`,[req.params.schoolId,name,req.user.user_id]);
+  await client.query(`INSERT INTO school_finance_audit_events(school_id,actor_id,entity_type,entity_id,action,new_values) VALUES($1,$2,'EXPENSE_CATEGORY',$3,'CREATED',$4::jsonb)`,[req.params.schoolId,req.user.user_id,row.rows[0].id,JSON.stringify(row.rows[0])]);
+  await client.query('COMMIT');res.status(201).json(row.rows[0]);
+ }catch(e){await client.query('ROLLBACK').catch(()=>{});if(e.code==='23505')return res.status(409).json({error:'That expense category already exists.'});console.error('Create expense category failed:',e);res.status(500).json({error:'Unable to create expense category.'});}
+ finally{client.release();}
+});
+
+router.patch('/:schoolId/expense-categories/:categoryId',schoolBoundary,roles(...FINANCE_ROLES),async(req,res)=>{
+ if(!UUID.test(req.params.categoryId))return res.status(400).json({error:'Invalid expense category ID.'});
+ const name=String(req.body?.name||'').trim(),active=req.body?.is_active;
+ if((!name&&typeof active!=='boolean')||name.length>100|| (typeof active!=='undefined'&&typeof active!=='boolean'))
+  return res.status(400).json({error:'Provide a category name (up to 100 characters) or an active status.'});
+ const client=await db.pool.connect();
+ try{
+  await client.query('BEGIN');
+  const previous=(await client.query(`SELECT id,name,is_active FROM school_finance_expense_categories WHERE school_id=$1 AND id=$2 FOR UPDATE`,[req.params.schoolId,req.params.categoryId])).rows[0];
+  if(!previous){await client.query('ROLLBACK');return res.status(404).json({error:'Expense category not found.'});}
+  const row=await client.query(`UPDATE school_finance_expense_categories SET name=COALESCE(NULLIF($3,''),name),is_active=COALESCE($4,is_active) WHERE school_id=$1 AND id=$2 RETURNING id,name,is_active`,[req.params.schoolId,req.params.categoryId,name||null,typeof active==='boolean'?active:null]);
+  await client.query(`INSERT INTO school_finance_audit_events(school_id,actor_id,entity_type,entity_id,action,previous_values,new_values) VALUES($1,$2,'EXPENSE_CATEGORY',$3,'UPDATED',$4::jsonb,$5::jsonb)`,[req.params.schoolId,req.user.user_id,row.rows[0].id,JSON.stringify(previous),JSON.stringify(row.rows[0])]);
+  await client.query('COMMIT');res.json(row.rows[0]);
+ }catch(e){await client.query('ROLLBACK').catch(()=>{});if(e.code==='23505')return res.status(409).json({error:'That expense category already exists.'});console.error('Update expense category failed:',e);res.status(500).json({error:'Unable to update expense category.'});}
+ finally{client.release();}
+});
+
+router.get('/:schoolId/expenses',schoolBoundary,roles(...FINANCE_READ),async(req,res)=>{
+ try{
+  const {from,to,status,category_id,payment_method}=req.query;
+  if(from&&!validDate(from)||to&&!validDate(to))return res.status(400).json({error:'Use valid YYYY-MM-DD dates for expense filters.'});
+  if(category_id&&!UUID.test(String(category_id)))return res.status(400).json({error:'Invalid expense category filter.'});
+  const rows=await db.query(`SELECT e.*,c.name category_name,rec.first_name recorder_first_name,rec.last_name recorder_last_name,
+      app.first_name approver_first_name,app.last_name approver_last_name
+    FROM school_finance_expenses e
+    JOIN school_finance_expense_categories c ON c.id=e.category_id AND c.school_id=e.school_id
+    LEFT JOIN users rec ON rec.id=e.recorded_by LEFT JOIN users app ON app.id=e.approved_by
+    WHERE e.school_id=$1 AND ($2::date IS NULL OR e.transaction_date >= $2)
+      AND ($3::date IS NULL OR e.transaction_date <= $3)
+      AND ($4::text IS NULL OR e.status=$4)
+      AND ($5::uuid IS NULL OR e.category_id=$5)
+      AND ($6::text IS NULL OR e.payment_method=$6)
+    ORDER BY e.transaction_date DESC,e.created_at DESC LIMIT 1000`,
+   [req.params.schoolId,from||null,to||null,status||null,category_id||null,payment_method||null]);
+  res.json(rows.rows);
+ }catch(e){console.error('Load school expenses failed:',e);res.status(500).json({error:'Unable to load school expenses. Apply migration 039_bursar_expense_management.sql.'});}
+});
+
+router.get('/:schoolId/expenses/summary',schoolBoundary,roles(...FINANCE_READ),async(req,res)=>{
+ try{
+  const {from,to}=req.query;
+  if(from&&!validDate(from)||to&&!validDate(to))return res.status(400).json({error:'Use valid YYYY-MM-DD dates for expense filters.'});
+  const rows=await db.query(`SELECT
+    COALESCE(sum(amount) FILTER (WHERE status='PAID'),0) paid_total,
+    count(*) FILTER (WHERE status='PAID')::int paid_count,
+    COALESCE(sum(amount) FILTER (WHERE status IN ('RECORDED','SUBMITTED','APPROVED')),0) pending_total,
+    count(*) FILTER (WHERE status IN ('RECORDED','SUBMITTED','APPROVED'))::int pending_count,
+    COALESCE(sum(amount) FILTER (WHERE status='REJECTED'),0) rejected_total,
+    COALESCE(sum(amount) FILTER (WHERE status='PAID' AND transaction_date=CURRENT_DATE),0) today_paid,
+    COALESCE(sum(amount) FILTER (WHERE status='PAID' AND date_trunc('month',transaction_date)=date_trunc('month',CURRENT_DATE)),0) month_paid
+   FROM school_finance_expenses WHERE school_id=$1
+    AND ($2::date IS NULL OR transaction_date >= $2) AND ($3::date IS NULL OR transaction_date <= $3)`,
+   [req.params.schoolId,from||null,to||null]);
+  res.json(rows.rows[0]);
+ }catch(e){console.error('Load expense summary failed:',e);res.status(500).json({error:'Unable to calculate expense summary.'});}
+});
+
+router.post('/:schoolId/expenses',schoolBoundary,roles(...FINANCE_ACCESS),async(req,res)=>{
+ const sid=req.params.schoolId;
+ let input;
+ try{input=validateExpenseInput(req.body);}catch(e){return res.status(e.status||400).json({error:e.message});}
+ const client=await db.pool.connect();
+ try{
+  await client.query('BEGIN');
+  const category=(await client.query(`SELECT id FROM school_finance_expense_categories WHERE school_id=$1 AND id=$2 AND is_active=true FOR SHARE`,[sid,input.category_id])).rows[0];
+  if(!category)throw Object.assign(new Error('Select an active expense category from this school.'),{status:400});
+  const expenseNo=`EXP-${new Date().getUTCFullYear()}-${crypto.randomBytes(6).toString('hex').toUpperCase()}`;
+  const row=(await client.query(`INSERT INTO school_finance_expenses(school_id,expense_no,category_id,description,amount,payment_method,payment_reference,supplier,transaction_date,recorded_by)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
+   [sid,expenseNo,input.category_id,input.description,input.amount,input.payment_method,input.payment_reference,input.supplier,input.transaction_date,req.user.user_id])).rows[0];
+  await client.query(`INSERT INTO school_finance_audit_events(school_id,actor_id,entity_type,entity_id,action,new_values)
+    VALUES($1,$2,'EXPENSE',$3,'RECORDED',$4::jsonb)`,[sid,req.user.user_id,row.id,JSON.stringify(row)]);
+  await client.query('COMMIT');res.status(201).json(row);
+ }catch(e){await client.query('ROLLBACK').catch(()=>{});if(e.status)return res.status(e.status).json({error:e.message});console.error('Record school expense failed:',e);res.status(500).json({error:'Unable to record expense. Apply migration 039_bursar_expense_management.sql.'});}
+ finally{client.release();}
+});
+
+router.patch('/:schoolId/expenses/:expenseId',schoolBoundary,roles(...FINANCE_ACCESS),async(req,res)=>{
+ if(!UUID.test(req.params.expenseId))return res.status(400).json({error:'Invalid expense ID.'});
+ let input;
+ try{input=validateExpenseInput(req.body);}catch(e){return res.status(e.status||400).json({error:e.message});}
+ const client=await db.pool.connect();
+ try{
+  await client.query('BEGIN');
+  const current=(await client.query(`SELECT * FROM school_finance_expenses WHERE school_id=$1 AND id=$2 FOR UPDATE`,[req.params.schoolId,req.params.expenseId])).rows[0];
+  if(!current){await client.query('ROLLBACK');return res.status(404).json({error:'Expense not found in this school.'});}
+  if(!['RECORDED','REJECTED'].includes(current.status))throw Object.assign(new Error('Only recorded or rejected expenses can be edited. Approved or paid expense history is immutable.'),{status:409});
+  const category=(await client.query(`SELECT id FROM school_finance_expense_categories WHERE school_id=$1 AND id=$2 AND is_active=true`,[req.params.schoolId,input.category_id])).rows[0];
+  if(!category)throw Object.assign(new Error('Select an active expense category from this school.'),{status:400});
+  const updated=(await client.query(`UPDATE school_finance_expenses SET category_id=$3,description=$4,amount=$5,payment_method=$6,payment_reference=$7,supplier=$8,transaction_date=$9,updated_at=now() WHERE school_id=$1 AND id=$2 RETURNING *`,
+   [req.params.schoolId,current.id,input.category_id,input.description,input.amount,input.payment_method,input.payment_reference,input.supplier,input.transaction_date])).rows[0];
+  await client.query(`INSERT INTO school_finance_audit_events(school_id,actor_id,entity_type,entity_id,action,previous_values,new_values)
+   VALUES($1,$2,'EXPENSE',$3,'EDITED',$4::jsonb,$5::jsonb)`,[req.params.schoolId,req.user.user_id,current.id,JSON.stringify(current),JSON.stringify(updated)]);
+  await client.query('COMMIT');res.json(updated);
+ }catch(e){await client.query('ROLLBACK').catch(()=>{});if(e.status)return res.status(e.status).json({error:e.message});console.error('Edit school expense failed:',e);res.status(500).json({error:'Unable to update expense.'});}
+ finally{client.release();}
+});
+
+router.post('/:schoolId/expenses/:expenseId/submit',schoolBoundary,roles(...FINANCE_ACCESS),async(req,res)=>{
+ await transitionExpense(req,res,'SUBMITTED');
+});
+
+router.post('/:schoolId/expenses/:expenseId/decision',schoolBoundary,roles(...EXPENSE_APPROVERS),async(req,res)=>{
+ const next=String(req.body?.decision||'').toUpperCase();
+ if(!['APPROVED','REJECTED'].includes(next))return res.status(400).json({error:'Decision must be APPROVED or REJECTED.'});
+ const note=String(req.body?.note||'').trim();
+ if(next==='REJECTED'&&note.length<4)return res.status(400).json({error:'Provide a rejection reason of at least four characters.'});
+ await transitionExpense(req,res,next,{note,forbidSelfApproval:true});
+});
+
+router.post('/:schoolId/expenses/:expenseId/paid',schoolBoundary,roles(...FINANCE_ACCESS),async(req,res)=>{
+ await transitionExpense(req,res,'PAID');
+});
+
+router.post('/:schoolId/expenses/:expenseId/cancel',schoolBoundary,roles(...FINANCE_ROLES),async(req,res)=>{
+ const reason=String(req.body?.reason||'').trim();
+ if(reason.length<4||reason.length>500)return res.status(400).json({error:'Provide a cancellation reason between 4 and 500 characters.'});
+ await transitionExpense(req,res,'CANCELLED',{note:reason});
+});
+
+router.get('/:schoolId/audit-history',schoolBoundary,roles(...FINANCE_READ),async(req,res)=>{
+ try{
+  const rows=await db.query(`SELECT a.*,u.first_name,u.last_name FROM school_finance_audit_events a LEFT JOIN users u ON u.id=a.actor_id WHERE a.school_id=$1 ORDER BY a.created_at DESC LIMIT 500`,[req.params.schoolId]);
+  res.json(rows.rows);
+ }catch(e){console.error('Load finance audit history failed:',e);res.status(500).json({error:'Unable to load finance audit history.'});}
+});
+
+router.get('/:schoolId/reports/cash-flow',schoolBoundary,roles(...FINANCE_READ),async(req,res)=>{
+ try{
+  const {from,to}=req.query;
+  if(from&&!validDate(from)||to&&!validDate(to))return res.status(400).json({error:'Use valid YYYY-MM-DD dates for cash-flow filters.'});
+  const rows=await db.query(`WITH collections AS (
+    SELECT p.payment_date report_date,sum(p.amount) income FROM school_fee_payments p
+    JOIN learners l ON l.school_id=p.school_id AND l.id=p.learner_id
+    WHERE p.school_id=$1 AND p.status='CONFIRMED'
+      AND NOT EXISTS(SELECT 1 FROM school_fee_payment_reversals r WHERE r.school_id=p.school_id AND r.payment_id=p.id)
+      AND ($2::date IS NULL OR p.payment_date >= $2) AND ($3::date IS NULL OR p.payment_date <= $3)
+    GROUP BY p.payment_date
+   ), expenses AS (
+    SELECT e.transaction_date report_date,sum(e.amount) outflow FROM school_finance_expenses e
+    LEFT JOIN school_finance_expense_categories c ON c.school_id=e.school_id AND c.id=e.category_id
+    WHERE e.school_id=$1 AND e.status='PAID'
+      AND ($2::date IS NULL OR e.transaction_date >= $2) AND ($3::date IS NULL OR e.transaction_date <= $3)
+    GROUP BY e.transaction_date
+   )
+   SELECT COALESCE(c.report_date,x.report_date) report_date,COALESCE(c.income,0) income,COALESCE(x.outflow,0) expenditure,
+    COALESCE(c.income,0)-COALESCE(x.outflow,0) net_cash_flow
+   FROM collections c FULL OUTER JOIN expenses x ON x.report_date=c.report_date
+   ORDER BY report_date DESC LIMIT 1000`,[req.params.schoolId,from||null,to||null]);
+  const totals=rows.rows.reduce((sum,row)=>({income:sum.income+Number(row.income||0),expenditure:sum.expenditure+Number(row.expenditure||0),net_cash_flow:sum.net_cash_flow+Number(row.net_cash_flow||0)}),{income:0,expenditure:0,net_cash_flow:0});
+  res.json({rows:rows.rows,totals});
+ }catch(e){console.error('Cash-flow report failed:',e);res.status(500).json({error:'Unable to generate cash-flow report.'});}
+});
+
+async function transitionExpense(req,res,next,{note='',forbidSelfApproval=false}={}){
+ if(!UUID.test(req.params.expenseId))return res.status(400).json({error:'Invalid expense ID.'});
+ const sid=req.params.schoolId,client=await db.pool.connect();
+ try{
+  await client.query('BEGIN');
+  const current=(await client.query(`SELECT * FROM school_finance_expenses WHERE school_id=$1 AND id=$2 FOR UPDATE`,[sid,req.params.expenseId])).rows[0];
+  if(!current){await client.query('ROLLBACK');return res.status(404).json({error:'Expense not found in this school.'});}
+  assertTransition(current.status,next);
+  if(forbidSelfApproval&&String(current.recorded_by)===String(req.user.user_id))
+   throw Object.assign(new Error('Separation of duties: the expense recorder cannot approve or reject their own expense.'),{status:403});
+  const updated=(await client.query(`UPDATE school_finance_expenses SET status=$3,
+      approved_by=CASE WHEN $3 IN ('APPROVED','REJECTED') THEN $4 ELSE approved_by END,
+      approval_note=CASE WHEN $3 IN ('APPROVED','REJECTED') THEN $5 ELSE approval_note END,
+      approved_at=CASE WHEN $3 IN ('APPROVED','REJECTED') THEN now() ELSE approved_at END,
+      paid_at=CASE WHEN $3='PAID' THEN now() ELSE paid_at END,
+      cancelled_by=CASE WHEN $3='CANCELLED' THEN $4 ELSE cancelled_by END,
+      cancellation_reason=CASE WHEN $3='CANCELLED' THEN $5 ELSE cancellation_reason END,
+      updated_at=now()
+    WHERE school_id=$1 AND id=$2 RETURNING *`,[sid,current.id,next,req.user.user_id,note])).rows[0];
+  await client.query(`INSERT INTO school_finance_audit_events(school_id,actor_id,entity_type,entity_id,action,previous_values,new_values)
+    VALUES($1,$2,'EXPENSE',$3,$4,$5::jsonb,$6::jsonb)`,[sid,req.user.user_id,current.id,next,JSON.stringify(current),JSON.stringify(updated)]);
+  await client.query('COMMIT');res.json(updated);
+ }catch(e){
+  await client.query('ROLLBACK').catch(()=>{});
+  if(e.status)return res.status(e.status).json({error:e.message});
+  if(e.code==='23514')return res.status(409).json({error:e.message});
+  console.error(`Expense transition ${next} failed:`,e);res.status(500).json({error:'Unable to update expense status.'});
+ }finally{client.release();}
+}
 
 module.exports=router;

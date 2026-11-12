@@ -82,12 +82,52 @@ test('preserves locked placements while scheduling the remaining occurrences',()
  assert.ok(result.scheduled.some(x=>x.locked&&x.day===2&&x.period===4));
 });
 
+test('preserves the room on a locked placement and rejects ineligible locked rooms',()=>{
+ const requirement={class_id:'class-a',subject_id:'science',teacher_id:'teacher-a',lessons_per_week:1};
+ const locked={class_id:'class-a',subject_id:'science',teacher_id:'teacher-a',day:1,period:2,start_time:'08:40',end_time:'09:20',room:'Lab B'};
+ const configured={...settings,rooms:['Lab A','Lab B'],locked:[locked]};
+ const result=generate({requirements:[requirement],settings:configured});
+ assert.equal(result.scheduled[0].room,'Lab B');
+ assert.throws(()=>generate({requirements:[requirement],settings:{...configured,rooms:['Lab A']}}),/unavailable or ineligible room/);
+});
+
+test('preserves an intentionally unassigned room on a locked placement',()=>{
+ const result=generate({requirements:[
+  {class_id:'class-a',subject_id:'science',teacher_id:'teacher-a',lessons_per_week:1}
+ ],settings:{...settings,rooms:['Lab A'],locked:[
+  {class_id:'class-a',subject_id:'science',teacher_id:'teacher-a',day:1,period:1,start_time:'08:00',end_time:'08:40',room:null}
+ ]}});
+ assert.equal(result.scheduled[0].locked,true);
+ assert.equal(result.scheduled[0].room,'');
+});
+
 test('does not form a double period across a configured break',()=>{
  const result=generate({requirements:[
   {class_id:'class-a',subject_id:'science',teacher_id:'teacher-a',lessons_per_week:1,periods_per_lesson:2}
  ],settings:{days:[1],periods_per_day:3,period_start_times:['08:00','09:00','09:40'],period_end_times:['08:40','09:40','10:20']}});
  assert.equal(result.complete,true);
  assert.equal(result.scheduled[0].period,2);
+});
+
+test('enforces teacher workload limits and returns schedule diagnostics',()=>{
+ const result=generate({requirements:[
+  {class_id:'class-a',subject_id:'math',teacher_id:'teacher-a',lessons_per_week:2}
+ ],settings:{...settings,days:[1],periods_per_day:4,teacher_limits:[{teacher_id:'teacher-a',max_daily_periods:1,max_weekly_periods:1}]}});
+ assert.equal(result.complete,false);
+ assert.equal(result.placed,1);
+ assert.equal(result.teacher_workload['teacher-a'].periods,1);
+ assert.equal(result.class_workload['class-a'].periods,1);
+ assert.equal(result.hard_constraints.valid,true);
+ assert.equal(result.soft_preference_score,null);
+ assert.equal(result.unscheduled_lessons,1);
+});
+
+test('scores soft preferences per scheduled lesson occurrence',()=>{
+ const result=generate({requirements:[
+  {class_id:'class-a',subject_id:'math',teacher_id:'teacher-a',lessons_per_week:2,preferred_day:1,preferred_period:1}
+ ],settings:{days:[1],periods_per_day:2}});
+ assert.equal(result.complete,true);
+ assert.equal(result.soft_preference_score,75);
 });
 
 test('returns a partial diagnostic and unplaced lesson reasons when infeasible',()=>{

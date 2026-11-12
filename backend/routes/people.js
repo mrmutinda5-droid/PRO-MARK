@@ -9,7 +9,7 @@ function getClassListPdf(key){const hit=classListPdfCache.get(key);if(hit&&hit.e
 function putClassListPdf(key,value){classListPdfCache.set(key,{value,expires:Date.now()+30000});if(classListPdfCache.size>32){const oldest=[...classListPdfCache.entries()].sort((a,b)=>a[1].expires-b[1].expires)[0];if(oldest)classListPdfCache.delete(oldest[0]);}}
 router.use(authenticate);
 const clean=v=>String(v??'').trim();
-const MANAGED_ROLES=['SCHOOL_ADMIN','ADMIN','HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER','CLASS_TEACHER','TEACHER'];
+const MANAGED_ROLES=['SCHOOL_ADMIN','ADMIN','HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER','BURSAR','CLASS_TEACHER','TEACHER'];
 const UNIQUE_ROLES=new Set(['SCHOOL_ADMIN','ADMIN','HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER']);
 const ADMIN_ROLES=new Set(['SCHOOL_ADMIN','ADMIN']);
 async function hasOtherActiveAdmin(c,sid,excludeUserId){

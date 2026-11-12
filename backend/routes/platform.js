@@ -40,7 +40,7 @@ router.patch("/users/:roleId",async(req,res)=>{
       await c.query('UPDATE user_school_roles SET mark_entry_enabled=$2 WHERE id=$1',[r.id,b.mark_entry_enabled]);
     if(b.role!==undefined){
       const next=String(b.role||'').toUpperCase();
-      const allowed=['SCHOOL_ADMIN','ADMIN','HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER','CLASS_TEACHER','TEACHER'];
+      const allowed=['SCHOOL_ADMIN','ADMIN','HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER','BURSAR','CLASS_TEACHER','TEACHER'];
       const unique=['SCHOOL_ADMIN','ADMIN','HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER'];
       if(!allowed.includes(next))throw Object.assign(new Error('Invalid school role.'),{status:400});
       if(unique.includes(next)){

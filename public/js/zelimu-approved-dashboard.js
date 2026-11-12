@@ -277,7 +277,7 @@ function make(){
   const admin=['SCHOOL_ADMIN','ADMIN'].includes(roles);
   const leadership=['SCHOOL_ADMIN','ADMIN','HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER','CLASS_TEACHER'].includes(roles);
   const canAudit=['PLATFORM_OWNER','SCHOOL_ADMIN','ADMIN','HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER'].includes(roles);
-  const canFinance=['SCHOOL_ADMIN','ADMIN','HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER'].includes(roles);
+  const canFinance=['SCHOOL_ADMIN','ADMIN','HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER','BURSAR'].includes(roles);
   let loading=false,queued=false;
   const number=value=>Number.isFinite(Number(value))?Number(value):0;
   const money=value=>`KSh ${number(value).toLocaleString('en-KE',{maximumFractionDigits:0})}`;

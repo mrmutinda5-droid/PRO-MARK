@@ -47,6 +47,14 @@ function generate({requirements,settings={}}){
  const unavailable=new Set((settings.teacher_unavailable||[]).map(x=>`${x.teacher_id}:${integer(x.day,null)}:${integer(x.period,null)}`));
  const roomUnavailable=new Set((settings.room_unavailable||[]).map(x=>`${x.room}:${integer(x.day,null)}:${integer(x.period,null)}`));
  const rooms=(settings.rooms||[]).map(room=>typeof room==='string'?{room_name:room,capacity:null}:{...room});
+ const teacherLimits=new Map((settings.teacher_limits||[]).map(limit=>{
+  if(!limit?.teacher_id)throw Error('Teacher workload limits must identify a teacher');
+  for(const key of ['max_daily_periods','max_weekly_periods']){
+   if(limit[key]!==undefined&&limit[key]!==null&&(!Number.isInteger(Number(limit[key]))||Number(limit[key])<1||Number(limit[key])>periodCount*days.length))
+    throw Error(`Invalid ${key.replaceAll('_',' ')} for teacher ${limit.teacher_id}`);
+  }
+  return [String(limit.teacher_id),limit];
+ }));
  const tasks=[],keys=new Set();
  for(const requirement of requirements){
   const classId=requirement.class_id,subjectId=requirement.subject_id,teacherId=requirement.teacher_id;
@@ -85,12 +93,14 @@ function generate({requirements,settings={}}){
  for(const lock of settings.locked||[]){
   const task=tasks.find(x=>x.class_id===lock.class_id&&x.subject_id===lock.subject_id&&x.teacher_id===lock.teacher_id&&!x.lockedCandidate);
   if(!task)throw Error(`Locked placement for ${lock.class_id}/${lock.subject_id} has no matching lesson requirement`);
-  const candidate=task.candidates.find(x=>x.day===Number(lock.day)&&x.period===Number(lock.period)&&x.start_time===String(lock.start_time).slice(0,5)&&x.end_time===String(lock.end_time).slice(0,5)&&(!lock.room||x.room===lock.room));
+  if(lock.room&&!task.room_options.includes(String(lock.room)))throw Error(`Locked placement for ${lock.class_id}/${lock.subject_id} requires an unavailable or ineligible room`);
+  const candidate=task.candidates.find(x=>x.day===Number(lock.day)&&x.period===Number(lock.period)&&x.start_time===String(lock.start_time).slice(0,5)&&x.end_time===String(lock.end_time).slice(0,5));
   if(!candidate)throw Error(`Locked placement for ${lock.class_id}/${lock.subject_id} does not match the configured bell schedule`);
-  task.lockedCandidate=candidate;
+  task.lockedCandidate=candidate;task.lockedRoom=lock.room?String(lock.room):'';
  }
 
  const classBusy=new Set(),teacherBusy=new Set(),roomBusy=new Set(),subjectDaily=new Map(),placed=[];
+ const teacherDailyPeriods=new Map(),teacherWeeklyPeriods=new Map();
  const lessonsPerTeacher=new Map();
  for(const task of tasks)lessonsPerTeacher.set(task.teacher_id,(lessonsPerTeacher.get(task.teacher_id)||0)+task.periods_per_lesson);
  tasks.sort((a,b)=>Number(Boolean(b.lockedCandidate))-Number(Boolean(a.lockedCandidate))||a.candidates.length-b.candidates.length||b.periods_per_lesson-a.periods_per_lesson||
@@ -103,6 +113,10 @@ function generate({requirements,settings={}}){
   if(task.preferred_day&&Number(task.preferred_day)!==candidate.day&&task.hard_preference)return false;
   if(task.preferred_period&&Number(task.preferred_period)!==candidate.period&&task.hard_preference)return false;
   if(task.max_per_day&&((subjectDaily.get(dayKey)||0)+1)>task.max_per_day)return false;
+  const limits=teacherLimits.get(String(task.teacher_id))||{};
+  const dailyKey=`${task.teacher_id}:${candidate.day}`,dailyPeriods=teacherDailyPeriods.get(dailyKey)||0,weeklyPeriods=teacherWeeklyPeriods.get(task.teacher_id)||0;
+  if(limits.max_daily_periods&&dailyPeriods+candidate.periods.length>Number(limits.max_daily_periods))return false;
+  if(limits.max_weekly_periods&&weeklyPeriods+candidate.periods.length>Number(limits.max_weekly_periods))return false;
   for(const period of candidate.periods){
    const slotKey=`${candidate.day}:${period}`;
    if(classBusy.has(`${task.class_id}:${slotKey}`)||teacherBusy.has(`${task.teacher_id}:${slotKey}`))return false;
@@ -114,6 +128,7 @@ function generate({requirements,settings={}}){
  }
  function mark(task,candidate,value){
   const dayKey=`${task.class_id}:${task.subject_id}:${candidate.day}`;
+  const dailyKey=`${task.teacher_id}:${candidate.day}`;
   for(const period of candidate.periods){
    const slotKey=`${candidate.day}:${period}`;
    const method=value?'add':'delete';
@@ -121,6 +136,8 @@ function generate({requirements,settings={}}){
    teacherBusy[method](`${task.teacher_id}:${slotKey}`);
    if(candidate.room)roomBusy[method](`${candidate.room}:${slotKey}`);
   }
+  teacherDailyPeriods.set(dailyKey,(teacherDailyPeriods.get(dailyKey)||0)+(value?candidate.periods.length:-candidate.periods.length));
+  teacherWeeklyPeriods.set(task.teacher_id,(teacherWeeklyPeriods.get(task.teacher_id)||0)+(value?candidate.periods.length:-candidate.periods.length));
   subjectDaily.set(dayKey,(subjectDaily.get(dayKey)||0)+(value?1:-1));
  }
  function candidateScore(task,candidate){
@@ -139,7 +156,7 @@ function generate({requirements,settings={}}){
   const task=tasks[index];
   const candidates=(task.lockedCandidate?[task.lockedCandidate]:task.candidates.slice()).sort((a,b)=>candidateScore(task,a)-candidateScore(task,b)||a.day-b.day||a.period-b.period);
   for(const timeCandidate of candidates){
-   for(const room of task.room_options){
+   for(const room of task.lockedCandidate?[task.lockedRoom]:task.room_options){
     const candidate={...timeCandidate,room};
     if(!canPlace(task,candidate))continue;
     mark(task,candidate,true);
@@ -155,24 +172,60 @@ function generate({requirements,settings={}}){
  const complete=place(0);
  const scheduled=(complete?placed:bestPlaced).slice().sort((a,b)=>a.day-b.day||a.period-b.period||String(a.class_id).localeCompare(String(b.class_id)));
  const workload={};
+ const classWorkload={},roomUtilization={};
  for(const lesson of scheduled){
   workload[lesson.teacher_id]??={lessons:0,periods:0,by_day:{}};
   workload[lesson.teacher_id].lessons++;
   workload[lesson.teacher_id].periods+=lesson.periods_per_lesson;
   workload[lesson.teacher_id].by_day[lesson.day]=(workload[lesson.teacher_id].by_day[lesson.day]||0)+lesson.periods_per_lesson;
+  classWorkload[lesson.class_id]??={lessons:0,periods:0,by_day:{}};
+  classWorkload[lesson.class_id].lessons++;classWorkload[lesson.class_id].periods+=lesson.periods_per_lesson;
+  classWorkload[lesson.class_id].by_day[lesson.day]=(classWorkload[lesson.class_id].by_day[lesson.day]||0)+lesson.periods_per_lesson;
+  if(lesson.room){
+   roomUtilization[lesson.room]??={lessons:0,periods:0,by_day:{}};
+   roomUtilization[lesson.room].lessons++;roomUtilization[lesson.room].periods+=lesson.periods_per_lesson;
+   roomUtilization[lesson.room].by_day[lesson.day]=(roomUtilization[lesson.room].by_day[lesson.day]||0)+lesson.periods_per_lesson;
+  }
  }
  const softWarnings=[];
  const warnedPreferences=new Set();
  for(const task of tasks){
   const taskKey=`${task.class_id}:${task.subject_id}:${task.teacher_id}`;
-  if(task.preferred_day&&scheduled.some(x=>x.class_id===task.class_id&&x.subject_id===task.subject_id&&x.teacher_id===task.teacher_id)&&!scheduled.some(x=>x.class_id===task.class_id&&x.subject_id===task.subject_id&&x.teacher_id===task.teacher_id&&x.day===Number(task.preferred_day))&&!warnedPreferences.has(taskKey)){
-   softWarnings.push(`Preferred day ${task.preferred_day} not used for ${task.subject_id} in ${task.class_id}.`);
+  const matches=scheduled.filter(x=>x.class_id===task.class_id&&x.subject_id===task.subject_id&&x.teacher_id===task.teacher_id);
+  if(task.preferred_day&&matches.length&&matches.some(x=>x.day!==Number(task.preferred_day))&&!warnedPreferences.has(taskKey)){
+   softWarnings.push(`Preferred day ${task.preferred_day} was not used for every ${task.subject_id} lesson in ${task.class_id}.`);
    warnedPreferences.add(taskKey);
   }
+  if(task.preferred_period&&matches.length&&matches.some(x=>x.period!==Number(task.preferred_period))&&!warnedPreferences.has(`${taskKey}:period`)){
+   softWarnings.push(`Preferred period ${task.preferred_period} was not used for every ${task.subject_id} lesson in ${task.class_id}.`);
+   warnedPreferences.add(`${taskKey}:period`);
+  }
  }
+ const scheduledSlots=new Set(),hardConflicts=[];
+ for(const lesson of scheduled)for(const period of lesson.periods){
+  const slot=`${lesson.day}:${period}`;
+  for(const [type,key] of [['class',`${lesson.class_id}:${slot}`],['teacher',`${lesson.teacher_id}:${slot}`],...(lesson.room? [['room',`${lesson.room}:${slot}`]]:[])]){
+   if(scheduledSlots.has(`${type}:${key}`))hardConflicts.push({type,lesson_id:`${lesson.class_id}:${lesson.subject_id}:${lesson.day}:${period}`});
+   else scheduledSlots.add(`${type}:${key}`);
+  }
+ }
+ const preferenceTargets=tasks.filter(task=>task.preferred_day||task.preferred_period);
+ const preferenceChecks=preferenceTargets.reduce((sum,task)=>sum+Number(Boolean(task.preferred_day))+Number(Boolean(task.preferred_period)),0);
+ const preferenceMet=preferenceTargets.reduce((sum,task)=>{
+  const lesson=scheduled.find(x=>x.class_id===task.class_id&&x.subject_id===task.subject_id&&x.teacher_id===task.teacher_id&&x.sequence===task.sequence);
+  return sum+Number(Boolean(task.preferred_day&&lesson?.day===Number(task.preferred_day)))+Number(Boolean(task.preferred_period&&lesson?.period===Number(task.preferred_period)));
+ },0);
  const placedKeys=new Set(scheduled.map(x=>`${x.class_id}:${x.subject_id}:${x.teacher_id}:${x.sequence}`));
  const unscheduled=tasks.filter(task=>!placedKeys.has(`${task.class_id}:${task.subject_id}:${task.teacher_id}:${task.sequence}`)).map(task=>({class_id:task.class_id,subject_id:task.subject_id,teacher_id:task.teacher_id,lesson_number:task.sequence+1,reason:task.candidates.length?'No placement remains without violating a class, teacher, room or availability constraint.':'No valid period block exists for this lesson.'}));
- return {complete,scheduled,required:tasks.length,placed:scheduled.length,attempts,search_limit:MAX_ATTEMPTS,stopped,unscheduled,workload,soft_warnings:softWarnings,reason:complete?null:'No complete conflict-free timetable found; review the unplaced lessons and constraints.'};
+ return {
+  complete,scheduled,required:tasks.length,placed:scheduled.length,total_required_lessons:tasks.length,
+  successfully_placed_lessons:scheduled.length,unscheduled_lessons:unscheduled.length,
+  attempts,search_limit:MAX_ATTEMPTS,stopped,unscheduled,workload,teacher_workload:workload,
+  class_workload:classWorkload,room_utilization:roomUtilization,
+  hard_constraints:{valid:hardConflicts.length===0,conflicts:hardConflicts},
+  soft_preference_score:preferenceChecks?Math.round(preferenceMet/preferenceChecks*100):null,
+  soft_warnings:softWarnings,reason:complete?null:'No complete conflict-free timetable found; review the unplaced lessons and constraints.'
+ };
 }
 
 module.exports={generate};
