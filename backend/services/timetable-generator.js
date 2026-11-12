@@ -49,8 +49,8 @@ function generate({requirements,settings={}}){
  const rooms=(settings.rooms||[]).map(room=>typeof room==='string'?{room_name:room,capacity:null}:{...room});
  const teacherLimits=new Map((settings.teacher_limits||[]).map(limit=>{
   if(!limit?.teacher_id)throw Error('Teacher workload limits must identify a teacher');
-  for(const key of ['max_daily_periods','max_weekly_periods']){
-   if(limit[key]!==undefined&&limit[key]!==null&&(!Number.isInteger(Number(limit[key]))||Number(limit[key])<1||Number(limit[key])>periodCount*days.length))
+  for(const [key,maximum] of [['max_daily_periods',periodCount],['max_weekly_periods',periodCount*days.length]]){
+   if(limit[key]!==undefined&&limit[key]!==null&&(!Number.isInteger(Number(limit[key]))||Number(limit[key])<1||Number(limit[key])>maximum))
     throw Error(`Invalid ${key.replaceAll('_',' ')} for teacher ${limit.teacher_id}`);
   }
   return [String(limit.teacher_id),limit];

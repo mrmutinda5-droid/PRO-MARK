@@ -136,6 +136,73 @@ router.patch('/:schoolId/timetable/:entryId/lock',schoolBoundary,roles('PLATFORM
   }catch(e){res.status(400).json({error:e.message});}
 });
 router.get('/:schoolId/timetable',schoolBoundary,roles(...ADMIN,'HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER'),async(req,res)=>{try{res.json((await db.query(`SELECT te.*,c.name class_name,c.stream,s.name subject_name,s.code subject_code,t.first_name teacher_first_name,t.last_name teacher_last_name FROM timetable_entries te JOIN classes c ON c.id=te.class_id JOIN subjects s ON s.id=te.subject_id LEFT JOIN teachers t ON t.id=te.teacher_id WHERE te.school_id=$1 ORDER BY te.day_of_week,te.start_time,c.name`,[req.params.schoolId])).rows)}catch(e){res.status(400).json({error:e.message})}});
+router.get('/:schoolId/timetable/versions',schoolBoundary,roles(...ADMIN,'HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER'),async(req,res)=>{
+ try{
+  const {academic_year_id:yearId,term_id:termId}=req.query;
+  const rows=await db.query(`SELECT id,version_number,status,published_at
+    FROM timetable_versions WHERE school_id=$1
+      AND ($2::uuid IS NULL OR academic_year_id=$2)
+      AND ($3::uuid IS NULL OR term_id=$3)
+    ORDER BY academic_year_id DESC,term_id DESC,version_number DESC LIMIT 200`,
+  [req.params.schoolId,yearId||null,termId||null]);
+  res.json(rows.rows);
+ }catch(error){console.error('Load timetable versions failed:',error);res.status(500).json({error:'Unable to load timetable versions. Apply migration 042_timetable_workload_versions.sql.'});}
+});
+router.get('/:schoolId/timetable/versions/:versionId',schoolBoundary,roles(...ADMIN,'HEADTEACHER','DEPUTY_HEADTEACHER','SENIOR_TEACHER'),async(req,res)=>{
+ try{
+  const row=await db.query(`SELECT id,version_number,status,published_at,snapshot
+    FROM timetable_versions WHERE school_id=$1 AND id=$2`,
+  [req.params.schoolId,req.params.versionId]);
+  if(!row.rowCount)return res.status(404).json({error:'Timetable version not found.'});
+  res.json(row.rows[0]);
+ }catch(error){console.error('Load timetable version snapshot failed:',error);res.status(500).json({error:'Unable to load timetable version snapshot.'});}
+});
+router.post('/:schoolId/timetable/publish',schoolBoundary,roles('PLATFORM_OWNER','SCHOOL_ADMIN','ADMIN','HEADTEACHER','DEPUTY_HEADTEACHER'),async(req,res)=>{
+ const sid=req.params.schoolId,yearId=req.body?.academic_year_id,termId=req.body?.term_id,client=await db.pool.connect();
+ try{
+  if(!yearId||!termId)return res.status(400).json({error:'Academic year and term are required to publish a timetable.'});
+  await assertBelongs('academic_years',yearId,sid);await assertBelongs('terms',termId,sid);
+  const term=await db.query('SELECT id FROM terms WHERE id=$1 AND school_id=$2 AND academic_year_id=$3',[termId,sid,yearId]);
+  if(!term.rowCount)return res.status(400).json({error:'Selected term does not belong to this academic year.'});
+  await client.query('BEGIN');
+  await client.query('SELECT pg_advisory_xact_lock(hashtext($1))',[`${sid}:timetable-publish:${yearId}:${termId}`]);
+  const entries=await client.query(`SELECT te.*,c.name class_name,c.stream,s.name subject_name,s.code subject_code,
+      t.first_name teacher_first_name,t.last_name teacher_last_name
+    FROM timetable_entries te JOIN classes c ON c.id=te.class_id AND c.school_id=te.school_id
+    JOIN subjects s ON s.id=te.subject_id AND s.school_id=te.school_id
+    LEFT JOIN teachers t ON t.id=te.teacher_id AND t.school_id=te.school_id
+    WHERE te.school_id=$1 AND te.academic_year_id=$2 AND te.term_id=$3
+    ORDER BY te.day_of_week,te.start_time,c.name,c.stream`,[sid,yearId,termId]);
+  if(!entries.rowCount){await client.query('ROLLBACK');return res.status(400).json({error:'Add timetable entries before publishing.'});}
+  const conflicts=await client.query(`SELECT count(*)::int conflicts
+    FROM timetable_entries a JOIN timetable_entries b
+      ON a.school_id=b.school_id AND a.academic_year_id=b.academic_year_id AND a.term_id=b.term_id AND a.id<b.id
+      AND a.start_time<b.end_time AND b.start_time<a.end_time
+      AND (a.class_id=b.class_id
+        OR (a.teacher_id IS NOT NULL AND a.teacher_id=b.teacher_id)
+        OR (NULLIF(btrim(a.room),'') IS NOT NULL AND a.room=b.room))
+    WHERE a.school_id=$1 AND a.academic_year_id=$2 AND a.term_id=$3`,
+  [sid,yearId,termId]);
+  if(Number(conflicts.rows[0].conflicts)){await client.query('ROLLBACK');return res.status(409).json({error:`Resolve ${conflicts.rows[0].conflicts} class, teacher, or room scheduling conflict(s) before publishing.`});}
+  const version=Number((await client.query(`SELECT COALESCE(max(version_number),0)+1 version_number
+    FROM timetable_versions WHERE school_id=$1 AND academic_year_id=$2 AND term_id=$3`,
+  [sid,yearId,termId])).rows[0].version_number);
+  await client.query(`UPDATE timetable_versions SET status='ARCHIVED'
+    WHERE school_id=$1 AND academic_year_id=$2 AND term_id=$3 AND status='PUBLISHED'`,
+  [sid,yearId,termId]);
+  const saved=await client.query(`INSERT INTO timetable_versions
+      (school_id,academic_year_id,term_id,version_number,status,snapshot,published_by)
+    VALUES($1,$2,$3,$4,'PUBLISHED',$5::jsonb,$6)
+    RETURNING id,version_number,status,published_at`,
+  [sid,yearId,termId,version,JSON.stringify(entries.rows),req.user.user_id]);
+  await client.query('COMMIT');
+  res.status(201).json({...saved.rows[0],entries:entries.rowCount});
+ }catch(error){
+  await client.query('ROLLBACK').catch(()=>{});
+  console.error('Publish timetable failed:',error);
+  res.status(error.status||500).json({error:error.status?error.message:'Unable to publish timetable.'});
+ }finally{client.release();}
+});
 router.post('/:schoolId/timetable',schoolBoundary,roles(...ADMIN),async(req,res)=>{try{const b=req.body||{};if(!b.class_id||!b.subject_id||!b.day_of_week||!b.start_time||!b.end_time)return res.status(400).json({error:'Class, subject, day and time are required'});const sid=req.params.schoolId;await assertBelongs('classes',b.class_id,sid);await assertBelongs('subjects',b.subject_id,sid);if(b.teacher_id)await assertBelongs('teachers',b.teacher_id,sid);if(b.academic_year_id)await assertBelongs('academic_years',b.academic_year_id,sid);if(b.term_id)await assertBelongs('terms',b.term_id,sid);if(Number(b.day_of_week)<1||Number(b.day_of_week)>7||b.start_time>=b.end_time)return res.status(400).json({error:'Invalid timetable day or time interval'});const clash=await db.query(`SELECT id FROM timetable_entries WHERE school_id=$1 AND day_of_week=$2 AND start_time<$4::time AND end_time>$3::time AND academic_year_id IS NOT DISTINCT FROM $5::uuid AND term_id IS NOT DISTINCT FROM $6::uuid AND (class_id=$7 OR ($8::uuid IS NOT NULL AND teacher_id=$8) OR ($9::text<>'' AND room=$9)) LIMIT 1`,[sid,b.day_of_week,b.start_time,b.end_time,b.academic_year_id||null,b.term_id||null,b.class_id,b.teacher_id||null,b.room||'']);if(clash.rows.length)return res.status(409).json({error:'Timetable conflict: class, teacher or room already scheduled in this period'});const q=await db.query(`INSERT INTO timetable_entries(school_id,academic_year_id,term_id,class_id,subject_id,teacher_id,day_of_week,start_time,end_time,room,notes,is_locked) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,[req.params.schoolId,b.academic_year_id||null,b.term_id||null,b.class_id,b.subject_id,b.teacher_id||null,b.day_of_week,b.start_time,b.end_time,b.room||'',b.notes||'',b.is_locked===true]);res.status(201).json(q.rows[0])}catch(e){res.status(400).json({error:e.message})}});
 
 router.get('/:schoolId/audit',schoolBoundary,roles(...ADMIN),async(req,res)=>{try{const q=await db.query(`SELECT a.*,u.email,u.first_name,u.last_name FROM audit_log a LEFT JOIN users u ON u.id=a.user_id WHERE a.school_id=$1 ORDER BY a.created_at DESC LIMIT 500`,[req.params.schoolId]);res.json(q.rows)}catch(e){res.status(400).json({error:e.message})}});

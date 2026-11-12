@@ -186,4 +186,51 @@ router.delete('/:schoolId/unavailability/:unavailabilityId',schoolBoundary,admin
     res.json({ok:true,id:q.rows[0].id});
   }catch(e){res.status(400).json({error:e.message});}
 });
+router.get('/:schoolId/teacher-limits',schoolBoundary,reader,async(req,res)=>{
+  try{
+    const rows=await db.query(`SELECT l.*,t.first_name teacher_first_name,t.last_name teacher_last_name
+      FROM timetable_teacher_limits l JOIN teachers t ON t.id=l.teacher_id AND t.school_id=l.school_id
+      WHERE l.school_id=$1
+        AND ($2::uuid IS NULL OR l.academic_year_id=$2)
+        AND ($3::uuid IS NULL OR l.term_id=$3)
+      ORDER BY t.last_name,t.first_name`,
+    [req.params.schoolId,req.query.academic_year_id||null,req.query.term_id||null]);
+    res.json(rows.rows);
+  }catch(error){console.error('Load timetable teacher limits failed:',error);res.status(500).json({error:'Unable to load teacher workload limits. Apply migration 042_timetable_workload_versions.sql.'});}
+});
+router.post('/:schoolId/teacher-limits',schoolBoundary,admin,async(req,res)=>{
+  const body=req.body||{},sid=req.params.schoolId;
+  const daily=body.max_daily_periods===''||body.max_daily_periods==null?null:Number(body.max_daily_periods);
+  const weekly=body.max_weekly_periods===''||body.max_weekly_periods==null?null:Number(body.max_weekly_periods);
+  try{
+    if(!body.academic_year_id||!body.term_id||!body.teacher_id)throw Error('Academic year, term and teacher are required.');
+    if((daily!==null&&(!Number.isInteger(daily)||daily<1||daily>12))||
+       (weekly!==null&&(!Number.isInteger(weekly)||weekly<1||weekly>84))||
+       (daily===null&&weekly===null))throw Error('Enter a daily limit (1–12), a weekly limit (1–84), or both.');
+    await assertBelongs('academic_years',body.academic_year_id,sid);
+    await assertBelongs('terms',body.term_id,sid);
+    await assertBelongs('teachers',body.teacher_id,sid);
+    const term=await db.query('SELECT id FROM terms WHERE id=$1 AND school_id=$2 AND academic_year_id=$3',[body.term_id,sid,body.academic_year_id]);
+    if(!term.rowCount)throw Error('Selected term does not belong to this academic year.');
+    const row=await db.query(`INSERT INTO timetable_teacher_limits
+        (school_id,academic_year_id,term_id,teacher_id,max_daily_periods,max_weekly_periods,created_by)
+      VALUES($1,$2,$3,$4,$5,$6,$7)
+      ON CONFLICT(school_id,academic_year_id,term_id,teacher_id) DO UPDATE SET
+        max_daily_periods=EXCLUDED.max_daily_periods,
+        max_weekly_periods=EXCLUDED.max_weekly_periods,
+        created_by=EXCLUDED.created_by,updated_at=now()
+      RETURNING *`,
+    [sid,body.academic_year_id,body.term_id,body.teacher_id,daily,weekly,req.user.user_id]);
+    res.status(201).json(row.rows[0]);
+  }catch(error){res.status(error.status||400).json({error:error.message});}
+});
+router.delete('/:schoolId/teacher-limits/:limitId',schoolBoundary,admin,async(req,res)=>{
+  try{
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(req.params.limitId))
+      return res.status(400).json({error:'Invalid teacher workload limit ID.'});
+    const row=await db.query('DELETE FROM timetable_teacher_limits WHERE school_id=$1 AND id=$2 RETURNING id',[req.params.schoolId,req.params.limitId]);
+    if(!row.rowCount)return res.status(404).json({error:'Teacher workload limit not found.'});
+    res.json({ok:true,id:row.rows[0].id});
+  }catch(error){console.error('Delete timetable teacher limit failed:',error);res.status(500).json({error:'Unable to delete teacher workload limit.'});}
+});
 module.exports=router;

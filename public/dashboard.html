@@ -560,7 +560,7 @@ body, main, .main-content, .dashboard-main {
 <section id="documentCentre" class="nav-managed-section card admin-or-leadership">
  <div class="section-title"><div><h2>Document Centre</h2><p class="muted small">Generate learner ID cards and issue auditable academic certificates. Award wording is entered by the school and must be verified before issue.</p></div><span class="pill">ID cards · Academic certificates · Verification</span></div>
  <div class="card-subsection"><h3>Learner ID card</h3><p class="muted small">Uses the learner’s current school record and existing passport photo, if one is on file. No date of birth or guardian contact details are printed.</p><div class="grid"><label>Class filter<select id="dcClass"><option value="">All classes</option></select></label><label>Find learner<input id="dcLearnerSearch" type="search" placeholder="Name or admission number"></label><label>Learner<select id="dcLearner" required><option value="">Search and select a learner</option></select></label><button class="btn secondary" type="button" id="dcIdCard">GENERATE ID CARD PDF</button></div><div id="dcIdStatus" class="muted small" role="status"></div></div>
- <div class="card-subsection" id="dcCertificateEditor"><h3>Academic certificate · Draft and issue</h3><p class="muted small">Create a draft first. An authorised school leader must review and issue it. Issued certificates cannot be edited; revoke an incorrect certificate and create a replacement.</p><form id="dcCertificateForm" class="grid"><input type="hidden" name="certificate_id"><label>Certificate title<input name="title" maxlength="120" required placeholder="e.g. Certificate of Achievement"></label><label>Academic year<select name="academic_year_id"><option value="">Not specified</option></select></label><label>Term<select name="term_id"><option value="">Not specified</option></select></label><label style="grid-column:1/-1">Achievement statement<textarea name="achievement_statement" maxlength="1000" rows="3" required placeholder="Enter the specific achievement approved by the school"></textarea></label><div class="actions"><button type="submit" class="btn primary" id="dcCertificateSave">SAVE CERTIFICATE DRAFT</button><button type="button" class="btn secondary" id="dcCertificateCancel" hidden>Cancel edit</button></div></form><div id="dcCertificateMessage" class="muted small" role="status"></div></div>
+ <div class="card-subsection" id="dcCertificateEditor"><h3>Academic certificate · Draft and issue</h3><p class="muted small">Create and preview a draft first. An authorised school leader must review and issue it. Issued certificates cannot be edited; revoke an incorrect certificate and create a replacement.</p><form id="dcCertificateForm" class="grid"><input type="hidden" name="certificate_id"><label>Certificate category<select name="category" required><option value="ACADEMIC_ACHIEVEMENT">Academic achievement</option><option value="SUBJECT_PERFORMANCE">Subject performance</option><option value="MOST_IMPROVED">Most improved learner</option><option value="COMPLETION">Completion</option><option value="CO_CURRICULAR">Co-curricular achievement</option><option value="SPORTS">Sports / extracurricular</option><option value="SCHOOL_RECOGNITION">School-specific recognition</option></select></label><label>Certificate title<input name="title" maxlength="120" required placeholder="e.g. Certificate of Achievement"></label><label>Academic year<select name="academic_year_id"><option value="">Not specified</option></select></label><label>Term<select name="term_id"><option value="">Not specified</option></select></label><label style="grid-column:1/-1">Achievement statement<textarea name="achievement_statement" maxlength="1000" rows="3" required placeholder="Enter the specific achievement approved by the school"></textarea></label><div class="actions"><button type="submit" class="btn primary" id="dcCertificateSave">SAVE CERTIFICATE DRAFT</button><button type="button" class="btn secondary" id="dcCertificateCancel" hidden>Cancel edit</button></div></form><div id="dcCertificateMessage" class="muted small" role="status"></div></div>
  <div class="card-subsection"><div class="section-title"><h3>Academic certificate register</h3><div class="actions"><label>Status<select id="dcCertificateStatus"><option value="">All statuses</option><option value="DRAFT">Draft</option><option value="ISSUED">Issued</option><option value="REVOKED">Revoked</option></select></label><button type="button" class="btn secondary" id="dcCertificateRefresh">REFRESH REGISTER</button></div></div><div id="dcCertificateList" class="table-wrap">Open the Document Centre to load certificates.</div></div>
  <div class="card-subsection"><h3>Public certificate verification</h3><p class="muted small">A verifier must enter the certificate reference and the learner’s admission number. The verification result does not disclose learner details.</p><a class="btn secondary" href="/certificate-verification.html" target="_blank" rel="noopener">OPEN VERIFICATION PAGE</a></div>
 </section>
@@ -2308,7 +2308,7 @@ async function renderSchoolFinanceModule(){
   if(!financeLoaded)for(const id of ['sfStructures','sfCharges','sfLearnerBalances','sfPayments'])$(id).innerHTML='<div class="notice">Loading finance records…</div>';
   try{
    const d=await api(`/api/finance/${sid}/overview`);window.__zelimuFinancePayments=d.payments||[];window.__zelimuFeeStructures=d.structures||[];const sum=d.summary||{};
-   $('sfSummary').innerHTML=[['Total charges',`KES ${fmt(sum.charged)}`],['Net payments received',`KES ${fmt(sum.collected)}`],['Outstanding balance',`KES ${fmt(sum.outstanding)}`],['Prepaid credit',`KES ${fmt(sum.prepaid_credit)}`],['Fee structures',(d.structures||[]).filter(x=>x.is_active).length]].map(x=>`<div class="analytics-kpi"><span>${esc(x[0])}</span><strong>${esc(String(x[1]))}</strong></div>`).join('');
+   $('sfSummary').innerHTML=[['Total charges',`KES ${fmt(sum.charged)}`],['Net payments received',`KES ${fmt(sum.collected)}`],['Collected today',`KES ${fmt(sum.collected_today)}`],['Collected this month',`KES ${fmt(sum.collected_this_month)}`],['Outstanding balance',`KES ${fmt(sum.outstanding)}`],['Prepaid credit',`KES ${fmt(sum.prepaid_credit)}`],['Fee structures',(d.structures||[]).filter(x=>x.is_active).length]].map(x=>`<div class="analytics-kpi"><span>${esc(x[0])}</span><strong>${esc(String(x[1]))}</strong></div>`).join('');
    $('sfAssignStructure').innerHTML='<option value="">Select fee structure</option>'+(d.structures||[]).filter(x=>x.is_active).map(x=>`<option value="${x.id}">${esc(x.name)} · ${esc(x.class_name?x.class_name+' '+(x.stream||''):'No class')} · ${esc(x.currency)} ${fmt(x.amount)}</option>`).join('');
    $('sfStructures').innerHTML=`<table><thead><tr><th>Fee</th><th>Year</th><th>Class / stream</th><th>Amount</th><th>Due date</th><th>Status</th><th>Actions</th></tr></thead><tbody>${(d.structures||[]).map(x=>`<tr class="${x.is_active?'':'sf-archived'}"><td>${esc(x.name)}${x.print_notes?'<br><small>Has printed instructions</small>':''}</td><td>${esc(x.year_label||'—')}</td><td>${esc((x.class_name||'All classes')+' '+(x.stream||''))}</td><td>${esc(x.currency)} ${fmt(x.amount)}</td><td>${esc(String(x.due_on||'').slice(0,10)||'—')}</td><td>${x.is_active?'Active':'Archived'}</td><td><div class="sf-row-actions"><button type="button" class="btn secondary sfPrintStructure" data-structure-id="${x.id}">PRINT</button>${isFinance?`${x.is_active?`<button type="button" class="btn secondary sfEditStructure" data-structure-id="${x.id}">EDIT</button>`:`<button type="button" class="btn secondary sfRestoreStructure" data-structure-id="${x.id}">RESTORE</button>`}<button type="button" class="btn danger sfRemoveStructure" data-structure-id="${x.id}">REMOVE</button>`:''}</div></td></tr>`).join('')||'<tr><td colspan="7">No fee structures created yet.</td></tr>'}</tbody></table>`;
    const outstanding=(d.charges||[]).filter(x=>Number(x.balance)>0.009);
@@ -2844,6 +2844,17 @@ async function renderTimetableWorkspace(){
     <div id="ttRequirementStatus" class="muted small" role="status"></div>
     <div id="ttRequirementsList" class="table-wrap"><div class="notice">Loading lesson requirements…</div></div>
    </div>
+   <div class="analytics-panel"><h3>Teacher workload limits</h3>
+    <p>These saved limits are hard constraints for generated timetables in the selected academic year and term.</p>
+    <form id="ttTeacherLimitForm" class="grid">
+     <label>Teacher<select name="teacher_id" required><option value="">Select teacher…</option>${teacherOptions}</select></label>
+     <label>Maximum periods per day<input name="max_daily_periods" type="number" min="1" max="12" placeholder="Optional"></label>
+     <label>Maximum periods per week<input name="max_weekly_periods" type="number" min="1" max="84" placeholder="Optional"></label>
+     <button class="btn primary" type="submit" ${!canManage?'disabled':''}>SAVE WORKLOAD LIMIT</button>
+    </form>
+    <div id="ttTeacherLimitStatus" class="muted small" role="status"></div>
+    <div id="ttTeacherLimitsList" class="table-wrap"><div class="notice">Loading teacher workload limits…</div></div>
+   </div>
    <div class="analytics-panel"><h3>Rooms and facilities</h3>
     <form id="ttRoomForm" class="grid">
      <label>Room name<input name="room_name" required placeholder="Science laboratory"></label>
@@ -2898,8 +2909,11 @@ async function renderTimetableWorkspace(){
      <label class="inline"><input name="is_locked" type="checkbox"> Lock this timetable placement</label>
      <button class="btn primary" type="submit" ${!canManage||!data.classes.length||!data.subjects.length?'disabled':''}>ADD TIMETABLE ENTRY</button>
     </form>
-    <div class="actions"><label>View<select id="ttView"><option value="all">All timetable entries</option><option value="class">Class timetable</option><option value="teacher">Teacher timetable</option><option value="room">Room timetable</option></select></label><select id="ttViewEntity" aria-label="Select class, teacher, or room"><option value="">All</option></select><button class="btn secondary" type="button" id="ttExport">DOWNLOAD CSV</button><button class="btn secondary" type="button" id="ttPrint">PRINT VIEW</button></div>
+    <div class="actions"><label>View<select id="ttView"><option value="all">All timetable entries</option><option value="class">Class timetable</option><option value="teacher">Teacher timetable</option><option value="room">Room timetable</option></select></label><select id="ttViewEntity" aria-label="Select class, teacher, or room"><option value="">All</option></select><button class="btn secondary" type="button" id="ttExport">DOWNLOAD CSV</button><button class="btn secondary" type="button" id="ttPrint">PRINT VIEW</button><button class="btn primary" type="button" id="ttPublish" ${!canManage?'disabled':''}>PUBLISH TIMETABLE</button></div>
     <div id="ttList" class="table-wrap"></div>
+    <div id="ttPublishStatus" class="muted small" role="status"></div>
+    <div id="ttVersionList" class="table-wrap"></div>
+    <div id="ttVersionSnapshot" class="table-wrap"></div>
    </div>`;
   const configForm=$('ttConfigForm');
   if(currentConfig){
@@ -2924,9 +2938,12 @@ async function renderTimetableWorkspace(){
   const scopeQuery=()=>`academic_year_id=${encodeURIComponent(yearSelect.value||'')}&term_id=${encodeURIComponent(termSelect.value||'')}`;
   const requirementsUrl=()=>`/api/timetable-config/${sid}/requirements?${scopeQuery()}`;
   const unavailableUrl=()=>`/api/timetable-config/${sid}/unavailability?${scopeQuery()}`;
+  const limitsUrl=()=>`/api/timetable-config/${sid}/teacher-limits?${scopeQuery()}`;
+  const versionsUrl=()=>`/api/operations/${sid}/timetable/versions?${scopeQuery()}`;
   const entriesUrl=()=>`/api/operations/${sid}/timetable/workspace?${scopeQuery()}`;
   let savedRequirements=[];
   let unavailablePeriods=[];
+  let teacherLimits=[];
   const renderRequirements=()=>{
    const list=$('ttRequirementsList');
    list.innerHTML=`<table><thead><tr><th>Class / stream</th><th>Subject</th><th>Teacher</th><th>Lessons / week</th><th>Length</th><th>Room</th><th></th></tr></thead><tbody>${savedRequirements.map(r=>`<tr><td>${esc([r.class_name,r.stream].filter(Boolean).join(' '))}</td><td>${esc(r.subject_name)}</td><td>${esc([r.teacher_first_name,r.teacher_last_name].filter(Boolean).join(' '))}</td><td>${r.lessons_per_week}</td><td>${r.periods_per_lesson||1} period(s)</td><td>${esc(r.room_requirement||'—')}</td><td>${canManage?`<button type="button" class="btn mini danger ttRequirementDelete" data-id="${esc(r.id)}">REMOVE</button>`:''}</td></tr>`).join('')||'<tr><td colspan="7">No saved lesson requirements for this academic year and term.</td></tr>'}</tbody></table>`;
@@ -2939,6 +2956,24 @@ async function renderTimetableWorkspace(){
   const loadUnavailability=async()=>{
    unavailablePeriods=await api(unavailableUrl());
    $('ttUnavailableList').innerHTML=`<table><thead><tr><th>Entity</th><th>Day</th><th>Period</th><th>Reason</th><th></th></tr></thead><tbody>${unavailablePeriods.map(x=>`<tr><td>${esc(x.teacher_id?[x.teacher_first_name,x.teacher_last_name].filter(Boolean).join(' '):x.room_name||'Unknown')}</td><td>${dayLabels[x.day_of_week]||x.day_of_week}</td><td>${x.period}</td><td>${esc(x.reason||'—')}</td><td>${canManage?`<button type="button" class="btn mini danger ttUnavailableDelete" data-id="${esc(x.id)}">REMOVE</button>`:''}</td></tr>`).join('')||'<tr><td colspan="5">No teacher or room restrictions saved.</td></tr>'}</tbody></table>`;
+  };
+  const loadTeacherLimits=async()=>{
+   teacherLimits=await api(limitsUrl());
+   $('ttTeacherLimitsList').innerHTML=`<table><thead><tr><th>Teacher</th><th>Maximum periods / day</th><th>Maximum periods / week</th><th></th></tr></thead><tbody>${teacherLimits.map(limit=>`<tr><td>${esc([limit.teacher_first_name,limit.teacher_last_name].filter(Boolean).join(' '))}</td><td>${esc(limit.max_daily_periods??'—')}</td><td>${esc(limit.max_weekly_periods??'—')}</td><td>${canManage?`<button type="button" class="btn mini danger ttTeacherLimitDelete" data-id="${esc(limit.id)}">REMOVE</button>`:''}</td></tr>`).join('')||'<tr><td colspan="4">No workload limits saved for this year and term.</td></tr>'}</tbody></table>`;
+  };
+  const loadTimetableVersions=async()=>{
+   const versions=await api(versionsUrl());
+   $('ttVersionList').innerHTML=`<h4>Published versions</h4><table><thead><tr><th>Version</th><th>Status</th><th>Published</th><th></th></tr></thead><tbody>${versions.map(version=>`<tr><td>Version ${esc(version.version_number)}</td><td>${esc(version.status)}</td><td>${esc(new Date(version.published_at).toLocaleString())}</td><td><button type="button" class="btn mini secondary ttVersionView" data-id="${esc(version.id)}">VIEW SNAPSHOT</button></td></tr>`).join('')||'<tr><td colspan="4">No timetable versions published for this year and term.</td></tr>'}</tbody></table>`;
+  };
+  $('ttVersionList').onclick=async e=>{
+   const button=e.target.closest('.ttVersionView');if(!button)return;
+   const snapshotBox=$('ttVersionSnapshot');snapshotBox.textContent='Loading timetable snapshot…';
+   try{
+    const version=await api(`/api/operations/${sid}/timetable/versions/${encodeURIComponent(button.dataset.id)}`);
+    const days=['','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    const rows=Array.isArray(version.snapshot)?version.snapshot:[];
+    snapshotBox.innerHTML=`<h4>Version ${esc(version.version_number)} · ${esc(version.status)}</h4><table><thead><tr><th>Day</th><th>Time</th><th>Class</th><th>Subject</th><th>Teacher</th><th>Room</th></tr></thead><tbody>${rows.map(row=>`<tr><td>${esc(days[row.day_of_week]||row.day_of_week)}</td><td>${esc(row.start_time)}–${esc(row.end_time)}</td><td>${esc([row.class_name,row.stream].filter(Boolean).join(' '))}</td><td>${esc(row.subject_code||row.subject_name)}</td><td>${esc([row.teacher_first_name,row.teacher_last_name].filter(Boolean).join(' ')||'Unassigned')}</td><td>${esc(row.room||'—')}</td></tr>`).join('')||'<tr><td colspan="6">This version contains no entries.</td></tr>'}</tbody></table>`;
+   }catch(error){snapshotBox.innerHTML=`<div class="notice" role="alert">${esc(error.message||String(error))}</div>`;}
   };
   let timetableRows=[];
   const renderEntries=rows=>{
@@ -2956,14 +2991,14 @@ async function renderTimetableWorkspace(){
    renderEntries(scoped.entries||[]);
   };
   yearSelect.onchange=async()=>{
-   try{const choices=await terms(yearSelect.value,termSelect,true,'Select term…');termSelect.value=choices[0]?.id||'';await Promise.all([loadRequirements(),loadUnavailability(),loadScopedEntries()]);}
+   try{const choices=await terms(yearSelect.value,termSelect,true,'Select term…');termSelect.value=choices[0]?.id||'';await Promise.all([loadRequirements(),loadUnavailability(),loadTeacherLimits(),loadScopedEntries(),loadTimetableVersions()]);}
    catch(error){$('ttRequirementStatus').textContent=error.message||String(error);}
   };
   termSelect.onchange=async()=>{
-   try{await Promise.all([loadRequirements(),loadUnavailability(),loadScopedEntries()]);}
+   try{await Promise.all([loadRequirements(),loadUnavailability(),loadTeacherLimits(),loadScopedEntries(),loadTimetableVersions()]);}
    catch(error){$('ttRequirementStatus').textContent=error.message||String(error);}
   };
-  await Promise.all([loadRequirements(),loadUnavailability(),loadScopedEntries()]);
+  await Promise.all([loadRequirements(),loadUnavailability(),loadTeacherLimits(),loadScopedEntries(),loadTimetableVersions()]);
   $('ttRequirementForm').onsubmit=async e=>{
    e.preventDefault();
    const form=e.currentTarget,fd=new FormData(form);
@@ -2990,6 +3025,22 @@ async function renderTimetableWorkspace(){
    try{await api(`/api/timetable-config/${sid}/unavailability/${encodeURIComponent(button.dataset.id)}`,{method:'DELETE'});await loadUnavailability();}
    catch(error){$('ttUnavailableStatus').textContent=error.message||String(error);}
   };
+  $('ttTeacherLimitForm').onsubmit=async e=>{
+   e.preventDefault();
+   const form=e.currentTarget,values=Object.fromEntries(new FormData(form));
+   if(!yearSelect.value||!termSelect.value){$('ttTeacherLimitStatus').textContent='Select an academic year and term first.';return;}
+   if(!values.max_daily_periods&&!values.max_weekly_periods){$('ttTeacherLimitStatus').textContent='Enter at least one workload limit.';return;}
+   try{
+    await api(`/api/timetable-config/${sid}/teacher-limits`,{method:'POST',body:{academic_year_id:yearSelect.value,term_id:termSelect.value,teacher_id:values.teacher_id,max_daily_periods:values.max_daily_periods||null,max_weekly_periods:values.max_weekly_periods||null}});
+    $('ttTeacherLimitStatus').textContent='Teacher workload limit saved.';
+    form.reset();await loadTeacherLimits();
+   }catch(error){$('ttTeacherLimitStatus').textContent=error.message||String(error);}
+  };
+  $('ttTeacherLimitsList').onclick=async e=>{
+   const button=e.target.closest('.ttTeacherLimitDelete');if(!button)return;
+   try{await api(`/api/timetable-config/${sid}/teacher-limits/${encodeURIComponent(button.dataset.id)}`,{method:'DELETE'});await loadTeacherLimits();}
+   catch(error){$('ttTeacherLimitStatus').textContent=error.message||String(error);}
+  };
   $('ttRoomForm').onsubmit=async e=>{
    e.preventDefault();
    const payload=Object.fromEntries(new FormData(e.currentTarget));
@@ -3002,6 +3053,18 @@ async function renderTimetableWorkspace(){
    const button=e.target.closest('.ttLock');if(!button)return;
    try{await api(`/api/operations/${sid}/timetable/${encodeURIComponent(button.dataset.id)}/lock`,{method:'PATCH',body:{is_locked:button.dataset.locked!=='true'}});await loadScopedEntries();}
    catch(error){$('ttGeneratorStatus').textContent=error.message||String(error);}
+  };
+  $('ttPublish').onclick=async()=>{
+   const status=$('ttPublishStatus');
+   if(!yearSelect.value||!termSelect.value){status.textContent='Select an academic year and term before publishing.';return;}
+   if(!confirm('Publish the current timetable for this academic year and term? A permanent version snapshot will be retained.'))return;
+   const button=$('ttPublish');setBusy(button,true,'Publishing…');status.textContent='Validating and publishing the timetable…';
+   try{
+    const result=await api(`/api/operations/${sid}/timetable/publish`,{method:'POST',body:{academic_year_id:yearSelect.value,term_id:termSelect.value}});
+    status.textContent=`Published timetable version ${result.version_number} (${result.entries} entries).`;
+    await loadTimetableVersions();
+   }catch(error){status.textContent=error.message||String(error);}
+   finally{setBusy(button,false);}
   };
   $('ttExport').onclick=()=>{
    const kind=$('ttView').value,filter=$('ttViewEntity').value;
@@ -3161,8 +3224,8 @@ async function dcLoadCertificates(){
    const edit=dcRoleCanDraft&&row.status==='DRAFT'?`<button class="btn secondary" data-dc-action="edit" data-id="${esc(row.id)}">EDIT DRAFT</button>`:'';
    const issue=dcRoleCanIssue&&row.status==='DRAFT'?`<button class="btn primary" data-dc-action="issue" data-id="${esc(row.id)}">ISSUE</button>`:'';
    const revoke=dcRoleCanIssue&&row.status==='ISSUED'?`<button class="btn danger" data-dc-action="revoke" data-id="${esc(row.id)}">REVOKE</button>`:'';
-   const pdf=row.status!=='DRAFT'?`<button class="btn secondary" data-dc-action="pdf" data-id="${esc(row.id)}">OPEN PDF</button>`:'';
-   return `<tr><td><b>${esc(row.certificate_no)}</b><br><small>${esc(row.admission_no||'')}</small></td><td>${esc(learner)}</td><td>${esc(row.title)}<br><small>${esc(row.achievement_statement)}</small></td><td>${esc(context||'—')}</td><td><b>${esc(row.status)}</b>${row.revocation_reason?`<br><small>${esc(row.revocation_reason)}</small>`:''}</td><td><div class="sf-row-actions">${edit}${issue}${revoke}${pdf}</div></td></tr>`;
+   const pdf=`<button class="btn secondary" data-dc-action="pdf" data-id="${esc(row.id)}">${row.status==='DRAFT'?'PREVIEW PDF':'OPEN PDF'}</button>`;
+   return `<tr><td><b>${esc(row.certificate_no)}</b><br><small>${esc(row.admission_no||'')}</small></td><td>${esc(learner)}</td><td>${esc(row.title)}<br><small>${esc(row.category.replaceAll('_',' '))} · ${esc(row.achievement_statement)}</small></td><td>${esc(context||'—')}</td><td><b>${esc(row.status)}</b>${row.revocation_reason?`<br><small>${esc(row.revocation_reason)}</small>`:''}</td><td><div class="sf-row-actions">${edit}${issue}${revoke}${pdf}</div></td></tr>`;
   }).join('')||'<tr><td colspan="6">No academic certificates match this filter.</td></tr>'}</tbody></table>`;
  }catch(error){list.innerHTML=`<div class="notice" role="alert">${esc(error.message)}</div>`;}
 }
@@ -3209,7 +3272,7 @@ $('dcCertificateForm')?.addEventListener('submit',async event=>{
  event.preventDefault();const form=event.currentTarget,button=$('dcCertificateSave'),message=$('dcCertificateMessage'),learnerId=$('dcLearner').value;
  if(!learnerId){message.textContent='Select a learner before saving the certificate draft.';return;}
  const values=Object.fromEntries(new FormData(form)),id=values.certificate_id;
- const payload={learner_id:learnerId,title:values.title,achievement_statement:values.achievement_statement,academic_year_id:values.academic_year_id||null,term_id:values.term_id||null};
+ const payload={learner_id:learnerId,category:values.category,title:values.title,achievement_statement:values.achievement_statement,academic_year_id:values.academic_year_id||null,term_id:values.term_id||null};
  button.disabled=true;message.textContent=id?'Saving draft changes…':'Saving certificate draft…';
  try{await api(id?`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates/${encodeURIComponent(id)}`:`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates`,{method:id?'PATCH':'POST',body:payload});message.textContent=id?'Draft updated.':'Certificate draft saved.';dcResetCertificateForm();await dcLoadCertificates();}
  catch(error){message.textContent=error.message;}finally{button.disabled=false;}
@@ -3229,7 +3292,7 @@ $('dcCertificateList')?.addEventListener('click',async event=>{
  catch(error){alert(error.message);return;}
  if(!row)return;
  if(action==='edit'){
-  const form=$('dcCertificateForm');form.elements.namedItem('certificate_id').value=row.id;form.elements.namedItem('title').value=row.title;form.elements.namedItem('achievement_statement').value=row.achievement_statement;form.elements.namedItem('academic_year_id').value=row.academic_year_id||'';await dcUpdateTerms();form.elements.namedItem('term_id').value=row.term_id||'';
+  const form=$('dcCertificateForm');form.elements.namedItem('certificate_id').value=row.id;form.elements.namedItem('category').value=row.category||'ACADEMIC_ACHIEVEMENT';form.elements.namedItem('title').value=row.title;form.elements.namedItem('achievement_statement').value=row.achievement_statement;form.elements.namedItem('academic_year_id').value=row.academic_year_id||'';await dcUpdateTerms();form.elements.namedItem('term_id').value=row.term_id||'';
   const classId=String(state.learners.find(item=>String(item.id)===String(row.learner_id))?.class_id||'');if(classId)$('dcClass').value=classId;
   const learner=state.learners.find(item=>String(item.id)===String(row.learner_id));$('dcLearnerSearch').value=learner?[learner.first_name,learner.last_name,learner.admission_no].filter(Boolean).join(' '):'';
   dcLearnerFilter();$('dcLearner').value=row.learner_id;$('dcCertificateSave').textContent='SAVE DRAFT CHANGES';$('dcCertificateCancel').hidden=false;form.scrollIntoView({behavior:'smooth',block:'center'});return;

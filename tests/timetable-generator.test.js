@@ -122,6 +122,12 @@ test('enforces teacher workload limits and returns schedule diagnostics',()=>{
  assert.equal(result.unscheduled_lessons,1);
 });
 
+test('rejects workload limits larger than the configured timetable capacity',()=>{
+ const requirement={class_id:'class-a',subject_id:'math',teacher_id:'teacher-a',lessons_per_week:1};
+ assert.throws(()=>generate({requirements:[requirement],settings:{...settings,teacher_limits:[{teacher_id:'teacher-a',max_daily_periods:5}]}}),/Invalid max daily periods/);
+ assert.throws(()=>generate({requirements:[requirement],settings:{...settings,teacher_limits:[{teacher_id:'teacher-a',max_weekly_periods:13}]}}),/Invalid max weekly periods/);
+});
+
 test('scores soft preferences per scheduled lesson occurrence',()=>{
  const result=generate({requirements:[
   {class_id:'class-a',subject_id:'math',teacher_id:'teacher-a',lessons_per_week:2,preferred_day:1,preferred_period:1}

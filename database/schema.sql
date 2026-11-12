@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS school_academic_certificates (
  academic_year_id uuid REFERENCES academic_years(id) ON DELETE SET NULL,
  term_id uuid REFERENCES terms(id) ON DELETE SET NULL,
  certificate_no text NOT NULL,
+ category text NOT NULL DEFAULT 'ACADEMIC_ACHIEVEMENT' CHECK(category IN ('ACADEMIC_ACHIEVEMENT','SUBJECT_PERFORMANCE','MOST_IMPROVED','COMPLETION','CO_CURRICULAR','SPORTS','SCHOOL_RECOGNITION')),
  title text NOT NULL CHECK(length(btrim(title)) BETWEEN 3 AND 120),
  achievement_statement text NOT NULL CHECK(length(btrim(achievement_statement)) BETWEEN 4 AND 1000),
  status text NOT NULL DEFAULT 'DRAFT' CHECK(status IN ('DRAFT','ISSUED','REVOKED')),

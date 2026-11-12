@@ -15,6 +15,7 @@
 - Unique school-scoped payment references, generated receipt numbers, and append-only credit-note reversals.
 - Receipt updates are rejected at the database layer; correction uses a separate audited reversal record.
 - Outstanding-charge, account-balance, payment and fee-structure lists; summary totals; printable receipt view.
+- Bursar finance summary includes net collections for today and the current month, excluding reversed receipts.
 - Tenant-bound API routes and school/user checks for finance writes.
 - Audit-log events for fee-structure creation, payment recording and receipt reversals.
 
@@ -29,7 +30,7 @@ For a new database, apply `database/028_school_finance_core.sql`, `database/033_
 - Payroll is not part of this phase.
 - SMS fee reminders and parent-facing balances are not yet connected to this ledger.
 - The first version supports KES only to prevent cross-currency payment allocation errors.
-- Financial writes and reversals are restricted to `SCHOOL_ADMIN` or `ADMIN`; dedicated finance-staff roles and granular permissions remain future work.
+- Bursars can manage fee structures, record payments and expenses, and issue receipt reversals; approval and category-management actions remain restricted to school administrators or authorised school leadership.
 
 ## Checks run
 

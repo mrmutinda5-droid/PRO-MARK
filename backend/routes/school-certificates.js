@@ -38,7 +38,7 @@ router.get('/:schoolId/academic-certificates',schoolBoundary,roles(...VIEW),asyn
  try{
   const status=String(req.query.status||'').toUpperCase();
   if(status&&!['DRAFT','ISSUED','REVOKED'].includes(status))return res.status(400).json({error:'Invalid certificate status filter.'});
-  const rows=await db.query(`SELECT c.id,c.learner_id,c.certificate_no,c.title,c.achievement_statement,c.status,c.issued_on,
+  const rows=await db.query(`SELECT c.id,c.learner_id,c.certificate_no,c.category,c.title,c.achievement_statement,c.status,c.issued_on,
       c.academic_year_id,c.term_id,c.created_at,c.issued_at,c.revoked_at,c.revocation_reason,
       l.admission_no,l.first_name,l.middle_name,l.last_name,
       ay.year_label,t.term_no,t.name term_name,
@@ -79,9 +79,9 @@ router.post('/:schoolId/academic-certificates',schoolBoundary,roles(...WRITE),as
    await client.query('BEGIN');
    const number=`ZAC-${new Date().getUTCFullYear()}-${crypto.randomBytes(12).toString('hex').toUpperCase()}`;
    const row=(await client.query(`INSERT INTO school_academic_certificates
-      (school_id,learner_id,academic_year_id,term_id,certificate_no,title,achievement_statement,created_by)
-      VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-    [sid,input.learner_id,input.academic_year_id,input.term_id,number,input.title,input.achievement_statement,req.user.user_id])).rows[0];
+      (school_id,learner_id,academic_year_id,term_id,certificate_no,category,title,achievement_statement,created_by)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+    [sid,input.learner_id,input.academic_year_id,input.term_id,number,input.category,input.title,input.achievement_statement,req.user.user_id])).rows[0];
    await client.query(`INSERT INTO audit_log(school_id,user_id,action,entity_type,entity_id,details)
       VALUES($1,$2,'ACADEMIC_CERTIFICATE_DRAFT_CREATED','school_academic_certificate',$3,$4::jsonb)`,
     [sid,req.user.user_id,row.id,JSON.stringify({certificate_no:number,learner_id:input.learner_id,title:input.title})]);
@@ -112,9 +112,9 @@ router.patch('/:schoolId/academic-certificates/:certificateId',schoolBoundary,ro
    if(input.academic_year_id&&String(term.academic_year_id)!==String(input.academic_year_id))throw Object.assign(new Error('Selected term does not belong to the selected academic year.'),{status:400});
    input.academic_year_id=input.academic_year_id||term.academic_year_id;
   }
-  const updated=(await client.query(`UPDATE school_academic_certificates SET learner_id=$3,academic_year_id=$4,term_id=$5,title=$6,achievement_statement=$7,updated_at=now()
+  const updated=(await client.query(`UPDATE school_academic_certificates SET learner_id=$3,academic_year_id=$4,term_id=$5,category=$6,title=$7,achievement_statement=$8,updated_at=now()
     WHERE school_id=$1 AND id=$2 RETURNING *`,
-   [req.params.schoolId,current.id,input.learner_id,input.academic_year_id,input.term_id,input.title,input.achievement_statement])).rows[0];
+   [req.params.schoolId,current.id,input.learner_id,input.academic_year_id,input.term_id,input.category,input.title,input.achievement_statement])).rows[0];
   await client.query(`INSERT INTO audit_log(school_id,user_id,action,entity_type,entity_id,details)
     VALUES($1,$2,'ACADEMIC_CERTIFICATE_DRAFT_UPDATED','school_academic_certificate',$3,$4::jsonb)`,
    [req.params.schoolId,req.user.user_id,current.id,JSON.stringify({certificate_no:current.certificate_no,previous_title:current.title,title:input.title})]);
@@ -190,7 +190,6 @@ router.get('/:schoolId/academic-certificates/:certificateId/pdf',schoolBoundary,
     LEFT JOIN users issuer ON issuer.id=c.issued_by
     WHERE c.school_id=$1 AND c.id=$2`,[req.params.schoolId,req.params.certificateId])).rows[0];
   if(!row)return res.status(404).json({error:'Certificate not found.'});
-  if(row.status==='DRAFT')return res.status(409).json({error:'Issue the certificate before generating its PDF.'});
   const pdf=new PDFDocument({size:'A4',margin:52,info:{Title:row.title,Author:row.school_name}});
   const filename=`academic-certificate-${row.certificate_no}.pdf`;
   res.setHeader('Content-Type','application/pdf');res.setHeader('Content-Disposition',`inline; filename="${filename}"`);pdf.pipe(res);
@@ -199,7 +198,8 @@ router.get('/:schoolId/academic-certificates/:certificateId/pdf',schoolBoundary,
   if(logo){try{pdf.image(logo,275,35,{fit:[45,45]})}catch{}}
   pdf.moveDown(3).fillColor('#17365d').font('Helvetica-Bold').fontSize(21).text(row.school_name,{align:'center'});
   pdf.fillColor('#52647a').font('Helvetica').fontSize(9).text([row.motto,row.address,row.contact_phone,row.contact_email].filter(Boolean).join(' · '),{align:'center'});
-  pdf.moveDown(2).strokeColor('#d9a441').lineWidth(2).moveTo(90,pdf.y).lineTo(505,pdf.y).stroke();
+  pdf.moveDown(1).fillColor('#52647a').font('Helvetica-Bold').fontSize(9).text(String(row.category||'ACADEMIC_ACHIEVEMENT').replaceAll('_',' '),{align:'center'});
+  pdf.moveDown(1).strokeColor('#d9a441').lineWidth(2).moveTo(90,pdf.y).lineTo(505,pdf.y).stroke();
   pdf.moveDown(1.7).fillColor('#17365d').font('Helvetica-Bold').fontSize(24).text(row.title,{align:'center',width:490});
   pdf.moveDown(1.4).fillColor('#334155').font('Helvetica').fontSize(13).text('This certificate is awarded to',{align:'center'});
   pdf.moveDown(.5).fillColor('#111827').font('Helvetica-Bold').fontSize(24).text([row.first_name,row.middle_name,row.last_name].filter(Boolean).join(' '),{align:'center'});
@@ -207,7 +207,7 @@ router.get('/:schoolId/academic-certificates/:certificateId/pdf',schoolBoundary,
   pdf.moveDown(1.2).fillColor('#334155').font('Helvetica').fontSize(12).text(row.achievement_statement,{align:'center',width:465,lineGap:5});
   const context=[row.year_label,row.term_no?`Term ${row.term_no}`:row.term_name,[row.class_name,row.stream].filter(Boolean).join(' ')].filter(Boolean).join(' · ');
   if(context)pdf.moveDown(1).fontSize(10).fillColor('#52647a').text(context,{align:'center'});
-  pdf.moveDown(1.4).fontSize(10).text(`Issued: ${String(row.issued_on).slice(0,10)}  ·  Reference: ${row.certificate_no}`,{align:'center'});
+  pdf.moveDown(1.4).fontSize(10).text(`${row.status==='DRAFT'?'DRAFT PREVIEW':`Issued: ${String(row.issued_on).slice(0,10)}`}  ·  Reference: ${row.certificate_no}`,{align:'center'});
   pdf.moveDown(3).strokeColor('#94a3b8').lineWidth(.8).moveTo(85,pdf.y).lineTo(250,pdf.y).stroke();
   pdf.font('Helvetica').fontSize(9).fillColor('#334155').text(row.issuer_first_name?[row.issuer_first_name,row.issuer_last_name].filter(Boolean).join(' '):'Authorised school officer',85,pdf.y+6,{width:165,align:'center'});
   pdf.moveTo(355,pdf.y-12).lineTo(510,pdf.y-12).stroke();
@@ -215,7 +215,7 @@ router.get('/:schoolId/academic-certificates/:certificateId/pdf',schoolBoundary,
   if(stamp){try{pdf.image(stamp,397,pdf.y-70,{fit:[70,48]})}catch{}}
   pdf.font('Helvetica').fontSize(9).fillColor('#334155').text('Official school stamp',355,pdf.y+6,{width:155,align:'center'});
   pdf.moveDown(4).fontSize(8).fillColor('#64748b').text(`Verify at the school portal: certificate-verification.html · Enter reference ${row.certificate_no} and admission number.`,{align:'center'});
-  if(row.status==='REVOKED')pdf.save().rotate(-25,{origin:[300,410]}).fillColor('#b91c1c').opacity(.16).font('Helvetica-Bold').fontSize(48).text('REVOKED',{x:80,y:390,width:440,align:'center'}).restore();
+  if(row.status==='DRAFT'||row.status==='REVOKED')pdf.save().rotate(-25,{origin:[300,410]}).fillColor(row.status==='DRAFT'?'#64748b':'#b91c1c').opacity(.16).font('Helvetica-Bold').fontSize(48).text(row.status,{x:80,y:390,width:440,align:'center'}).restore();
   pdf.end();
  }catch(error){console.error('Generate academic certificate PDF failed:',error);if(!res.headersSent)res.status(500).json({error:'Unable to generate certificate PDF.'});else res.end();}
 });

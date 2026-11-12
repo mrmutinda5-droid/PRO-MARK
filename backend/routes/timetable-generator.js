@@ -16,7 +16,7 @@ router.post('/:schoolId/generate',schoolBoundary,admin,async(req,res)=>{
        AND ($3::uuid IS NULL OR tr.term_id=$3)
      ORDER BY tr.class_id,tr.subject_id`,[sid,b.academic_year_id||null,b.term_id||null])).rows;
   }
-  const [configResult,schoolRooms,unavailableRows,lockedRows]=await Promise.all([db.query(`SELECT * FROM timetable_configurations
+  const [configResult,schoolRooms,unavailableRows,lockedRows,teacherLimits]=await Promise.all([db.query(`SELECT * FROM timetable_configurations
     WHERE school_id=$1
       AND ($2::uuid IS NULL OR academic_year_id IS NULL OR academic_year_id=$2)
       AND ($3::uuid IS NULL OR term_id IS NULL OR term_id=$3)
@@ -32,7 +32,10 @@ router.post('/:schoolId/generate',schoolBoundary,admin,async(req,res)=>{
     db.query(`SELECT class_id,subject_id,teacher_id,day_of_week,start_time,end_time,room
       FROM timetable_entries WHERE school_id=$1 AND is_locked=true
         AND academic_year_id IS NOT DISTINCT FROM $2::uuid AND term_id IS NOT DISTINCT FROM $3::uuid`,
-      [sid,b.academic_year_id||null,b.term_id||null])]);
+        [sid,b.academic_year_id||null,b.term_id||null]),
+    db.query(`SELECT teacher_id,max_daily_periods,max_weekly_periods FROM timetable_teacher_limits
+        WHERE school_id=$1 AND academic_year_id=$2 AND term_id=$3`,
+        [sid,b.academic_year_id||null,b.term_id||null])]);
   const savedConfig=configResult.rows[0]||{};
   const unavailableTeachers=unavailableRows.rows.filter(x=>x.teacher_id).map(x=>({teacher_id:x.teacher_id,day:x.day_of_week,period:x.period}));
   const unavailableRooms=unavailableRows.rows.filter(x=>x.room_name).map(x=>({room:x.room_name,day:x.day_of_week,period:x.period}));
@@ -63,7 +66,10 @@ router.post('/:schoolId/generate',schoolBoundary,admin,async(req,res)=>{
     blocked:b.blocked ?? (b.settings&&b.settings.blocked) ?? [],
     teacher_unavailable:[...unavailableTeachers,...(b.teacher_unavailable ?? (b.settings&&b.settings.teacher_unavailable) ?? [])],
     room_unavailable:[...unavailableRooms,...(b.room_unavailable ?? (b.settings&&b.settings.room_unavailable) ?? [])],
-    teacher_limits:b.teacher_limits ?? (b.settings&&b.settings.teacher_limits) ?? [],
+    teacher_limits:[
+      ...(Array.isArray(b.teacher_limits)?b.teacher_limits:(Array.isArray(b.settings?.teacher_limits)?b.settings.teacher_limits:[])),
+      ...teacherLimits.rows
+    ],
     locked
    }
   };

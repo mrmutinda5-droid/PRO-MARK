@@ -13,14 +13,16 @@ const draft={
 };
 
 test('validates and normalizes academic certificate drafts',()=>{
- assert.deepEqual(validateCertificateDraft(draft),draft);
+ assert.deepEqual(validateCertificateDraft(draft),{...draft,category:'ACADEMIC_ACHIEVEMENT'});
+ assert.deepEqual(validateCertificateDraft({...draft,category:'SPORTS'}),{...draft,category:'SPORTS'});
  assert.deepEqual(validateCertificateDraft({...draft,title:'  Recognition  ',academic_year_id:'',term_id:''}),{
-  ...draft,title:'Recognition',academic_year_id:null,term_id:null
+  ...draft,category:'ACADEMIC_ACHIEVEMENT',title:'Recognition',academic_year_id:null,term_id:null
  });
 });
 
 test('rejects invalid learner, context identifiers, title and statement',()=>{
  assert.throws(()=>validateCertificateDraft({...draft,learner_id:'not-a-uuid'}),/valid learner/);
+ assert.throws(()=>validateCertificateDraft({...draft,category:'UNVERIFIED'}),/valid certificate category/);
  assert.throws(()=>validateCertificateDraft({...draft,academic_year_id:'wrong'}),/valid academic year/);
  assert.throws(()=>validateCertificateDraft({...draft,title:'x'}),/Certificate title/);
  assert.throws(()=>validateCertificateDraft({...draft,achievement_statement:'no'}),/Achievement statement/);
