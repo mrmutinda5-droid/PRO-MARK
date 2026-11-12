@@ -1,0 +1,133 @@
+:root{--ink:#142231;--muted:#6c7885;--line:#e4e9ee;--surface:#fff;--bg:#f4f7fa;--brand:#17365D;--accent:#D9A441;--shadow:0 14px 40px rgba(20,35,60,.08)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:linear-gradient(180deg,#f7f9fb 0,#eef3f7 100%);color:var(--ink)}
+button,input,select,textarea{font:inherit}.page{max-width:1380px;margin:auto;padding:22px}.card,.page>header{background:var(--surface);border:1px solid rgba(20,35,60,.07);border-radius:18px;box-shadow:var(--shadow)}
+.page>header{padding:14px 20px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:18px;position:sticky;top:12px;z-index:20;backdrop-filter:blur(12px)}.brand-lockup,.header-actions{display:flex;align-items:center;gap:14px}.logo{font-size:24px;font-weight:950;letter-spacing:.16em;color:var(--brand)}.role-caption{margin-top:2px}.small{font-size:12px}.muted{color:var(--muted)}
+.portal-hero{padding:24px 28px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;gap:24px;background:linear-gradient(135deg,#fff 0%,#f8fbfd 65%,#f3f7fa 100%)}.eyebrow{font-size:10px;font-weight:850;letter-spacing:.14em;color:var(--accent)}.portal-hero h1{margin:5px 0 4px;font-size:28px}.portal-hero p{margin:0;color:var(--muted)}.hero-badge,.pill{display:inline-flex;align-items:center;border-radius:999px;padding:6px 11px;background:#eef3f7;color:var(--brand);font-size:11px;font-weight:800;letter-spacing:.04em}.hero-badge{background:var(--brand);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:18px}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.card{padding:24px;margin-bottom:18px}.stat{padding:18px 20px}.stat b{font-size:28px;display:block;margin-top:4px}.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.section-title h2{margin:0;font-size:19px}.card h3{margin:5px 0 12px;font-size:15px}
+.card form{display:grid;gap:11px}label{font-weight:750;display:grid;gap:6px;font-size:12px;color:#344250}input,select,textarea{width:100%;border:1px solid #cfd8e0;border-radius:10px;padding:10px 11px;background:#fff;color:var(--ink);outline:none;transition:border-color .15s,box-shadow .15s}input:focus,select:focus,textarea:focus{border-color:#8ca3ba;box-shadow:0 0 0 3px rgba(23,54,93,.08)}textarea{min-height:78px;resize:vertical}
+.btn{display:inline-flex;justify-content:center;align-items:center;background:var(--brand);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:800;text-decoration:none;cursor:pointer;transition:transform .12s,box-shadow .12s}.btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(23,54,93,.18)}.btn.secondary{background:#6c7885}.btn.danger{background:#963b3b}.actions{display:flex;gap:9px;flex-wrap:wrap}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0}.tabs button{border:1px solid #d2dbe3;background:#fff;color:#3c4b59;border-radius:999px;padding:8px 12px;cursor:pointer;font-weight:750}.tabs button:hover,.tabs button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+.portal-toolbar{display:grid;gap:12px;margin-top:18px}.filter-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.search{min-width:180px}.directory{display:grid;gap:8px}.item{padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:#fff;transition:transform .12s,box-shadow .12s,border-color .12s}.item:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(20,35,60,.07);border-color:#cbd6df}.person-card,.assignment-card,.class-card{display:flex;align-items:center;gap:12px;text-align:left;width:100%;cursor:pointer}.person-card{border:1px solid var(--line)}.avatar,.passport-mini{width:42px;height:42px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;flex:none}.avatar{background:#e8eef4;color:var(--brand);font-weight:900}.passport-mini{object-fit:cover;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.12)}.class-card{justify-content:space-between}
+.notice{padding:12px 14px;border-radius:11px;background:#f2f6f9;color:#42515e;border:1px solid #e0e7ec}.preview{min-height:90px;background:#fafbfc;border:1px dashed #bcc6cf;border-radius:12px;padding:12px;margin-top:10px}.logo-preview{max-height:76px;max-width:190px;object-fit:contain;border-radius:8px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:650px}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left}th{background:#f5f7f9;color:#52616f;font-size:11px;text-transform:uppercase;letter-spacing:.04em}tr:last-child td{border-bottom:0}
+.report-preview-shell{margin-top:16px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#eef2f5}.report-preview-head{padding:10px 13px;background:#fff;border-bottom:1px solid var(--line);display:flex;justify-content:space-between}.report-preview-shell iframe{display:block;width:100%;height:780px;border:0;background:#dfe5ea}.modal{position:fixed;inset:0;background:rgba(10,21,32,.48);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}.modal.open{display:flex}.modal-card{position:relative;width:min(700px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:20px;padding:28px;box-shadow:0 25px 80px rgba(0,0,0,.25)}.modal-close{position:absolute;right:14px;top:10px;border:0;background:transparent;font-size:28px;color:#6d7781;cursor:pointer}.profile-hero{display:flex;align-items:center;gap:18px;padding-bottom:20px;border-bottom:1px solid var(--line)}.profile-photo{width:86px;height:86px;border-radius:16px;object-fit:cover;background:#e8eef4}.profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:20px 0}.mini-tabs{margin:14px 0}
+.auth{max-width:460px;margin:10vh auto}.hero{max-width:900px;margin:12vh auto;padding:60px;text-align:center}.hero h1{font-size:42px;max-width:700px;margin:25px auto 12px}.hero p{color:var(--muted);font-size:18px}
+@media(max-width:950px){.grid,.grid.three{grid-template-columns:1fr}.filter-grid{grid-template-columns:1fr 1fr}.page{padding:12px}.page>header{position:static}.portal-hero{align-items:flex-start;flex-direction:column}.report-preview-shell iframe{height:650px}}@media(max-width:600px){.filter-grid,.profile-grid{grid-template-columns:1fr}.card{padding:18px}.portal-hero{padding:20px}.header-actions #who{display:none}.hero h1{font-size:30px}.hero{margin:5vh 12px;padding:35px 22px}}
+
+.promotion-panel{margin-top:18px;background:linear-gradient(180deg,#fff,#f7f9fb);border:1px solid var(--line);border-radius:16px}.promotion-panel .table-wrap{margin-top:12px}.promotion-panel table{width:100%;border-collapse:collapse}.promotion-panel th,.promotion-panel td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left}.promotion-panel th{font-size:12px;text-transform:uppercase;letter-spacing:.04em}.card-subsection{padding:18px}.card-subsection h3{margin:0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+
+/* ZELIMU CBC 3.2 mobile teacher workflow */
+.mark-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:12px 0}.mark-context{font-weight:800;color:var(--brand)}.bulk-mark-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px}.bulk-mark-table{min-width:760px}.bulk-mark-table th{background:var(--brand);color:#fff}.bulk-mark-table td{vertical-align:middle}.bulk-mark-input{width:92px;font-size:16px;font-weight:850;text-align:center;padding:10px}.bulk-remark-input{min-width:160px}.learner-cell{display:flex;align-items:center;gap:9px;min-width:230px}.save-status{font-size:11px;font-weight:800;color:#2d6a4f}.class-teacher-only{display:none}
+@media(max-width:700px){.mark-toolbar{display:grid;grid-template-columns:1fr;align-items:stretch}.mark-toolbar .actions{display:grid;grid-template-columns:1fr 1fr}.mark-toolbar .btn{width:100%}.teacher-filters{grid-template-columns:1fr}.bulk-mark-table{min-width:690px}.bulk-mark-table th,.bulk-mark-table td{padding:8px 7px}.bulk-mark-input{width:82px;font-size:18px;padding:11px 8px}.learner-cell{min-width:205px}.learner-cell b{font-size:13px;white-space:normal}.bulk-remark-input{min-width:140px;font-size:14px}.report-preview-shell iframe{height:620px}.page>header{gap:8px}.brand-lockup{gap:8px}.logo{font-size:19px}.portal-hero h1{font-size:24px}.card{border-radius:14px}.table-wrap{border-radius:10px}}
+.merit-sheet{min-width:max-content;border-collapse:collapse}.merit-sheet th,.merit-sheet td{border:1px solid #dce4ec;padding:8px 7px;text-align:center;white-space:nowrap}.merit-sheet th:nth-child(1),.merit-sheet td:nth-child(1),.merit-sheet th:nth-child(2),.merit-sheet td:nth-child(2){text-align:left}.merit-sheet thead th{background:#17365D;color:#fff;font-size:11px}.merit-sheet tbody tr:nth-child(even){background:#fafbfc}.merit-sheet .grade-cell{font-weight:700;background:#eef4fb}.merit-sheet tbody tr:first-child td{font-weight:600}.merit-sheet-wrap{overflow-x:auto}
+@media(max-width:700px){.merit-sheet th,.merit-sheet td{padding:7px 6px;font-size:11px}.merit-sheet{min-width:900px}}
+
+/* ZELIMU CBC 3.4.4 polished portal theme + empty-state previews */
+.theme-swatches{display:flex;align-items:center;gap:8px;margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fafcfd;font-size:11px;font-weight:800}.theme-swatches i{display:block;width:28px;height:28px;border-radius:8px;border:2px solid #fff;box-shadow:0 2px 8px rgba(20,35,60,.14)}
+.portal-hero{position:relative;overflow:hidden}.portal-hero:after{content:'✦  ✧  ✦  ✧  ✦';position:absolute;right:22px;bottom:10px;letter-spacing:10px;opacity:.10;font-size:26px}.notice marquee{font-weight:800;line-height:1.6}.class-report-table{margin-top:14px;background:linear-gradient(180deg,#fff,#fbfcfd)}.class-report-table .table-wrap{max-height:360px}.class-report-table table{min-width:620px}.class-report-table .btn{padding:7px 10px;font-size:11px}.passport-mini{background:#eef3f7}.bulk-mark-table .learner-cell{min-width:250px}.bulk-mark-table .learner-cell b{white-space:normal}
+@media(max-width:700px){.class-report-table{padding:12px}.class-report-table .table-wrap{overflow:visible;border:0}.class-report-table table{min-width:0;font-size:12px}.class-report-table thead{display:none}.class-report-table tbody,.class-report-table tr,.class-report-table td{display:block;width:100%}.class-report-table tr{border:1px solid var(--line);border-radius:12px;margin-bottom:8px;padding:8px;background:#fff}.class-report-table td{border:0;padding:5px 7px}.class-report-table td:nth-child(1),.class-report-table td:nth-child(3){display:inline-block;width:50%;font-size:11px;color:var(--muted)}.class-report-table td:nth-child(4){padding-top:8px}.class-report-table .learner-cell{min-width:0}.bulk-mark-wrap{overflow:visible;border:0}.bulk-mark-table{min-width:0}.bulk-mark-table thead{display:none}.bulk-mark-table tbody,.bulk-mark-table tr,.bulk-mark-table td{display:block;width:100%}.bulk-mark-table tr{border:1px solid var(--line);border-radius:14px;margin-bottom:10px;padding:10px;background:#fff;box-shadow:0 4px 14px rgba(20,35,60,.05)}.bulk-mark-table td{border:0;padding:4px 2px}.bulk-mark-table td:first-child{display:none}.bulk-mark-table td:nth-child(2){padding-bottom:7px}.bulk-mark-table td:nth-child(3):before{content:'Admission: ';font-weight:800;color:var(--muted)}.bulk-mark-table td:nth-child(4):before{content:'MARK ';display:block;font-size:10px;font-weight:900;color:var(--muted);letter-spacing:.08em;margin-bottom:4px}.bulk-mark-table td:nth-child(5):before{content:'REMARK ';display:block;font-size:10px;font-weight:900;color:var(--muted);letter-spacing:.08em;margin-bottom:4px}.bulk-mark-input{width:100%;max-width:none;height:48px;font-size:20px}.bulk-remark-input{width:100%;min-width:0}.save-status{display:block;padding:3px 0}.mark-context{font-size:13px}.theme-swatches{justify-content:flex-start}.theme-swatches i{width:24px;height:24px}}
+
+/* ZELIMU CBC 3.4.5 controls */
+.class-card{gap:10px}.class-card .class-open{border:0;background:transparent;display:flex;justify-content:space-between;align-items:center;gap:10px;flex:1;text-align:left;cursor:pointer;color:var(--ink);font:inherit}.school-control-card{display:flex;justify-content:space-between;align-items:center;gap:14px}.school-control-card .actions{justify-content:flex-end}.owner-school-switch{max-width:220px;padding:7px 9px}.stamp-preview{max-width:100px;max-height:70px;object-fit:contain;display:block;margin-bottom:5px}@media(max-width:700px){.school-control-card{align-items:stretch;flex-direction:column}.school-control-card .actions{display:grid;grid-template-columns:1fr 1fr}.owner-school-switch{max-width:170px}.class-card .class-open{min-width:0}}
+
+.assessment-class-panel{margin:14px 0;padding:14px;border:1px solid rgba(0,0,0,.12);border-radius:12px;background:rgba(0,0,0,.025)}
+.assessment-subject-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px}
+.subject-check,.check-row{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid rgba(0,0,0,.1);border-radius:8px;background:#fff}
+.check-row input[type=number]{width:85px;margin-left:auto}
+.assessment-manual{margin-top:12px;padding:10px;border:1px dashed rgba(0,0,0,.2);border-radius:10px}
+
+
+/* ZELIMU CBC 3.9.8 — document-grade visual system */
+:root{--line:#aeb9c5;--line-strong:#7d8996;--brand:#17365D;--accent:#D9A441;--surface:#ffffff;--ink:#18212B;--muted:#5d6b78}
+*,*::before,*::after{box-sizing:border-box}
+body{background:linear-gradient(180deg,#f3f7fa 0%,#eef3f6 100%);color:var(--ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.card,.item,.table-wrap,.promotion-panel,.assessment-class-panel,.teacher-step,.teacher-assignment-card,.teacher-entry-panel,.class-list-tile,.analytics-card,.school-control-card{border-color:var(--line-strong);box-shadow:0 2px 10px rgba(18,43,66,.06)}
+.table-wrap{border:1.5px solid var(--line-strong);border-radius:10px}
+table{border-collapse:collapse}
+table th,table td{border:1px solid var(--line);}
+table th{border-color:var(--line-strong);background:linear-gradient(180deg,#17365D,#234b76);color:#fff}
+.merit-sheet th,.merit-sheet td{border:1.5px solid #111111}
+.merit-sheet thead th{border-color:#111111}
+input,select,textarea{border:1.5px solid #8e9aa7!important;background:#fff}
+input:focus,select:focus,textarea:focus{border-color:var(--brand)!important;box-shadow:0 0 0 2px rgba(23,54,93,.12)}
+.btn{border:1.5px solid var(--brand);font-weight:800}
+.btn.secondary{border-color:#657382}
+.btn.danger{border-color:#b54b4b}
+.nav-managed-section,.card{background:rgba(255,255,255,.98)}
+.portal-hero{background:linear-gradient(135deg,#fff 0%,rgba(23,54,93,.08) 62%,rgba(25,135,84,.10) 100%);border-top:5px solid var(--brand)}
+.pm-admin-menu button{border:1.5px solid #8d99a6;background:linear-gradient(180deg,#fff,#f3f7fa)}
+.pm-admin-menu button:hover,.pm-admin-menu button.active{border-color:var(--brand)}
+.notice{border:1.5px solid #aeb9c5}
+.notice marquee{color:var(--brand);font-weight:900}
+.pm-site-footer{display:flex;justify-content:center;align-items:center;gap:14px;flex-wrap:wrap;margin:22px 0 10px;padding:12px 16px;border-top:1.5px solid #7d8996;color:#52616f;font-size:11px;background:rgba(255,255,255,.8)}
+.pm-site-footer strong{color:var(--brand);letter-spacing:.08em}
+/* Strong, crisp document watermark for browser print previews. */
+.report-preview-shell{border:1.5px solid #7d8996}
+/* Keep dense school tables usable on narrow phones without shrinking text to illegibility. */
+@media(max-width:700px){
+ body{font-size:14px}.page{width:100%;max-width:100%;padding:8px}.card{padding:14px}.table-wrap{border-radius:8px}
+ .pm-site-footer{font-size:10px;gap:7px;text-align:center}
+ .header-actions{width:100%}.header-actions .btn{min-height:42px}.header-actions select{max-width:48vw}
+ .pm-admin-menu{grid-template-columns:1fr 1fr;gap:7px}.pm-admin-menu button{padding:11px 9px;font-size:12px;min-height:48px}
+ input,select,textarea{min-height:44px;font-size:16px!important}.btn{min-height:44px}
+ .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+}
+
+/* Document-grade table rules: crisp black borders, no washed-out grey lines. */
+table, th, td, .table-wrap { border-color:#111111; }
+.table-wrap { border-width:1px; }
+
+
+/* ZELIMU CBC 3.9.12 — professional live portal finish */
+:root{
+  --brand:#0B4F8A;
+  --accent:#16A36A;
+  --brand-deep:#083B68;
+  --gold:#E2A72E;
+  --line:#111111;
+  --line-soft:#CBD5E1;
+}
+body{background:linear-gradient(135deg,#F4F9FC 0%,#EFFAF5 48%,#F8FBFD 100%);}
+.card{border:1px solid #B8C7D5;box-shadow:0 8px 24px rgba(8,59,104,.08)}
+.portal-hero{background:linear-gradient(135deg,#FFFFFF 0%,#EAF4FF 58%,#EAF9F1 100%);border-top:5px solid var(--brand)}
+.portal-hero:after{color:var(--accent);opacity:.16}
+.pm-admin-menu button{border:1px solid #B6C5D4!important;background:linear-gradient(135deg,#fff,#F4F9FC)!important;color:#17324D!important;box-shadow:0 3px 10px rgba(8,59,104,.06)}
+.pm-admin-menu button:hover,.pm-admin-menu button.active{background:linear-gradient(135deg,#0B4F8A,#16A36A)!important;color:#fff!important;border-color:#0B4F8A!important;box-shadow:0 7px 18px rgba(11,79,138,.22)}
+.btn{background:linear-gradient(135deg,#0B4F8A,#1268AE);border-color:#083B68;box-shadow:0 4px 12px rgba(11,79,138,.14)}
+.btn.secondary{background:linear-gradient(135deg,#16A36A,#0D8757);border-color:#087348}
+.btn.danger{background:linear-gradient(135deg,#C73E3E,#A92323);border-color:#8F1D1D}
+.pill,.hero-badge{box-shadow:0 2px 7px rgba(8,59,104,.08)}
+.notice{background:linear-gradient(135deg,#F4FAFF,#F1FBF6);border-color:#AFC4D6}
+.table-wrap{border:1.5px solid #111!important;box-shadow:0 4px 14px rgba(15,23,42,.08)}
+table th,table td{border:1px solid #111!important}
+table th{background:linear-gradient(135deg,#0B4F8A,#1268AE)!important;color:#fff!important}
+.merit-table-wrap{border:1.5px solid #111!important;border-radius:12px;background:#fff;box-shadow:0 8px 22px rgba(8,59,104,.09)}
+.merit-sheet{font-size:12px!important}
+.merit-sheet thead th{background:linear-gradient(135deg,#0B4F8A,#16A36A)!important;border:1.5px solid #111!important;color:#fff!important}
+.merit-sheet tbody tr:nth-child(even){background:#F2FAF6}
+.merit-sheet tbody tr:first-child td{background:#FFF8E6;font-weight:800}
+.merit-sheet .grade-cell{font-weight:900}
+.merit-subject-table td:nth-child(4){font-weight:900}
+.class-register-table th{background:linear-gradient(135deg,#0B4F8A,#16A36A)!important}
+.class-register-table td{padding:10px 9px}
+.analytics-card{border:1px solid #AFC4D6!important;background:linear-gradient(135deg,#fff,#F5FBF8);box-shadow:0 7px 18px rgba(8,59,104,.08)}
+.analytics-bar{background:#DCEAF3}
+.analytics-bar i{background:linear-gradient(90deg,#0B4F8A,#16A36A)!important}
+/* Strong, print-like controls and table lines. */
+input,select,textarea{border-color:#7D8FA1!important}
+@media(max-width:700px){
+  .pm-admin-menu button{min-height:50px;font-size:12px}
+  .merit-table-wrap{overflow-x:auto}
+  .merit-sheet{min-width:900px}
+}
+
+/* ZELIMU CBC 3.9.12 navigation icons */
+.pm-admin-menu button{display:flex;align-items:center;justify-content:flex-start;gap:9px;text-align:left}
+.pm-nav-icon{width:30px;height:30px;display:grid;place-items:center;flex:0 0 30px;border-radius:9px;background:linear-gradient(135deg,#EAF4FF,#EAF9F1);color:#0B4F8A;border:1px solid #C7D9E7}
+.pm-nav-icon svg{width:17px;height:17px;fill:currentColor}
+.pm-admin-menu button:hover .pm-nav-icon,.pm-admin-menu button.active .pm-nav-icon{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4);color:#fff}
+/* Teacher Resource Library: clear catalogue by category, subject, class and year. */
+.resource-category{margin:12px 0;padding:12px;border:1.5px solid #111;border-radius:12px;background:#fff}
+.resource-category-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding-bottom:8px;border-bottom:1px solid #cbd5e1;margin-bottom:8px}
+.resource-category-head h3{margin:0 0 3px;color:#17365D}
+.resource-row{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:6px 0;padding:10px;border:1px solid #d6dee7;border-radius:9px;background:#f8fafc}
+@media(max-width:700px){.resource-category-head,.resource-row{align-items:stretch;flex-direction:column}.resource-row .btn{width:100%}}

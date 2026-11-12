@@ -1,0 +1,124 @@
+
+=== ADMINISTRATION ===
+admission: 5 matching files
+  assessments.js, school-documents.js, people.js, platform.js, 015_full_workflow_compatibility.sql
+guardian: 2 matching files
+  communications.js, 015_full_workflow_compatibility.sql
+parent: 2 matching files
+  communications.js, 015_full_workflow_compatibility.sql
+transfer: 1 matching files
+  005_billing_and_subscriptions.sql
+promot: 0 matching files
+leaving_certificate: 1 matching files
+  school-documents.js
+
+=== ACADEMICS ===
+academic_year: 0 matching files
+term: 13 matching files
+  assessments.js, school.js, merit.js, people.js, communications.js
+school_level: 0 matching files
+class: 16 matching files
+  resources.js, grading.js, assessments.js, operations.js, finance.js
+subject: 10 matching files
+  resources.js, assessments.js, operations.js, merit.js, auth.js
+teacher_assignment: 0 matching files
+
+=== ASSESSMENTS ===
+assessment: 11 matching files
+  assessments.js, merit.js, people.js, communications.js, platform.js
+mark: 25 matching files
+  assessments.js, operations.js, merit.js, people.js, communications.js
+grading: 5 matching files
+  grading.js, communications.js, seed_grading_examples.sql, 001_hardening.sql, 015_full_workflow_compatibility.sql
+approval: 0 matching files
+report_card: 0 matching files
+merit: 5 matching files
+  merit.js, platform.js, reports.js, 015_full_workflow_compatibility.sql, 016_analytics_and_report_card_designation.sql
+
+=== TIMETABLE ===
+timetable: 2 matching files
+  operations.js, timetable-generator.js
+schedule: 0 matching files
+room: 4 matching files
+  extended.js, operations.js, timetable-generator.js, 017_full_operations_and_term3_repair.sql
+clash: 1 matching files
+  operations.js
+
+=== STAFF_HR ===
+staff: 3 matching files
+  biometrics.js, people.js, platform.js
+employee: 0 matching files
+leave_request: 0 matching files
+payroll: 0 matching files
+
+=== FINANCE ===
+fee_structure: 0 matching files
+invoice: 1 matching files
+  billing.js
+payment: 3 matching files
+  finance.js, billing.js, 005_billing_and_subscriptions.sql
+receipt: 1 matching files
+  finance.js
+balance: 1 matching files
+  finance.js
+arrears: 0 matching files
+
+=== ATTENDANCE ===
+attendance: 3 matching files
+  biometrics.js, operations.js, people.js
+absence: 0 matching files
+biometric: 1 matching files
+  biometrics.js
+
+=== COMMUNICATION ===
+sms: 4 matching files
+  communications.js, 002_production_documents_lifecycle.sql, 015_full_workflow_compatibility.sql, 008_assessment_context_and_portal_sms.sql
+announcement: 0 matching files
+notification: 2 matching files
+  billing.js, communications.js
+reminder: 1 matching files
+  billing.js
+
+=== TRANSPORT ===
+vehicle: 0 matching files
+transport_route: 0 matching files
+driver: 0 matching files
+transport_charge: 0 matching files
+
+=== BOARDING ===
+dormitory: 1 matching files
+  extended.js
+bed_allocation: 0 matching files
+boarding_attendance: 0 matching files
+boarding_fee: 0 matching files
+
+=== RESOURCES ===
+inventory: 1 matching files
+  operations.js
+resource: 1 matching files
+  resources.js
+stock: 0 matching files
+issue: 1 matching files
+  school-documents.js
+return: 19 matching files
+  resources.js, grading.js, assessments.js, school.js, extended.js
+
+=== ANALYTICS ===
+analytics: 2 matching files
+  communications.js, 015_full_workflow_compatibility.sql
+performance: 1 matching files
+  seed_grading_examples.sql
+trend: 0 matching files
+report: 9 matching files
+  assessments.js, merit.js, communications.js, platform.js, reports.js
+
+=== SYSTEM ===
+user_role: 3 matching files
+  schema.sql, 003_leadership_and_learner_authority.sql, 015_full_workflow_compatibility.sql
+permission: 0 matching files
+branding: 1 matching files
+  merit.js
+audit: 3 matching files
+  operations.js, people.js, 001_hardening.sql
+security: 1 matching files
+  merit.js

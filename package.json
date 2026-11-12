@@ -1,0 +1,30 @@
+{
+  "name": "zelimu-cbc",
+  "version": "4.0.9",
+  "private": true,
+  "description": "ZELIMU CBC multi-school school management platform with a 24-module operational workflow, persistent school operations, school-wide mark authority, class progress tracking and corrected Term 3 assessment integrity.",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node --watch backend/server.js",
+    "bootstrap-owner": "node scripts/bootstrap-owner.js",
+    "migrate:kauti": "node migration/import_kauti_workbook.js",
+    "validate": "node migration/validate_kauti.js",
+    "check": "node scripts/smoke-check.js",
+    "import:kauti": "node migration/import_kauti_workbook.js --commit",
+    "audit:integrations": "node scripts/integration-audit.js",
+    "test": "node --test \"tests/*.test.js\""
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "exceljs": "^4.4.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.2",
+    "pdf-lib": "^1.17.1",
+    "pdfkit": "^0.17.2",
+    "pg": "^8.23.1"
+  }
+}

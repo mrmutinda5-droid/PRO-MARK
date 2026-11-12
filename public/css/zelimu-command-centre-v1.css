@@ -1,0 +1,38 @@
+/* ZELIMU CBC Command Centre V1: visual layer only. No API or module handlers changed. */
+:root{--zcc-green:#126b42;--zcc-deep:#0e4f33;--zcc-gold:#e6b74b}
+body{background:#f1f6f2!important;color:#173b2b!important;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif!important}
+body main.page{max-width:1560px!important}
+body main.page>header{background:#126b42!important;border-radius:16px!important;padding:15px 20px!important;color:#fff!important;border:0!important;box-shadow:0 10px 25px rgba(11,71,42,.15)!important}
+body main.page>header strong,body main.page>header #schoolTitle,body main.page>header #who{color:#fff!important}
+body main.page>header .muted,body main.page>header .role-caption{color:#d4eadd!important}
+body main.page>header .btn{background:#e6b74b!important;color:#183c29!important;border-color:#e6b74b!important}
+body main.page>.portal-hero{background:linear-gradient(110deg,#126b42,#0d5337)!important;color:white!important;border:0!important;border-radius:18px!important;padding:22px!important}
+body main.page>.portal-hero h1,body main.page>.portal-hero p,body main.page>.portal-hero .eyebrow{color:white!important}
+body main.page>.portal-hero .hero-badge{background:#e6b74b!important;color:#173b2b!important;border-radius:999px!important}
+body main.page>.zelimu-legacy-stats{display:none!important}
+body main.page>.zelimu-command-v1{display:block!important;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;margin:16px 0!important;max-width:none!important}
+.zelimu-command-v1 .zelimu-command-top{background:#fff;border-left:5px solid #e6b74b;padding:17px 20px;border-radius:14px;margin-bottom:12px}
+.zelimu-command-v1 .zelimu-kicker{color:#14754a!important;font-weight:800;font-size:12px;letter-spacing:.08em}
+.zelimu-command-v1 h2{margin:5px 0!important;color:#125638!important;font-size:clamp(21px,2.4vw,29px)!important}
+.zelimu-command-v1 p{color:#64756b!important;margin:4px 0!important}
+.zelimu-command-v1 .zelimu-command-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;margin:0 0 12px!important}
+.zelimu-command-v1 .zelimu-command-grid button{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:6px!important;text-align:left!important;background:#fff!important;color:#163f2a!important;border:1px solid #dce9df!important;border-radius:14px!important;padding:18px!important;min-height:128px!important;box-shadow:0 3px 14px rgba(12,73,43,.04)!important;cursor:pointer!important}
+.zelimu-command-v1 .zelimu-command-grid button:hover{border-color:#14925d!important;transform:translateY(-2px)}
+.zelimu-command-v1 .zelimu-command-grid strong{font-size:16px!important;color:#173b2b!important}
+.zelimu-command-v1 .zelimu-command-grid small{color:#60746a!important;font-size:12px!important}
+.zelimu-command-v1 .zcc-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:#e5f5ea;font-size:20px}
+.zelimu-command-v1 .zelimu-command-grid button:nth-child(2) .zcc-icon{background:#fff3d7}
+.zelimu-command-v1 .zelimu-command-grid button:nth-child(3) .zcc-icon{background:#e4efff}
+.zelimu-command-v1 .zelimu-command-grid button:nth-child(4) .zcc-icon{background:#f0e8ff}
+.zelimu-command-v1 .zelimu-command-panels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.zelimu-command-v1 .zcc-panel{background:#fff;border:1px solid #dce9df;border-radius:14px;padding:18px;min-width:0}
+.zelimu-command-v1 .zcc-panel h3{color:#125638!important;font-size:16px;margin:0 0 8px}
+.zelimu-command-v1 .zcc-panel p{font-size:13px;line-height:1.6;min-height:42px}
+.zelimu-command-v1 .zcc-action{border:0!important;background:transparent!important;color:#0c7545!important;font-weight:800!important;padding:8px 0!important;cursor:pointer!important;text-align:left!important}
+body main.page>.pm-workflow-intro{border:1px solid #dce9df!important;border-radius:16px!important;background:#fff!important}
+body main.page>.pm-workflow-intro h2{color:#125638!important}
+body main.page>.pm-workflow-intro .pm-module-group h3{color:#126b42!important}
+body main.page>#passwordPanel{display:none!important}
+body main.page>#passwordPanel.zelimu-password-open{display:block!important}
+@media(max-width:850px){.zelimu-command-v1 .zelimu-command-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:560px){body main.page>header{border-radius:10px!important;padding:12px!important}.zelimu-command-v1 .zelimu-command-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.zelimu-command-v1 .zelimu-command-panels{grid-template-columns:1fr!important}.zelimu-command-v1 .zelimu-command-grid button{min-height:115px!important;padding:12px!important}.zelimu-command-v1 .zcc-panel p{min-height:0}}

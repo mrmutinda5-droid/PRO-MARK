@@ -1,0 +1,13 @@
+ZELIMU FINANCE AND ACADEMICS INTEGRATION CHECK
+
+PASS: Finance fee validation
+PASS: Finance date validation
+PASS: Payment date validation
+PASS: Payment method validation
+PASS: Academic year date validation
+PASS: Academic year API
+PASS: Academic year listing
+PASS: Term management API
+PASS: Finance overview API
+PASS: Finance payment API
+PASS: Admissions form preserved

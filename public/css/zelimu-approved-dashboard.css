@@ -1,0 +1,774 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+/* ZELIMU CBC — APPROVED REFERENCE LAYOUT V7 */
+:root{
+ --zgreen:#003f35;--zdeep:#00372f;--znavy:#10294d;
+ --zborder:#e4ebef;--zblue:#1479f3;--zmuted:#718198
+}
+body{margin:0!important;background:#f4f9f8!important;font-family:Arial,Helvetica,sans-serif!important}
+body main.page{max-width:none!important;width:100%!important;min-height:100vh!important;margin:0!important;padding:0 0 0 255px!important;background:#f4f9f8!important;display:block!important;box-sizing:border-box!important}
+body main.page>header{height:70px!important;min-height:70px!important;margin:0!important;padding:0 24px!important;background:white!important;border-radius:0!important;border:0!important;border-bottom:1px solid #e1e9ec!important;box-shadow:0 2px 8px #0b382b08!important;display:flex!important;align-items:center!important;justify-content:flex-end!important}
+body main.page>header .brand-lockup{display:none!important}
+body main.page>.portal-hero{display:none!important}
+body main.page>.pm-workflow-intro{display:none!important}
+body main.page>.zelimu-command,body main.page>.zc-dashboard{margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;background:transparent!important;max-width:none!important;width:100%!important}
+body .z7,body .z7 *{box-sizing:border-box}
+body .z7{font-family:Arial,Helvetica,sans-serif;color:var(--znavy);font-size:12px}
+body .z7 button,body .z7 select,body .z7 input{font-family:inherit}
+body .z7-side{position:fixed;z-index:120;top:0;bottom:0;left:0;width:255px;overflow-y:auto;background:linear-gradient(165deg,#003c34,#00352e);color:white;padding:15px 12px 22px;scrollbar-width:thin}
+body .z7-brand{display:flex;align-items:center;gap:9px;padding:2px 8px 21px}
+body .z7-logo{font-size:31px;color:#9ad629}
+body .z7-brand strong{font-size:22px;color:white;white-space:nowrap;letter-spacing:-.7px}
+body .z7-brand small{display:block;color:#c0e6e2;font-size:10px;margin-top:3px}
+body .z7-navhead{font-size:10px;color:#94d1d5;letter-spacing:1px;font-weight:800;margin:17px 8px 8px}
+body .z7-nav{display:flex;flex-direction:column;gap:2px}
+body .z7-nav button{display:flex;align-items:center;gap:12px;width:100%;background:transparent;color:#eef8f7;border:0;border-radius:6px;text-align:left;min-height:36px;padding:9px 11px;font-size:12px;font-weight:600;cursor:pointer}
+body .z7-nav button:hover,body .z7-nav button.z7-current{background:linear-gradient(90deg,#887426,#655d1b);color:white}
+body .z7-nav .zi{width:22px;text-align:center;font-size:17px;color:#b7e9eb}
+body .z7-nav .chev{margin-left:auto;color:#b7e9eb}
+body .z7-side-foot{display:flex;justify-content:space-between;align-items:center;color:#d4f1ed;padding:26px 8px 0;font-size:11px}
+body .z7-side-foot strong{font-size:14px;color:white}
+body .z7-toolbar{position:fixed;z-index:110;top:0;left:255px;right:0;height:70px;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 24px;background:#fff;border-bottom:1px solid var(--zborder)}
+body .z7-pickers{display:flex;gap:12px;align-items:center}
+body .z7-pick{display:flex;align-items:center;gap:8px;border:1px solid #e1e8ee;background:white;border-radius:6px;padding:10px 12px;color:#10294d;font-size:12px;font-weight:800;min-width:110px;white-space:nowrap}
+body .z7-pick .zi{font-size:17px;color:#007b57}
+body .z7-toolbar-right{display:flex;align-items:center;gap:15px}
+body .z7-search{border:1px solid #e3e8ed;border-radius:7px;background:#f6f8fa;padding:12px 13px;width:min(310px,25vw);color:#193456;font-size:11px}
+body .z7-bell{border:0;background:transparent;color:#006e4e;font-size:20px;cursor:pointer}
+body .z7-user{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:800;white-space:nowrap}
+body .z7-avatar{height:34px;width:34px;border-radius:50%;background:#e6edf0;color:#0b634d;display:grid;place-items:center;font-size:20px}
+body .z7-user small{display:block;font-weight:400;color:#75849a;font-size:10px;margin-top:4px}
+body .z7-workspace{padding:18px 22px 22px;margin-top:70px}
+body .z7-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:19px}
+body .z7-heading h1{margin:0 0 5px!important;font-size:33px!important;letter-spacing:-1.3px;font-weight:850!important;color:#111!important;line-height:1.1}
+body .z7-heading p{margin:0;color:#667a97;font-size:12px}
+body .z7-heading-right{display:flex;align-items:center;gap:13px}
+body .z7-date{text-align:right;font-size:11px;font-weight:700;color:#2e486b}
+body .z7-date small{display:block;margin-top:5px;color:#60758f}
+body .z7-quick{background:#007b54!important;color:white!important;border:0!important;border-radius:6px!important;padding:13px 15px!important;font-size:12px!important;font-weight:800!important;cursor:pointer}
+body .z7-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:11px;margin-bottom:12px}
+body .z7-kpi{display:flex;gap:11px;min-width:0;min-height:105px;text-align:left;padding:14px 11px;border-radius:6px;border:1px solid;cursor:pointer}
+body .z7-kpi-icon{width:47px;height:47px;display:grid;place-items:center;border-radius:10px;color:white;font-size:22px;flex-shrink:0}
+body .z7-kpi-name{font-size:11px;font-weight:800;margin:3px 0 10px;white-space:nowrap}
+body .z7-kpi-number{font-size:25px;color:#111;font-weight:850;line-height:1}
+body .z7-kpi-note{font-size:10px;color:#577768;margin-top:10px}
+body .z7-kpi:nth-child(1){background:#eaf9f3;border-color:#cdebe0}
+body .z7-kpi:nth-child(1) .z7-kpi-icon{background:#00825c}
+body .z7-kpi:nth-child(2){background:#e8f3ff;border-color:#cfe5ff}
+body .z7-kpi:nth-child(2) .z7-kpi-icon{background:#2189ff}
+body .z7-kpi:nth-child(3){background:#edf9f1;border-color:#d6efdf}
+body .z7-kpi:nth-child(3) .z7-kpi-icon{background:#39b72d}
+body .z7-kpi:nth-child(4){background:#fff7e9;border-color:#ffe5b8}
+body .z7-kpi:nth-child(4) .z7-kpi-icon{background:#ffab13}
+body .z7-kpi:nth-child(5){background:#f4edff;border-color:#e7d6fc}
+body .z7-kpi:nth-child(5) .z7-kpi-icon{background:#9444ef}
+body .z7-kpi:nth-child(6){background:#fff0f1;border-color:#ffd9dd}
+body .z7-kpi:nth-child(6) .z7-kpi-icon{background:#f23845}
+body .z7-grid{display:grid;grid-template-columns:1.36fr .84fr .78fr;gap:12px;margin-bottom:12px}
+body .z7-panel{background:white;border:1px solid #e8eef1;border-radius:7px;padding:13px;min-width:0;min-height:245px}
+body .z7-panelhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:13px}
+body .z7-panel h2{font-size:14px!important;font-weight:850!important;color:#112b52!important;margin:0!important}
+body .z7-panel button.z7-link{border:0;background:transparent;color:#0079f4;font-weight:800;font-size:11px;cursor:pointer}
+body .z7-select{border:1px solid #e0e8ee;background:white;border-radius:5px;padding:7px 8px;font-size:10px;color:#29436a}
+body .z7-plot{width:100%;height:185px;display:block}
+body .z7-chart-caption{text-align:center;font-size:10px;color:#57708d;padding-top:7px}
+body .z7-legend{display:flex;justify-content:center;gap:14px;font-size:10px;margin-top:6px}
+body .z7-empty{display:flex;align-items:center;justify-content:center;min-height:165px;color:#71849a;text-align:center;padding:12px;line-height:1.5;font-size:11px}
+body .z7-actionrow{display:flex;align-items:center;gap:9px;width:100%;padding:9px 3px;background:white;border:0;border-bottom:1px solid #edf0f2;color:#1b3457;text-align:left;font-size:11px;cursor:pointer}
+body .z7-actionrow span:first-child{width:22px;text-align:center;color:#007e58;font-size:16px}
+body .z7-actionrow span:last-child{margin-left:auto;color:#8397ab}
+body .z7-table{width:100%;border-collapse:collapse;font-size:10px}
+body .z7-table th{background:#f2f5f8;color:#1e3a60;text-align:left;padding:9px 7px}
+body .z7-table td{border-bottom:1px solid #edf1f4;padding:10px 7px;color:#46617c}
+body .z7-finance{display:flex;align-items:center;justify-content:center;gap:18px;padding:5px 0 10px}
+body .z7-ring{width:128px;height:128px;border-radius:50%;background:#e5eee9;display:grid;place-items:center;flex-shrink:0}
+body .z7-ringinner{width:95px;height:95px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#1a304b;font-size:20px;font-weight:850}
+body .z7-ringinner small{font-size:10px;color:#72849a;font-weight:500}
+body .z7-finlist{font-size:11px;line-height:2.2;color:#385372}
+body .z7-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+body .z7-tabs button{background:#f2f4f6;border:0;border-radius:5px;padding:8px 5px;font-size:10px;font-weight:700;color:#38516f;cursor:pointer}
+body .z7-tabs button.selected{background:#007b54;color:white}
+body .z7-sectiontitle{font-size:14px;font-weight:850;margin:9px 0 11px;color:#142e50}
+body .z7-shortcuts{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px}
+body .z7-shortcut{display:flex;align-items:center;gap:9px;padding:10px 9px;min-height:63px;border-radius:6px;border:1px solid #d4e9df;background:#eaf8f2;color:#1d3656;text-align:left;font-size:10px;font-weight:750;cursor:pointer}
+body .z7-shortcut .bubble{display:grid;place-items:center;border-radius:50%;width:34px;height:34px;flex-shrink:0;background:#00835d;color:white;font-size:17px}
+body .z7-shortcut:nth-child(4n+2){background:#e8f3ff;border-color:#d0e5ff}
+body .z7-shortcut:nth-child(4n+2) .bubble{background:#1685f5}
+body .z7-shortcut:nth-child(4n+3){background:#fff6e7;border-color:#ffe4b7}
+body .z7-shortcut:nth-child(4n+3) .bubble{background:#eda30c}
+body .z7-shortcut:nth-child(4n+4){background:#f3eaff;border-color:#e5d5fc}
+body .z7-shortcut:nth-child(4n+4) .bubble{background:#9044ed}
+body .z7-nav button:focus-visible,body .z7 button:focus-visible{outline:3px solid #e5bb45;outline-offset:2px}
+@media(max-width:1400px){
+ body .z7-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+ body .z7-shortcuts{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:1080px){
+ body .z7-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body .z7-grid .z7-panel:first-child{grid-column:1/-1}
+ body .z7-search{display:none}
+}
+@media(max-width:750px){
+ body main.page{padding-left:0!important}
+ body .z7-side{position:relative;width:100%;height:auto;max-height:220px}
+ body .z7-toolbar{position:relative;left:0;top:0;height:auto;flex-wrap:wrap}
+ body .z7-workspace{margin-top:0;padding:14px}
+ body .z7-heading{align-items:flex-start;flex-direction:column}
+ body .z7-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body .z7-grid{grid-template-columns:1fr}
+ body .z7-grid .z7-panel:first-child{grid-column:auto}
+ body .z7-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}
+ body .z7-heading h1{font-size:25px!important}
+}
+
+
+/* APPROVED ZELIMU CBC — FINAL LAYOUT PRIORITY */
+
+body:has(.z7) main.page {
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding-left: 255px !important;
+    box-sizing: border-box !important;
+}
+
+body:has(.z7) main.page > header,
+body:has(.z7) main.page > .portal-hero,
+body:has(.z7) main.page > .pm-workflow-intro {
+    display: none !important;
+}
+
+body:has(.z7) main.page > .zelimu-command-v1 {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+body:has(.z7) .z7 {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+}
+
+body:has(.z7) .z7-side {
+    display: block !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 255px !important;
+    z-index: 120 !important;
+}
+
+body:has(.z7) .z7-toolbar {
+    display: flex !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 255px !important;
+    right: 0 !important;
+    z-index: 110 !important;
+}
+
+body:has(.z7) .z7-workspace {
+    display: block !important;
+    margin-top: 70px !important;
+}
+
+@media (max-width: 750px) {
+    body:has(.z7) main.page {
+        padding-left: 0 !important;
+    }
+
+    body:has(.z7) .z7-side {
+        position: relative !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: 220px !important;
+    }
+
+    body:has(.z7) .z7-toolbar {
+        position: relative !important;
+        left: 0 !important;
+        height: auto !important;
+    }
+
+    body:has(.z7) .z7-workspace {
+        margin-top: 0 !important;
+    }
+}
+
+/* APPROVED PICTURE — PRECISION DESKTOP LAYOUT */
+
+:root {
+  --zelimu-forest: #003d33;
+  --zelimu-gold: #817021;
+  --zelimu-page: #f5f9f8;
+  --zelimu-ink: #112a50;
+}
+
+body {
+  background: var(--zelimu-page) !important;
+}
+
+body main.page {
+  max-width: none !important;
+  width: 100% !important;
+  margin: 0 !important;
+  background: var(--zelimu-page) !important;
+}
+
+/* Exact sidebar proportions and visual hierarchy */
+
+body .z7-side {
+  background: linear-gradient(160deg,#003d33 0%,#00352e 100%) !important;
+  border-right: 1px solid #104e44 !important;
+  padding: 15px 12px 20px !important;
+}
+
+body .z7-brand {
+  min-height: 70px !important;
+  padding: 2px 7px 17px !important;
+  gap: 8px !important;
+}
+
+body .z7-brand strong {
+  font-size: 21px !important;
+  font-weight: 850 !important;
+  letter-spacing: -.65px !important;
+}
+
+body .z7-brand small {
+  color: #d2eae5 !important;
+  font-size: 10px !important;
+}
+
+body .z7-navhead {
+  color: #9ed4da !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: 1px !important;
+  margin: 16px 8px 8px !important;
+}
+
+body .z7-nav button {
+  min-height: 35px !important;
+  padding: 8px 10px !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+}
+
+body .z7-nav button.z7-current,
+body .z7-nav button:hover {
+  background: linear-gradient(90deg,#887527,#645c1b) !important;
+}
+
+body .z7-nav .zi {
+  color: #c6ebed !important;
+  font-size: 17px !important;
+}
+
+/* White header */
+
+body .z7-toolbar {
+  background: #fff !important;
+  border-bottom: 1px solid #e2e9ed !important;
+  box-shadow: 0 2px 6px rgba(0,40,35,.035) !important;
+}
+
+body .z7-pick {
+  background: #fff !important;
+  border: 1px solid #e1e7ed !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  padding: 10px 11px !important;
+}
+
+body .z7-search {
+  background: #f7f9fb !important;
+  border: 1px solid #e1e7ed !important;
+  border-radius: 7px !important;
+  font-size: 11px !important;
+}
+
+body .z7-user {
+  color: #11294c !important;
+}
+
+/* Heading and compact workspace */
+
+body .z7-heading {
+  margin-bottom: 18px !important;
+}
+
+body .z7-heading h1 {
+  color: #101010 !important;
+  font-size: 33px !important;
+  font-weight: 850 !important;
+  letter-spacing: -1.2px !important;
+  line-height: 1.08 !important;
+}
+
+body .z7-heading p {
+  color: #647795 !important;
+  font-size: 11px !important;
+  margin-top: 5px !important;
+}
+
+body .z7-quick {
+  background: #007c55 !important;
+  color: #fff !important;
+  border-radius: 6px !important;
+  font-size: 11px !important;
+  padding: 12px 14px !important;
+}
+
+/* Six pastel KPI cards */
+
+body .z7-kpi {
+  border-radius: 6px !important;
+  box-shadow: none !important;
+  text-align: left !important;
+  overflow: hidden !important;
+}
+
+body .z7-kpi-icon {
+  border-radius: 9px !important;
+  font-size: 21px !important;
+}
+
+body .z7-kpi-name {
+  color: #1c3557 !important;
+  font-weight: 800 !important;
+}
+
+body .z7-kpi-number {
+  color: #101010 !important;
+  font-weight: 850 !important;
+}
+
+body .z7-kpi:nth-child(1) {
+  background: #eaf8f2 !important;
+  border-color: #d1ede0 !important;
+}
+body .z7-kpi:nth-child(2) {
+  background: #e8f3ff !important;
+  border-color: #d1e5fc !important;
+}
+body .z7-kpi:nth-child(3) {
+  background: #ecf9f1 !important;
+  border-color: #d4eddb !important;
+}
+body .z7-kpi:nth-child(4) {
+  background: #fff6e8 !important;
+  border-color: #ffe5bd !important;
+}
+body .z7-kpi:nth-child(5) {
+  background: #f3ecff !important;
+  border-color: #e7d9fa !important;
+}
+body .z7-kpi:nth-child(6) {
+  background: #fff0f1 !important;
+  border-color: #ffd8dd !important;
+}
+
+/* White panels, screenshot-style headers and tables */
+
+body .z7-panel {
+  background: #fff !important;
+  border: 1px solid #e8edf0 !important;
+  border-radius: 7px !important;
+  box-shadow: 0 1px 3px rgba(10,40,45,.025) !important;
+}
+
+body .z7-panel h2 {
+  color: #122b52 !important;
+  font-weight: 850 !important;
+}
+
+body .z7-panelhead {
+  align-items: center !important;
+}
+
+body .z7-panel button.z7-link {
+  color: #0079f2 !important;
+  font-weight: 800 !important;
+}
+
+body .z7-actionrow {
+  border-bottom: 1px solid #edf1f4 !important;
+  color: #183657 !important;
+}
+
+body .z7-table th {
+  background: #f2f5f8 !important;
+  color: #19365a !important;
+}
+
+body .z7-table td {
+  border-bottom: 1px solid #edf1f4 !important;
+}
+
+body .z7-tabs button.selected {
+  background: #007b55 !important;
+  color: white !important;
+}
+
+/* Eight coloured shortcuts */
+
+body .z7-shortcut {
+  border-radius: 6px !important;
+  font-weight: 750 !important;
+  line-height: 1.35 !important;
+}
+
+body .z7-shortcut:nth-child(4n+1) {
+  background: #e9f8f1 !important;
+}
+body .z7-shortcut:nth-child(4n+2) {
+  background: #e7f3ff !important;
+}
+body .z7-shortcut:nth-child(4n+3) {
+  background: #fff5e5 !important;
+}
+body .z7-shortcut:nth-child(4n+4) {
+  background: #f3eaff !important;
+}
+
+/* Desktop: preserve the exact picture's arrangement */
+
+@media (min-width: 1100px) {
+
+  body main.page {
+    padding-left: 255px !important;
+  }
+
+  body .z7-side {
+    position: fixed !important;
+    width: 255px !important;
+    left: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+  }
+
+  body .z7-toolbar {
+    position: fixed !important;
+    left: 255px !important;
+    right: 0 !important;
+    top: 0 !important;
+    height: 70px !important;
+    padding: 9px 22px !important;
+  }
+
+  body .z7-workspace {
+    margin-top: 70px !important;
+    padding: 17px 22px 21px !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  body .z7-kpis {
+    display: grid !important;
+    grid-template-columns: repeat(6,minmax(0,1fr)) !important;
+    gap: 11px !important;
+    margin-bottom: 12px !important;
+  }
+
+  body .z7-kpi {
+    display: flex !important;
+    gap: 9px !important;
+    min-width: 0 !important;
+    height: 104px !important;
+    min-height: 104px !important;
+    padding: 13px 10px !important;
+  }
+
+  body .z7-kpi-icon {
+    width: 46px !important;
+    height: 47px !important;
+    flex: 0 0 46px !important;
+  }
+
+  body .z7-kpi-name {
+    font-size: 10px !important;
+    margin: 3px 0 9px !important;
+  }
+
+  body .z7-kpi-number {
+    font-size: clamp(18px,1.7vw,25px) !important;
+  }
+
+  body .z7-kpi-note {
+    font-size: 9px !important;
+    margin-top: 8px !important;
+  }
+
+  body .z7-grid {
+    display: grid !important;
+    grid-template-columns:
+      minmax(0,1.46fr)
+      minmax(0,.94fr)
+      minmax(0,.88fr) !important;
+    gap: 12px !important;
+    margin-bottom: 12px !important;
+    align-items: stretch !important;
+  }
+
+  body .z7-grid > .z7-panel:first-child {
+    grid-column: auto !important;
+  }
+
+  body .z7-panel {
+    min-width: 0 !important;
+    min-height: 260px !important;
+    padding: 13px !important;
+  }
+
+  body .z7-panel h2 {
+    font-size: 12px !important;
+    line-height: 1.25 !important;
+  }
+
+  body .z7-panel button.z7-link {
+    font-size: 10px !important;
+    white-space: nowrap !important;
+  }
+
+  body .z7-plot {
+    height: 168px !important;
+  }
+
+  body .z7-actionrow {
+    padding: 9px 3px !important;
+    font-size: 10px !important;
+  }
+
+  body .z7-finance {
+    gap: 11px !important;
+  }
+
+  body .z7-ring {
+    width: 113px !important;
+    height: 113px !important;
+  }
+
+  body .z7-ringinner {
+    width: 84px !important;
+    height: 84px !important;
+  }
+
+  body .z7-finlist {
+    font-size: 10px !important;
+  }
+
+  body .z7-shortcuts {
+    display: grid !important;
+    grid-template-columns: repeat(8,minmax(0,1fr)) !important;
+    gap: 10px !important;
+  }
+
+  body .z7-shortcut {
+    min-width: 0 !important;
+    min-height: 64px !important;
+    padding: 10px 8px !important;
+    font-size: 9px !important;
+    gap: 8px !important;
+  }
+
+  body .z7-shortcut .bubble {
+    width: 33px !important;
+    height: 33px !important;
+    flex: 0 0 33px !important;
+  }
+}
+
+/* Narrow screens remain usable */
+
+@media (min-width: 751px) and (max-width: 1099px) {
+  body .z7-kpis {
+    grid-template-columns: repeat(3,minmax(0,1fr)) !important;
+  }
+  body .z7-grid {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  }
+  body .z7-shortcuts {
+    grid-template-columns: repeat(4,minmax(0,1fr)) !important;
+  }
+}
+
+@media (max-width: 750px) {
+  body .z7-kpis {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  }
+  body .z7-grid {
+    grid-template-columns: 1fr !important;
+  }
+  body .z7-shortcuts {
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+  }
+}
+
+/* ZELIMU_HEADER_CONTROLS_REPAIR_20261030 */
+body .z7-toolbar .z7-pick[hidden],body .z7-toolbar .z7-school-label[hidden]{display:none!important}
+body .z7-toolbar select.z7-pick{cursor:pointer;max-width:190px;min-width:125px;font-family:inherit;appearance:auto}
+body .z7-toolbar .z7-school-label{max-width:210px;overflow:hidden;text-overflow:ellipsis}
+body .z7-toolbar .z7-user{min-width:0;max-width:210px;white-space:normal}
+body .z7-toolbar #z7User{display:block;overflow-wrap:anywhere;line-height:1.25}
+body .z7-toolbar .z7-signout{border:1px solid #a51d29;background:#fff;color:#a51d29;border-radius:7px;padding:9px 12px;font-weight:700;cursor:pointer;white-space:nowrap}
+body .z7-toolbar .z7-signout:hover{background:#fff1f2}
+body .z7-toolbar{height:auto;min-height:70px;flex-wrap:wrap}
+body .z7-toolbar-right{flex-wrap:wrap}
+
+
+/* ZELIMU SAFE RESPONSIVE LAYOUT V2 START */
+/* CSS only: preserve the HTML, scripts, routes, and existing staff management. */
+body:has(.z7) main.page { min-width:0!important; }
+body .z7,body .z7 * { min-width:0; }
+body .z7-toolbar {
+  box-sizing:border-box!important;
+  min-height:70px!important;
+  height:auto!important;
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:10px 14px!important;
+  padding:10px 18px!important;
+}
+body .z7-toolbar-right {display:flex!important;flex-wrap:wrap!important;gap:9px!important;min-width:0!important;}
+body .z7-toolbar .z7-school-label {max-width:clamp(125px,18vw,260px)!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+body .z7-toolbar .z7-pick {max-width:190px!important;min-width:100px!important;flex:0 1 auto!important;}
+body .z7-toolbar .z7-search {width:clamp(145px,20vw,300px)!important;max-width:100%!important;box-sizing:border-box!important;}
+body .z7-toolbar .z7-user {min-width:0!important;max-width:200px!important;}
+body .z7-grid {grid-template-columns:minmax(0,1.36fr) minmax(0,.84fr) minmax(0,.78fr)!important;}
+body .z7-grid > * {min-width:0!important;}
+body .z7-panel {min-width:0!important;}
+@media (max-width:1250px) and (min-width:751px) {
+ body .z7-toolbar {gap:8px!important;padding:9px 12px!important;}
+ body .z7-toolbar .z7-search {width:180px!important;}
+ body .z7-grid {grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+ body .z7-grid > .z7-panel:first-child {grid-column:1/-1!important;}
+}
+@media (max-width:750px) {
+ body main.page {padding-left:0!important;width:100%!important;min-width:0!important;}
+ body .z7-toolbar {position:relative!important;left:auto!important;right:auto!important;top:auto!important;width:100%!important;height:auto!important;min-height:0!important;flex-wrap:wrap!important;padding:12px!important;gap:10px!important;}
+ body .z7-toolbar-right {width:100%!important;justify-content:flex-start!important;}
+ body .z7-toolbar .z7-search {display:block!important;width:100%!important;flex:1 1 100%!important;}
+ body .z7-toolbar .z7-school-label {max-width:calc(100vw - 100px)!important;}
+ body .z7-toolbar .z7-pick {max-width:calc(50vw - 24px)!important;min-width:0!important;}
+ body .z7-grid {grid-template-columns:minmax(0,1fr)!important;}
+ body .z7-grid > .z7-panel:first-child {grid-column:auto!important;}
+ body .z7-panel {max-width:100%!important;overflow-wrap:anywhere;}
+}
+/* ZELIMU SAFE RESPONSIVE LAYOUT V2 END */
+
+
+/* ZELIMU PREMIUM TYPOGRAPHY V3 START */
+/* Scoped, CSS-only: no changes to dashboard HTML, JS, database or handlers. */
+body .z7,body .z7-toolbar,body .z7-side,body .z7-workspace{
+ font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif!important;
+ -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+}
+body .z7 h1,body .z7 h2,body .z7 h3,body .z7-heading h1,
+body .z7-panelhead strong,body .z7-brand strong{
+ font-family:'Plus Jakarta Sans','Inter',system-ui,sans-serif!important;
+ letter-spacing:-.025em!important;
+}
+body .z7-toolbar{
+ background:#f9fcfa!important;border-bottom:1px solid #d7e7dd!important;
+ box-shadow:0 3px 14px rgba(5,65,47,.055)!important;
+ gap:12px!important;align-items:center!important;
+}
+body .z7-pickers{display:flex!important;flex-wrap:wrap!important;gap:9px!important;min-width:0!important;align-items:center!important}
+body .z7-toolbar .z7-school-label{
+ max-width:none!important;min-width:180px!important;width:auto!important;
+ display:flex!important;align-items:center!important;
+ background:#eaf5ee!important;border:1px solid #badcc8!important;
+ border-left:4px solid #087c55!important;
+ padding:8px 12px!important;white-space:normal!important;
+ color:#064e3b!important;overflow:visible!important;
+ font-size:13px!important;line-height:1.35!important;
+ font-weight:800!important;box-sizing:border-box!important;
+}
+body .z7-toolbar .z7-school-label #z7School{
+ display:block!important;white-space:normal!important;overflow-wrap:anywhere!important;
+ max-width:250px!important;
+}
+body .z7-toolbar select.z7-pick{
+ font-family:'Inter',system-ui,sans-serif!important;font-size:13px!important;
+ font-weight:700!important;min-height:42px!important;
+ border:1px solid #d2e2d8!important;background:#fff!important;
+ border-radius:9px!important;color:#163e31!important;
+}
+body .z7-toolbar-right{display:flex!important;align-items:center!important;flex-wrap:wrap!important;gap:10px!important;min-width:0!important}
+body .z7-search{
+ font-family:'Inter',system-ui,sans-serif!important;
+ font-size:13px!important;border:1px solid #d8e5dc!important;
+ border-radius:9px!important;background:#fff!important;
+ min-height:42px!important;
+}
+body .z7-user{color:#103d2e!important;font-size:13px!important;font-weight:700!important;white-space:normal!important}
+body .z7-user small{font-size:11px!important;color:#60796d!important}
+body .z7-avatar{background:#e1f1e7!important;color:#08734e!important;border:2px solid #b8d9c5!important}
+body .z7-signout{font-family:'Inter',system-ui,sans-serif!important;border-radius:9px!important;font-weight:700!important}
+body .z7-workspace{background:#f7faf7!important;min-width:0!important}
+body .z7-heading h1{color:#133e30!important;font-size:clamp(24px,2.5vw,34px)!important;line-height:1.2!important}
+body .z7-panel{border-color:#dce9df!important;border-radius:12px!important}
+body .z7-kpi{border-radius:11px!important}
+body .z7-side{background:#053c30!important}
+body .z7-nav button{font-family:'Inter',system-ui,sans-serif!important;line-height:1.35!important}
+body .z7-navhead{letter-spacing:.075em!important}
+@media(max-width:1250px){
+ body .z7-toolbar .z7-school-label{min-width:140px!important}
+ body .z7-toolbar .z7-school-label #z7School{max-width:180px!important}
+}
+@media(max-width:750px){
+ body .z7-toolbar{height:auto!important;min-height:0!important;padding:10px 12px!important}
+ body .z7-pickers{width:100%!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ body .z7-toolbar .z7-school-label{grid-column:1/-1!important;min-width:0!important}
+ body .z7-toolbar .z7-school-label #z7School{max-width:none!important}
+ body .z7-toolbar select.z7-pick{min-width:0!important;width:100%!important;max-width:none!important}
+ body .z7-toolbar-right{width:100%!important}
+ body .z7-search{width:100%!important;flex:1 1 100%!important}
+ body .z7-user{flex:1 1 auto!important}
+ body .z7-heading h1{font-size:25px!important}
+}
+@media(prefers-reduced-motion:reduce){body .z7 *{scroll-behavior:auto!important}}
+/* ZELIMU PREMIUM TYPOGRAPHY V3 END */
+
+body .z7-live-status{display:flex;align-items:center;gap:7px;margin-top:8px!important;color:#56746a;font-size:10px}
+body .z7-live-dot{width:7px;height:7px;border-radius:50%;background:#20a565;box-shadow:0 0 0 3px #20a56522}
+body .z7-refresh{border:1px solid #cfe0d4;border-radius:8px;background:#fff;color:#16543d;padding:10px 12px;font-size:11px;font-weight:800;cursor:pointer}
+body .z7-refresh:disabled{opacity:.55;cursor:wait}
+body .z7-chart-context{min-height:22px;color:#637a70;font-size:10px}
+body .z7-chart-wrap{min-height:185px}
+body .z7-chart-loading{display:flex;align-items:center;justify-content:center;min-height:185px;padding:12px;color:#71849a;text-align:center;font-size:11px}
+body .z7-chart-loading.z7-error{color:#a73535}
+body .z7-live-plot{width:100%;height:auto;min-height:180px;display:block;overflow:visible}
+body .z7-gridline{stroke:#e7edf2;stroke-width:1}
+body .z7-axislabel{fill:#73869a;font-size:10px}
+body .z7-barlabel{fill:#29436a;font-size:11px}
+body .z7-barvalue{fill:#234a3b;font-size:10px;font-weight:700}
+body .z7-bar{fill:#13835e;transition:width .5s ease}
+body .z7-line{fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+body .z7-chart-note{margin:5px 0 0;color:#6b7f91;text-align:center;font-size:10px;line-height:1.45}
+body .z7-legend{flex-wrap:wrap}
+body .z7-legend i{display:inline-block;width:8px;height:8px;margin-right:5px;border-radius:50%}
+body .z7-actioncount{min-width:24px;color:#0b7956!important;font-size:11px;font-weight:800;text-align:right}
+body .z7-table-wrap{max-height:250px;overflow:auto}
+body .z7-activity-status{display:inline-block;padding:3px 6px;border-radius:20px;background:#e8f5ed;color:#176044;font-size:9px;font-weight:700}
+body .z7-finlist{line-height:1.9}
+body .z7-finlist b{color:#183e31}
+body .z7-error{color:#9e3b3b!important}
+@media(max-width:750px){
+ body .z7-heading-right{flex-wrap:wrap;justify-content:flex-end}
+ body .z7-refresh{padding:9px}
+ body .z7-table-wrap{overflow-x:auto}
+ body .z7-live-plot{min-height:155px}
+}

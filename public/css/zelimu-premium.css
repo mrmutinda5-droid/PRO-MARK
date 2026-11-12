@@ -1,0 +1,30 @@
+/* ZELIMU CBC premium application skin — sharp readable type, vibrant surfaces */
+:root{--brand-primary:#2859c7;--brand-secondary:#069b90;--zelimu-ink:#172944;--zelimu-bg:#edf3fc}
+html{font-size:16px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{background:linear-gradient(132deg,#eaf2ff 0%,#f3f8ff 43%,#eafbf6 75%,#fff9ed 100%) fixed!important;color:#172944!important;font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif!important;font-weight:450!important;letter-spacing:0!important}
+h1,h2,h3,h4,button,label,strong,b{font-family:inherit!important;text-shadow:none!important;filter:none!important;opacity:1!important}
+h1,h2,h3,h4{font-weight:800!important;letter-spacing:-.025em!important;color:#17355e}
+header{background:linear-gradient(105deg,#fff,#edf4ff 52%,#e8fbf5)!important;border:1px solid #cbdcf5!important;box-shadow:0 8px 26px #1c4d9818!important}
+.pm-workflow-intro{background:linear-gradient(168deg,#f8fbff,#edf4ff 55%,#f1fcf9)!important;border:1px solid #bed4ee!important;box-shadow:0 10px 30px #16407c1b!important}
+.pm-workflow-intro .section-title h2{font-size:1.02rem!important;color:#173d81!important;letter-spacing:-.025em!important}
+#navTabs .pm-module-group{background:#fff!important;border:1px solid #d5e3f4!important;border-radius:12px!important;overflow:hidden}
+#navTabs .pm-module-group>h3{font-size:.8rem!important;letter-spacing:.01em!important;color:#fff!important;font-weight:850!important;line-height:1.35!important;padding:12px!important}
+#navTabs .pm-module-group:nth-child(1)>h3{background:linear-gradient(100deg,#285bcc,#3e7de2)!important}
+#navTabs .pm-module-group:nth-child(2)>h3{background:linear-gradient(100deg,#6e48c8,#9870e3)!important}
+#navTabs .pm-module-group:nth-child(3)>h3{background:linear-gradient(100deg,#08845d,#20b38d)!important}
+#navTabs .pm-module-group:nth-child(4)>h3{background:linear-gradient(100deg,#c17b13,#e6ad41)!important}
+#navTabs .pm-module-group:nth-child(5)>h3{background:linear-gradient(100deg,#078a9a,#3ab6c2)!important}
+#navTabs .pm-module-group:nth-child(6)>h3{background:linear-gradient(100deg,#2d6fa8,#519ed5)!important}
+#navTabs .pm-module-group:nth-child(7)>h3{background:linear-gradient(100deg,#b33678,#dd6598)!important}
+#navTabs .pm-module-group:nth-child(8)>h3{background:linear-gradient(100deg,#6451ad,#9382d5)!important}
+#navTabs .pm-admin-menu{background:#fff!important}
+#navTabs .pm-admin-menu button{font-size:.85rem!important;font-weight:700!important;color:#203956!important;line-height:1.3!important;background:#fff!important;border:1px solid transparent!important;min-height:43px!important}
+#navTabs .pm-admin-menu button:hover,#navTabs .pm-admin-menu button.active{background:linear-gradient(90deg,#e7f0ff,#e5fbf6)!important;color:#164b91!important;border-color:#b6d2f3!important}
+#navTabs .pm-icon{font-size:1.15rem!important;min-width:31px!important;width:31px!important;height:31px!important;border-radius:9px!important;background:linear-gradient(135deg,#dceaff,#e8ddff)!important;display:inline-grid!important;place-items:center!important;filter:none!important}
+#navTabs .pm-module-group:nth-child(3) .pm-icon{background:#d9f6e7!important}#navTabs .pm-module-group:nth-child(4) .pm-icon{background:#fff0c9!important}#navTabs .pm-module-group:nth-child(5) .pm-icon{background:#d7f4f6!important}#navTabs .pm-module-group:nth-child(6) .pm-icon{background:#dbeeff!important}#navTabs .pm-module-group:nth-child(7) .pm-icon{background:#ffe0ee!important}#navTabs .pm-module-group:nth-child(8) .pm-icon{background:#ebe3ff!important}
+.nav-managed-section.nav-active{background:#fff!important;border:1px solid #d6e4f5!important;border-radius:18px!important;box-shadow:0 12px 34px #1a458018!important;padding:clamp(13px,2vw,24px)!important}
+.nav-managed-section .section-title{border-bottom:2px solid #e5effc!important;padding-bottom:12px!important;margin-bottom:16px!important}
+.nav-managed-section .section-title h2{color:#174484!important;font-size:clamp(1.12rem,1.8vw,1.55rem)!important}
+input,select,textarea{font-size:.92rem!important;color:#1c344f!important;background:#fff!important;border:1px solid #b9cde5!important;border-radius:9px!important}input::placeholder,textarea::placeholder{color:#6d7e91!important;opacity:1!important}
+button{font-weight:700!important}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #0ba99a77!important;outline-offset:2px!important}
+@media(max-width:760px){.pm-workflow-intro{max-height:42dvh!important}.pm-workflow-intro.zelimu-menu-collapsed{max-height:48px!important}.nav-managed-section.nav-active{padding:12px!important}}

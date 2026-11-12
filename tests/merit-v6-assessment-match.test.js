@@ -1,0 +1,13 @@
+'use strict';
+const test=require('node:test');const assert=require('node:assert/strict');
+const {selectAssessment,calculateSubject,calculateClass}=require('../backend/services/merit-v6-assessment-match');
+const W=[{assessment_type:'OPENER',weight:40},{assessment_type:'END_TERM',weight:60}];
+const A=[{id:'global',assessment_type:'OPENER'},{id:'specific',assessment_type:'OPENER',class_id:'c',subject_id:'math'},{id:'end',assessment_type:'END_TERM'}];
+test('specific assessment overrides generic setup',()=>assert.equal(selectAssessment(A,'OPENER','c','math').assessment.id,'specific'));
+test('other subjects retain generic assessment',()=>assert.equal(selectAssessment(A,'OPENER','c','english').assessment.id,'global'));
+test('unrelated class assessment does not match',()=>assert.equal(selectAssessment([{id:'a',assessment_type:'OPENER',class_id:'other'}],'OPENER','c','math').error,'MISSING_ASSESSMENT_SETUP'));
+test('equally specific duplicates are blocked',()=>assert.equal(selectAssessment([{id:'a',assessment_type:'OPENER',subject_id:'math'},{id:'b',assessment_type:'OPENER',subject_id:'math'}],'OPENER','c','math').error,'AMBIGUOUS_ASSESSMENT_SETUP'));
+test('complete weighted subject with subject-specific assessment',()=>{const r=calculateSubject([{assessment_id:'specific',percent:50},{assessment_id:'end',percent:100}],A,W,'c','math');assert.equal(r.complete,true);assert.equal(r.score,80)});
+test('missing required mark stays incomplete',()=>assert.equal(calculateSubject([{assessment_id:'specific',percent:50}],A,W,'c','math').reason,'MISSING_EXAM'));
+test('duplicate required marks are blocked',()=>assert.equal(calculateSubject([{assessment_id:'specific',percent:50},{assessment_id:'specific',percent:60},{assessment_id:'end',percent:100}],A,W,'c','math').reason,'DUPLICATE_MARK'));
+test('class results preserve complete/incomplete rankings',()=>{const r=calculateClass([{learner_id:'1',class_id:'c',school_level_id:'grade',subjects:[{subject_id:'math',marks:[{assessment_id:'specific',percent:50},{assessment_id:'end',percent:100}]}]},{learner_id:'2',class_id:'c',school_level_id:'grade',subjects:[{subject_id:'math',marks:[]}]}],A,W,['math']);assert.equal(r[0].average,80);assert.equal(r[0].class_rank,1);assert.equal(r[1].complete,false)});

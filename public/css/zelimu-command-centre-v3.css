@@ -1,0 +1,743 @@
+
+/* ZELIMU CBC — PROFESSIONAL SCHOOL COMMAND CENTRE V3 */
+:root {
+  --zc-green:#086747;
+  --zc-deep:#064a37;
+  --zc-gold:#e8b847;
+  --zc-bg:#f3f7f5;
+  --zc-text:#173b34;
+  --zc-muted:#71837d;
+}
+
+body {
+  background:var(--zc-bg)!important;
+  color:var(--zc-text);
+  font-family:Inter,"Segoe UI",Arial,sans-serif!important;
+}
+
+@media(min-width:761px) {
+  body main.page {
+    padding:18px 24px 35px 278px!important;
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+  }
+
+  body main.page>.pm-workflow-intro {
+    position:fixed!important;
+    top:0!important;
+    left:0!important;
+    bottom:0!important;
+    width:254px!important;
+    max-width:254px!important;
+    height:100dvh!important;
+    margin:0!important;
+    padding:18px 13px!important;
+    border:0!important;
+    border-radius:0!important;
+    background:linear-gradient(180deg,#075c43,#043e32)!important;
+    box-shadow:4px 0 20px rgba(0,0,0,.08)!important;
+    overflow-y:auto!important;
+    z-index:100!important;
+    box-sizing:border-box!important;
+  }
+
+  body main.page>.header,
+  body main.page>header {
+    margin:0 0 16px!important;
+    min-height:72px!important;
+    padding:12px 18px!important;
+    border-radius:14px!important;
+    box-sizing:border-box!important;
+  }
+
+  #zelimuWorkspaceDisplay {
+    margin-left:0!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+  }
+}
+
+.pm-workflow-intro .section-title {
+  color:#fff!important;
+  font-size:12px!important;
+  font-weight:750!important;
+  letter-spacing:.04em!important;
+  margin:4px 0 14px!important;
+}
+
+.pm-workflow-intro .zelimu-module-toolbar input,
+.pm-workflow-intro input[type="search"] {
+  background:#fff!important;
+  color:#183b33!important;
+  border:0!important;
+  border-radius:9px!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+}
+
+#navTabs {
+  display:flex!important;
+  flex-direction:column!important;
+  gap:3px!important;
+  background:transparent!important;
+}
+
+#navTabs .pm-module-group {
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+  padding:0!important;
+  margin:0 0 3px!important;
+}
+
+#navTabs .pm-module-group h3 {
+  background:transparent!important;
+  color:#a7d0bf!important;
+  font-size:10px!important;
+  letter-spacing:.085em!important;
+  font-weight:750!important;
+  padding:13px 11px 6px!important;
+  margin:0!important;
+  border:0!important;
+  text-transform:uppercase!important;
+}
+
+#navTabs .pm-admin-menu {
+  background:transparent!important;
+  border:0!important;
+  padding:0!important;
+}
+
+#navTabs .pm-admin-menu button {
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  width:100%!important;
+  min-height:34px!important;
+  padding:8px 11px!important;
+  margin:2px 0!important;
+  border:0!important;
+  border-radius:8px!important;
+  background:transparent!important;
+  color:#e8f5ef!important;
+  font-size:12px!important;
+  font-weight:500!important;
+  text-align:left!important;
+  box-shadow:none!important;
+  white-space:normal!important;
+}
+
+#navTabs .pm-admin-menu button:hover,
+#navTabs .pm-admin-menu button.zc-selected {
+  background:rgba(255,255,255,.14)!important;
+  color:#fff!important;
+}
+
+#navTabs .pm-module-group h3 {
+  cursor:pointer;
+}
+
+.zc-sidebar-home {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 10px;
+  margin:0 0 14px;
+  background:rgba(255,255,255,.09);
+  border-radius:11px;
+  color:white;
+}
+
+.zc-sidebar-mark {
+  width:35px;
+  height:35px;
+  display:grid;
+  place-items:center;
+  border-radius:9px;
+  background:#e9ba47;
+  color:#064a37;
+  font-size:19px;
+  font-weight:900;
+}
+
+.zc-sidebar-home strong {
+  display:block;
+  font-size:17px;
+  letter-spacing:.025em;
+}
+
+.zc-sidebar-home small {
+  display:block;
+  font-size:10px;
+  color:#c7e6d9;
+}
+
+.zc-home-link {
+  width:100%;
+  padding:12px 13px;
+  margin-bottom:11px;
+  background:#e8b847;
+  color:#143c32;
+  border:0;
+  border-radius:9px;
+  font-size:13px;
+  font-weight:800;
+  cursor:pointer;
+  text-align:left;
+}
+
+.zc-dashboard {
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin:0 0 20px!important;
+  padding:0!important;
+  background:transparent!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+.zc-dashboard * {
+  box-sizing:border-box;
+}
+
+.zc-heading {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap;
+  margin:0 0 19px;
+}
+
+.zc-heading h1 {
+  font-size:clamp(23px,2.3vw,31px);
+  line-height:1.2;
+  margin:0 0 5px;
+  color:#113c30;
+  font-weight:800;
+}
+
+.zc-heading p {
+  font-size:12px;
+  color:var(--zc-muted);
+  margin:0;
+}
+
+.zc-heading-actions {
+  display:flex;
+  gap:9px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.zc-date {
+  background:#fff;
+  border:1px solid #e2ebe6;
+  border-radius:9px;
+  padding:10px 13px;
+  font-size:12px;
+  color:#49655b;
+}
+
+.zc-action {
+  background:#087b54;
+  border:0;
+  border-radius:9px;
+  color:white;
+  font-size:12px;
+  font-weight:700;
+  padding:11px 15px;
+  cursor:pointer;
+}
+
+.zc-kpis {
+  display:grid!important;
+  grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  gap:12px!important;
+  margin-bottom:17px;
+}
+
+.zc-kpi {
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  min-width:0;
+  min-height:132px;
+  padding:15px;
+  border:1px solid rgba(0,0,0,.035);
+  border-radius:13px;
+  text-align:left;
+  cursor:pointer;
+  color:#174b3d;
+}
+
+.zc-kpi.green {background:#e7f5ec}
+.zc-kpi.blue {background:#e8f1fc}
+.zc-kpi.mint {background:#e3f5ee}
+.zc-kpi.amber {background:#fff3da}
+.zc-kpi.purple {background:#f0eafa}
+.zc-kpi.red {background:#ffebea}
+
+.zc-kpi-icon {
+  font-size:21px;
+  line-height:1;
+}
+
+.zc-kpi-label {
+  font-size:12px;
+  font-weight:700;
+  color:#385c50;
+}
+
+.zc-kpi-value {
+  font-size:clamp(20px,2vw,28px);
+  line-height:1.1;
+  font-weight:850;
+  color:#133f33;
+  overflow-wrap:anywhere;
+}
+
+.zc-kpi-foot {
+  font-size:10px;
+  color:#698177;
+}
+
+.zc-grid {
+  display:grid;
+  grid-template-columns:1.15fr 1fr .9fr;
+  gap:15px;
+  margin-bottom:15px;
+}
+
+.zc-panel {
+  background:#fff;
+  border:1px solid #e6ede9;
+  border-radius:13px;
+  min-width:0;
+  padding:17px;
+  box-shadow:0 3px 12px rgba(15,70,49,.025);
+}
+
+.zc-panel h2 {
+  font-size:14px;
+  font-weight:800;
+  color:#214d3d;
+  margin:0 0 4px;
+}
+
+.zc-panel-sub {
+  color:#899a92;
+  font-size:11px;
+  margin:0 0 15px;
+}
+
+.zc-empty {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+  min-height:170px;
+  border:1px dashed #d8e6df;
+  border-radius:10px;
+  background:linear-gradient(#fff,#fafdfb);
+  color:#8ba197;
+  text-align:center;
+  padding:15px;
+  gap:7px;
+  font-size:12px;
+}
+
+.zc-empty-icon {
+  font-size:28px;
+  opacity:.55;
+}
+
+.zc-mini-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  border-bottom:1px solid #eff2f0;
+  padding:11px 0;
+  font-size:12px;
+}
+
+.zc-mini-row:last-child {
+  border-bottom:0;
+}
+
+.zc-mini-row strong {
+  color:#164d3a;
+}
+
+.zc-panel-link {
+  border:0;
+  background:#e9f6ee;
+  color:#086747;
+  font-size:11px;
+  font-weight:750;
+  border-radius:7px;
+  padding:8px 11px;
+  cursor:pointer;
+}
+
+.zc-shortcuts {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+
+.zc-shortcut {
+  display:flex;
+  align-items:center;
+  gap:9px;
+  background:#f0f8f3;
+  border:1px solid #e2efe7;
+  border-radius:9px;
+  padding:12px;
+  font-size:12px;
+  font-weight:700;
+  color:#215b45;
+  cursor:pointer;
+  text-align:left;
+}
+
+.zc-shortcut:hover,.zc-kpi:hover {
+  filter:brightness(.975);
+  transform:translateY(-1px);
+}
+
+.zc-status {
+  display:inline-block;
+  padding:4px 8px;
+  background:#f1f6f3;
+  border-radius:6px;
+  font-size:10px;
+  color:#6c8477;
+}
+
+@media(max-width:1450px) {
+  .zc-kpis {grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .zc-grid {grid-template-columns:repeat(2,minmax(0,1fr))}
+  .zc-grid>.zc-panel:last-child {grid-column:1/-1}
+}
+
+@media(max-width:950px) {
+  .zc-grid {grid-template-columns:1fr}
+  .zc-grid>.zc-panel:last-child {grid-column:auto}
+  .zc-shortcuts {grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:760px) {
+  body main.page {padding:10px!important}
+  .zc-kpis {grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .zc-grid {grid-template-columns:1fr}
+  .zc-shortcuts {grid-template-columns:1fr 1fr}
+  .zc-heading {align-items:flex-start}
+  .zc-dashboard {margin-top:12px!important}
+  body main.page>.pm-workflow-intro {
+    position:relative!important;
+    width:100%!important;
+    max-width:100%!important;
+    height:auto!important;
+    max-height:50vh!important;
+    overflow:auto!important;
+    background:#075c43!important;
+    border-radius:12px!important;
+  }
+}
+
+@media(max-width:430px) {
+  .zc-kpis {gap:8px!important}
+  .zc-kpi {padding:11px;min-height:120px}
+  .zc-shortcuts {grid-template-columns:1fr}
+}
+
+/* ZELIMU COMMAND CENTRE PROFESSIONAL LAYOUT V4 */
+
+body main.page {
+    background: #f4f8f6 !important;
+}
+
+body main.page > .portal-hero,
+body main.page > #passwordPanel {
+    display: none !important;
+}
+
+body main.page > header {
+    padding: 9px 15px !important;
+    min-height: 62px !important;
+    border-radius: 13px !important;
+}
+
+body main.page > header .header-actions button {
+    min-height: 34px !important;
+    padding: 7px 11px !important;
+    font-size: 12px !important;
+}
+
+body .zc-dashboard {
+    margin-top: 0 !important;
+}
+
+body .zc-dashboard .zc-heading {
+    margin-bottom: 14px !important;
+}
+
+body .zc-dashboard .zc-heading h1,
+body .zc-dashboard .zc-heading h2 {
+    font-size: clamp(22px, 2.1vw, 29px) !important;
+    line-height: 1.2 !important;
+}
+
+body .zc-dashboard .zc-kpis {
+    gap: 11px !important;
+    margin-bottom: 14px !important;
+}
+
+body .zc-dashboard .zc-kpi {
+    min-height: 126px !important;
+    padding: 15px 17px !important;
+    border-radius: 13px !important;
+    box-shadow: none !important;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+body .zc-dashboard .zc-kpi:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 18px rgba(5, 70, 49, .1) !important;
+}
+
+body .zc-dashboard .zc-kpi strong {
+    font-size: 26px !important;
+    line-height: 1.1 !important;
+}
+
+body .zc-dashboard .zc-grid {
+    gap: 14px !important;
+}
+
+body .zc-dashboard .zc-panel {
+    border-radius: 13px !important;
+    padding: 17px !important;
+}
+
+body .zc-dashboard .zc-panel h2,
+body .zc-dashboard .zc-panel h3 {
+    font-size: 19px !important;
+    line-height: 1.3 !important;
+}
+
+body .pm-workflow-intro {
+    border-radius: 0 !important;
+}
+
+body .pm-workflow-intro #navTabs .pm-module-group > h3 {
+    font-size: 12px !important;
+    letter-spacing: .035em !important;
+}
+
+@media (max-width: 760px) {
+    body .zc-dashboard .zc-kpis {
+        grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+    }
+
+    body .zc-dashboard .zc-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    body .zc-dashboard .zc-kpi {
+        min-height: 110px !important;
+        padding: 12px !important;
+    }
+}
+
+
+/* ZELIMU PROFESSIONAL DASHBOARD BLOCK 2 START */
+
+body {
+    --zelimu-emerald: #07513e;
+    --zelimu-emerald-dark: #043d30;
+    --zelimu-gold: #e5b744;
+    --zelimu-canvas: #f3f7f5;
+}
+
+body main.page {
+    background: var(--zelimu-canvas) !important;
+}
+
+body main.page > header {
+    box-shadow: 0 5px 16px rgba(4,61,48,.10) !important;
+}
+
+body .zc-dashboard {
+    width: 100%;
+    max-width: 100%;
+}
+
+body .zc-dashboard .zc-heading {
+    margin-bottom: 15px !important;
+}
+
+body .zc-dashboard .zc-heading h1,
+body .zc-dashboard .zc-heading h2 {
+    color: var(--zelimu-emerald-dark) !important;
+    font-size: clamp(23px,2.2vw,30px) !important;
+    letter-spacing: -.025em;
+}
+
+body .zc-dashboard .zc-kpis {
+    display: grid !important;
+    grid-template-columns: repeat(3,minmax(0,1fr)) !important;
+    gap: 12px !important;
+    margin-bottom: 17px !important;
+}
+
+body .zc-dashboard .zc-kpi {
+    min-width: 0;
+    min-height: 125px !important;
+    padding: 15px 18px !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(4,61,48,.08) !important;
+    box-shadow: none !important;
+    text-align: left !important;
+    cursor: pointer;
+}
+
+body .zc-dashboard .zc-kpi:focus-visible {
+    outline: 3px solid var(--zelimu-gold) !important;
+    outline-offset: 2px;
+}
+
+body .zc-dashboard .zc-kpi strong {
+    color: var(--zelimu-emerald-dark) !important;
+    font-size: 27px !important;
+    font-weight: 800 !important;
+}
+
+body .zc-dashboard .zc-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    gap: 15px !important;
+}
+
+body .zc-dashboard .zc-panel {
+    min-width: 0;
+    min-height: 230px;
+    padding: 19px !important;
+    border: 1px solid #dce8e2 !important;
+    border-radius: 15px !important;
+    background: #fff !important;
+    box-shadow: 0 3px 12px rgba(4,61,48,.035) !important;
+}
+
+body .zc-dashboard .zc-panel h2,
+body .zc-dashboard .zc-panel h3 {
+    font-size: clamp(17px,1.6vw,21px) !important;
+    color: var(--zelimu-emerald-dark) !important;
+}
+
+body .zc-dashboard button,
+body .zc-dashboard input,
+body .zc-dashboard select {
+    font-family: inherit;
+}
+
+@media (max-width: 1000px) {
+    body .zc-dashboard .zc-kpis {
+        grid-template-columns: repeat(2,minmax(0,1fr)) !important;
+    }
+}
+
+@media (max-width: 650px) {
+    body .zc-dashboard .zc-kpis,
+    body .zc-dashboard .zc-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    body .zc-dashboard .zc-kpi {
+        min-height: 105px !important;
+    }
+
+    body .zc-dashboard .zc-panel {
+        min-height: 180px;
+    }
+}
+
+/* ZELIMU PROFESSIONAL DASHBOARD BLOCK 2 END */
+
+/* ZELIMU ANALYTICS PRESENTATION BLOCK 4 START */
+
+body .zc-dashboard .zc-grid {
+    align-items: stretch !important;
+}
+
+body .zc-dashboard .zc-panel {
+    min-height: 210px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+body .zc-dashboard .zc-panel h2,
+body .zc-dashboard .zc-panel h3 {
+    margin: 0 !important;
+    color: #064b38 !important;
+    font-weight: 800 !important;
+}
+
+body .zc-dashboard .zc-panel p {
+    color: #60756b !important;
+    line-height: 1.5 !important;
+}
+
+body .zc-dashboard .zc-panel canvas,
+body .zc-dashboard .zc-panel svg {
+    max-width: 100%;
+}
+
+body .zc-dashboard .zc-kpi {
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+body .zc-dashboard .zc-kpi:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(4,61,48,.08) !important;
+}
+
+body .zc-dashboard .zc-kpi:focus-visible {
+    outline: 3px solid #e5b744 !important;
+    outline-offset: 2px;
+}
+
+/* ZELIMU ANALYTICS PRESENTATION BLOCK 4 END */
+
+
+/* ZELIMU DASHBOARD CLEANUP BLOCK 5 */
+
+body main.page > .portal-hero {
+    display: none !important;
+}
+
+body .zc-dashboard {
+    margin-top: 0 !important;
+}
+
+body .zc-dashboard .zc-heading {
+    padding-top: 2px !important;
+}
+
+body .zc-dashboard .zc-kpis {
+    gap: 12px !important;
+}
+
+body .zc-dashboard .zc-grid {
+    gap: 14px !important;
+}

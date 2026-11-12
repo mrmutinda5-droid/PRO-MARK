@@ -1,0 +1,51 @@
+
+/* ZELIMU CBC SIDEBAR CLEAN V5 */
+
+body .pm-workflow-intro.zc-sidebar-clean #navTabs .pm-module-group,
+body .pm-workflow-intro.zc-sidebar-clean #navTabs .pm-module-group h3,
+body .pm-workflow-intro.zc-sidebar-clean #navTabs .pm-module-group h3.zc-clean-heading {
+  background:#064a37!important;
+  background-color:#064a37!important;
+  background-image:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  text-shadow:none!important;
+}
+
+body .pm-workflow-intro.zc-sidebar-clean #navTabs .pm-module-group h3.zc-clean-heading {
+  display:flex!important;
+  align-items:center!important;
+  min-height:30px!important;
+  margin:3px 0!important;
+  padding:8px 10px!important;
+  border-radius:6px!important;
+  color:#b7d8ca!important;
+  font-size:10px!important;
+  font-weight:750!important;
+  line-height:1.4!important;
+  letter-spacing:.05em!important;
+  cursor:pointer;
+}
+
+body .pm-workflow-intro.zc-sidebar-clean #navTabs .pm-module-group h3.zc-clean-heading:hover {
+  background:#155d48!important;
+  color:#fff!important;
+}
+
+body .pm-workflow-intro.zc-sidebar-clean #navTabs .pm-admin-menu button {
+  background:transparent!important;
+  background-image:none!important;
+  color:#e8f3ee!important;
+  border:0!important;
+  box-shadow:none!important;
+  font-size:11px!important;
+  min-height:34px!important;
+  padding:7px 9px!important;
+  margin:1px 0!important;
+}
+
+body .pm-workflow-intro.zc-sidebar-clean #navTabs .pm-admin-menu button:hover,
+body .pm-workflow-intro.zc-sidebar-clean #navTabs .pm-admin-menu button.zc-selected {
+  background:#1d6952!important;
+  color:#fff!important;
+}

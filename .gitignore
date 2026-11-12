@@ -1,0 +1,10 @@
+.env
+node_modules/
+/PRO-MARK-main/
+/PRO-MARK-main.zip
+/public/**/*.bak
+/public/**/*.backup
+/public/**/*.before-*
+/backend/**/*.bak
+/backend/**/*.backup
+/backend/**/*.before-*

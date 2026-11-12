@@ -1,0 +1,124 @@
+/* Assessment Control Centre — live glowing hub: dark tiles, animated icons,
+   sparkling particle bubbles. Scoped double-ID to outrank the gold shell. */
+#assess #zaAssessmentHub{
+  --bg0:#050d1a; --bg1:#0a1a33; --panel:#0b1c38; --navy:#17365d;
+  --gold:#f0c465; --ink:#f4f6f9; --mut:#9fb0c8;
+  position:relative; overflow:hidden; margin:14px 0 20px; padding:28px 22px 30px;
+  border:1px solid rgba(240,196,101,.22); border-radius:20px;
+  background:
+    radial-gradient(1100px 480px at 88% -12%, rgba(240,196,101,.14), transparent 60%),
+    radial-gradient(900px 460px at -10% 108%, rgba(56,189,248,.10), transparent 60%),
+    linear-gradient(180deg,#071122 0%, #050d1a 100%);
+  color:var(--ink);
+  scrollbar-width:thin; scrollbar-color:#b8860b #0c1e37;
+}
+#assess #zaAssessmentHub::-webkit-scrollbar{width:10px}
+#assess #zaAssessmentHub::-webkit-scrollbar-track{background:#0c1e37}
+#assess #zaAssessmentHub::-webkit-scrollbar-thumb{background:#b8860b;border-radius:99px;border:2px solid #0c1e37}
+#assess #zaAssessmentHub::-webkit-scrollbar-thumb:hover{background:#f0c465}
+#assess #zaAssessmentHub::before{content:""; position:absolute; inset:-20%; pointer-events:none;
+  background:radial-gradient(600px 300px at 30% 20%, rgba(23,54,93,.55), transparent 70%),
+             radial-gradient(500px 260px at 75% 70%, rgba(240,196,101,.07), transparent 70%);
+  animation:ahDrift 14s ease-in-out infinite alternate;}
+#assess #zaAssessmentHub::after{content:""; position:absolute; inset:0; pointer-events:none; opacity:.55;
+  background-image:
+    radial-gradient(1px 1px at 12% 22%, rgba(244,246,249,.7) 50%, transparent 51%),
+    radial-gradient(1px 1px at 34% 8%, rgba(240,196,101,.8) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 58% 16%, rgba(159,176,200,.6) 50%, transparent 51%),
+    radial-gradient(1px 1px at 81% 31%, rgba(244,246,249,.55) 50%, transparent 51%),
+    radial-gradient(1px 1px at 92% 12%, rgba(240,196,101,.7) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 45% 40%, rgba(159,176,200,.4) 50%, transparent 51%),
+    radial-gradient(1px 1px at 6% 64%, rgba(240,196,101,.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 70% 86%, rgba(244,246,249,.4) 50%, transparent 51%);
+  animation:ahStars 5s ease-in-out infinite alternate;}
+@keyframes ahDrift{from{transform:translate3d(-2%,-1%,0) rotate(-1deg)}to{transform:translate3d(2%,2%,0) rotate(1deg)}}
+@keyframes ahStars{from{opacity:.3}to{opacity:.7}}
+#assess #zaAssessmentHub .ah-head{position:relative; display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap; margin:0 0 20px;}
+#assess #zaAssessmentHub .ah-eyebrow{display:flex; align-items:center; gap:8px; font-size:11px; font-weight:700; letter-spacing:2.6px; color:var(--gold); margin-bottom:10px;}
+#assess #zaAssessmentHub .ah-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 10px #4ade80;animation:ahPulse 1.6s ease-in-out infinite;}
+@keyframes ahPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.72);opacity:.55}}
+#assess #zaAssessmentHub .ah-title{margin:0; font-size:clamp(22px,3vw,30px); font-weight:800; letter-spacing:.4px; color:var(--ink) !important; text-shadow:0 0 24px rgba(240,196,101,.25);}
+#assess #zaAssessmentHub .ah-title em{font-style:normal;color:var(--gold);}
+#assess #zaAssessmentHub .ah-rule{height:2px;margin:0 0 22px;background:linear-gradient(90deg,var(--gold),rgba(240,196,101,.05));border-radius:2px;box-shadow:0 0 12px rgba(240,196,101,.35);}
+#assess #zaAssessmentHub .ah-status{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:1.6px;color:var(--mut);
+  border:1px solid rgba(240,196,101,.35); background:rgba(10,26,51,.7); padding:8px 14px; border-radius:99px;}
+#assess #zaAssessmentHub .ah-status b{color:var(--gold);font-weight:700;}
+#assess #zaAssessmentHub .ah-grid{position:relative; display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin:0;}
+#assess #zaAssessmentHub .ah-tile{position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+  min-height:216px; padding:28px 18px 24px; cursor:pointer; text-align:center;
+  background:linear-gradient(160deg, color-mix(in srgb, var(--c) 9%, #0b1c38) 0%, #081226 68%);
+  border:1px solid color-mix(in srgb, var(--c) 26%, rgba(23,54,93,.6)); border-radius:18px;
+  box-shadow:0 10px 30px -18px rgba(0,0,0,.9), inset 0 1px 0 rgba(244,246,249,.06);
+  transition:transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  animation:ahIn .6s cubic-bezier(.2,.7,.3,1) backwards; animation-delay:var(--d);
+  font-family:inherit; color:inherit;}
+#assess #zaAssessmentHub .ah-tile::after{content:""; position:absolute; inset:0; border-radius:18px; pointer-events:none;
+  background:linear-gradient(120deg, transparent 30%, rgba(244,246,249,.06) 46%, transparent 60%);
+  transform:translateX(-120%); animation:ahSheen 5.5s ease-in-out infinite; animation-delay:var(--d);}
+@keyframes ahSheen{0%,55%{transform:translateX(-120%)}85%,100%{transform:translateX(120%)}}
+@keyframes ahIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+#assess #zaAssessmentHub .ah-tile:hover,#assess #zaAssessmentHub .ah-tile:focus-visible{transform:translateY(-4px); border-color:color-mix(in srgb, var(--c) 70%, transparent);
+  box-shadow:0 18px 44px -16px color-mix(in srgb, var(--c) 45%, transparent), 0 0 0 1px color-mix(in srgb, var(--c) 35%, transparent), inset 0 1px 0 rgba(244,246,249,.08); outline:none;}
+#assess #zaAssessmentHub .ah-tile:active{transform:translateY(-1px) scale(.99);}
+#assess #zaAssessmentHub .ah-step{position:absolute; top:12px; right:14px; font-size:10px; font-weight:800; letter-spacing:2px; color:color-mix(in srgb, var(--c) 85%, white); opacity:.85;
+  border:1px solid color-mix(in srgb, var(--c) 35%, transparent); border-radius:99px; padding:3px 8px; background:rgba(5,13,26,.5);}
+#assess #zaAssessmentHub .ah-medal{position:relative; width:96px; height:96px; border-radius:50%; overflow:hidden; display:grid; place-items:center; flex:none;
+  background:radial-gradient(circle at 35% 28%, color-mix(in srgb, var(--c) 24%, #0a1a33) 0%, #081226 72%);
+  border:1px solid color-mix(in srgb, var(--c) 50%, transparent);
+  box-shadow:0 0 18px color-mix(in srgb, var(--c) 30%, transparent), inset 0 0 22px color-mix(in srgb, var(--c) 16%, transparent);
+  transition:box-shadow .25s ease;}
+#assess #zaAssessmentHub .ah-tile:hover .ah-medal{box-shadow:0 0 30px color-mix(in srgb, var(--c) 55%, transparent), inset 0 0 26px color-mix(in srgb, var(--c) 26%, transparent);}
+#assess #zaAssessmentHub .ah-medal::after{content:""; position:absolute; inset:5px; border-radius:50%; border:1px dashed color-mix(in srgb, var(--c) 35%, transparent); animation:ahOrbit 22s linear infinite;}
+@keyframes ahOrbit{to{transform:rotate(360deg)}}
+#assess #zaAssessmentHub .ah-bubbles{position:absolute; inset:0; pointer-events:none;}
+#assess #zaAssessmentHub .ah-bubbles i{position:absolute; bottom:-8px; left:var(--x); width:var(--s); height:var(--s); border-radius:50%;
+  background:var(--c); box-shadow:0 0 8px var(--c); opacity:0;
+  animation:ahRise var(--dur) linear infinite; animation-delay:var(--del);}
+#assess #zaAssessmentHub .ah-bubbles i:nth-child(1){--x:16%;--s:3px;--dur:3.6s;--del:-.6s}
+#assess #zaAssessmentHub .ah-bubbles i:nth-child(2){--x:30%;--s:5px;--dur:4.4s;--del:-2.1s}
+#assess #zaAssessmentHub .ah-bubbles i:nth-child(3){--x:46%;--s:2.5px;--dur:3.1s;--del:-1.4s}
+#assess #zaAssessmentHub .ah-bubbles i:nth-child(4){--x:60%;--s:4px;--dur:4.9s;--del:-3.2s}
+#assess #zaAssessmentHub .ah-bubbles i:nth-child(5){--x:74%;--s:3px;--dur:3.8s;--del:-.9s}
+#assess #zaAssessmentHub .ah-bubbles i:nth-child(6){--x:86%;--s:2px;--dur:3.3s;--del:-2.6s}
+#assess #zaAssessmentHub .ah-bubbles i:nth-child(7){--x:24%;--s:2px;--dur:4.1s;--del:-3.7s}
+#assess #zaAssessmentHub .ah-bubbles i:nth-child(8){--x:54%;--s:3.5px;--dur:5.2s;--del:-4.4s}
+@keyframes ahRise{0%{transform:translateY(0) translateX(0);opacity:0}10%{opacity:.95}45%{opacity:.6;transform:translateY(-46px) translateX(3px)}80%{opacity:.35}100%{transform:translateY(-102px) translateX(-3px);opacity:0}}
+#assess #zaAssessmentHub .ah-icon{position:relative; width:46px; height:46px; color:var(--c); filter:drop-shadow(0 0 7px color-mix(in srgb, var(--c) 75%, transparent));}
+#assess #zaAssessmentHub .ah-icon *{vector-effect:non-scaling-stroke;}
+#assess #zaAssessmentHub .ah-name{font-size:15px; font-weight:800; letter-spacing:.4px; color:var(--ink);}
+#assess #zaAssessmentHub .ah-name small{display:block; margin-top:5px; font-size:9.5px; font-weight:700; letter-spacing:2.2px; color:color-mix(in srgb, var(--c) 78%, white); opacity:.8;}
+#assess #zaAssessmentHub .ah-wide{grid-column:1/-1; flex-direction:row; justify-content:flex-start; min-height:104px; padding:18px 22px; gap:20px; text-align:left;}
+#assess #zaAssessmentHub .ah-wide .ah-medal{width:64px;height:64px;}
+#assess #zaAssessmentHub .ah-wide .ah-icon{width:32px;height:32px;}
+#assess #zaAssessmentHub .ah-wide .ah-name{font-size:16px;}
+#assess #zaAssessmentHub .ah-wide .ah-name small{display:inline; margin:0 0 0 12px;}
+#assess #zaAssessmentHub .ah-foot{position:relative; margin:24px 0 0; display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  font-size:10.5px; font-weight:700; letter-spacing:1.8px; color:var(--mut);}
+#assess #zaAssessmentHub .ah-foot b{color:var(--gold);}
+#assess #zaAssessmentHub .ah-spin{animation:ahSpin 7s linear infinite; transform-origin:46px 44px;}
+@keyframes ahSpin{to{transform:rotate(360deg)}}
+#assess #zaAssessmentHub .ah-bob{animation:ahBob 2.6s ease-in-out infinite;}
+#assess #zaAssessmentHub .ah-bob.b2{animation-delay:.3s}
+#assess #zaAssessmentHub .ah-bob.b3{animation-delay:.6s}
+@keyframes ahBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-2.5px)}}
+#assess #zaAssessmentHub .ah-draw{stroke-dasharray:40; stroke-dashoffset:40; animation:ahDraw 2.8s ease-in-out infinite;}
+@keyframes ahDraw{0%{stroke-dashoffset:40}45%,70%{stroke-dashoffset:0}100%{stroke-dashoffset:-40}}
+#assess #zaAssessmentHub .ah-write{animation:ahWrite 1.8s ease-in-out infinite;}
+@keyframes ahWrite{0%,100%{transform:translate(0,0)}30%{transform:translate(-3px,2px)}60%{transform:translate(1px,-1px)}}
+#assess #zaAssessmentHub .ah-knob{animation:ahKnob 3s ease-in-out infinite;}
+#assess #zaAssessmentHub .ah-knob.k2{animation-delay:-1.5s;}
+@keyframes ahKnob{0%,100%{transform:translateX(0)}50%{transform:translateX(7px)}}
+#assess #zaAssessmentHub .ah-ring{animation:ahRing 2.4s ease-out infinite; transform-origin:32px 30px;}
+@keyframes ahRing{0%{transform:scale(.75);opacity:.5}100%{transform:scale(1.12);opacity:0}}
+#assess #zaAssessmentHub .ah-grow{transform-origin:32px 50px; animation:ahGrow 2.4s ease-in-out infinite;}
+#assess #zaAssessmentHub .ah-grow.g2{animation-delay:.2s}
+#assess #zaAssessmentHub .ah-grow.g3{animation-delay:.4s}
+@keyframes ahGrow{0%,100%{transform:scaleY(.82)}50%{transform:scaleY(1)}}
+#assess #zaAssessmentHub .ah-twinkle{animation:ahTwinkle 1.7s ease-in-out infinite; transform-origin:center; transform-box:fill-box;}
+@keyframes ahTwinkle{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.78)}}
+#assess #zaAssessmentHub .ah-dash{stroke-dasharray:6 6; animation:ahDash 1.2s linear infinite;}
+@keyframes ahDash{to{stroke-dashoffset:-12}}
+@media (max-width:980px){#assess #zaAssessmentHub .ah-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:620px){#assess #zaAssessmentHub{padding:20px 14px 24px}#assess #zaAssessmentHub .ah-grid{grid-template-columns:1fr}#assess #zaAssessmentHub .ah-tile{min-height:190px}#assess #zaAssessmentHub .ah-wide{flex-direction:row;min-height:96px}#assess #zaAssessmentHub .ah-wide .ah-name small{display:block;margin:5px 0 0}}
+@media (prefers-reduced-motion:reduce){#assess #zaAssessmentHub,#assess #zaAssessmentHub::before,#assess #zaAssessmentHub::after,#assess #zaAssessmentHub *{animation:none!important;transition:none!important}}
+@media print{#assess #zaAssessmentHub{background:#fff;border-color:#999}#assess #zaAssessmentHub::before,#assess #zaAssessmentHub::after,#assess #zaAssessmentHub .ah-bubbles{display:none}#assess #zaAssessmentHub .ah-tile{background:#fff;border-color:#999;animation:none}#assess #zaAssessmentHub .ah-name,#assess #zaAssessmentHub .ah-title{color:#111;text-shadow:none}}

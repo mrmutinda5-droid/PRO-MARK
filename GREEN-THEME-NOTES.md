@@ -1,0 +1,1 @@
+ZELIMU CBC green/white academic portal theme. Inspired by the green-and-white style shown in public Zeraki references; NOT a pixel-exact colour extraction or copy of Zeraki assets. ZELIMU identity and functional code retained. Verify browser visuals and role workflows before deployment.

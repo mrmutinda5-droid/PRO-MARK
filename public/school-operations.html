@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZELIMU CBC | School Operations</title><style>body{font:15px system-ui;background:#f3f6fb;color:#172b4d;margin:0}header{background:#142f59;color:white;padding:22px 5%}main{max-width:1150px;margin:25px auto;padding:0 15px}nav{display:flex;flex-wrap:wrap;gap:8px}button{cursor:pointer;border:0;border-radius:8px;padding:11px 15px;background:#1767b4;color:white}button.active{background:#0a2b50}section{background:white;padding:22px;margin-top:18px;border-radius:14px;box-shadow:0 3px 14px #182c4b14}input,select{padding:11px;border:1px solid #b6c5d6;border-radius:7px;min-width:190px}form{display:flex;flex-wrap:wrap;gap:12px;align-items:end}.field{display:flex;flex-direction:column;gap:5px}table{width:100%;border-collapse:collapse}th,td{padding:10px;text-align:left;border-bottom:1px solid #ddd;overflow-wrap:anywhere}#notice{margin-top:15px}a{color:#d6ebff}small{color:#50637a}
+:root{color-scheme:light}body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif!important;background:linear-gradient(145deg,#edf4ff,#f1fbf9 60%,#fff8ee)!important;color:#172a44!important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}header{background:linear-gradient(112deg,#234ac1,#0e9e95 70%,#8054d6)!important;padding:17px 25px!important;box-shadow:0 10px 26px #15396920}header h1{font-size:1.35rem;letter-spacing:-.025em;margin:0 0 5px}main{max-width:100%!important;margin:12px auto!important;padding:0 14px 20px!important}main>p{font-size:.9rem;line-height:1.55;color:#475569}section{border:1px solid #d8e4f4;box-shadow:0 8px 26px #173a6812!important;margin-top:12px!important;padding:18px!important}h2,h3{color:#183767;letter-spacing:-.02em}nav{gap:7px!important}nav button{background:#e8efff!important;color:#2445a4!important;font-weight:750!important;border:1px solid #c7d8fa!important;min-height:40px}nav button.active{background:linear-gradient(110deg,#2d5cce,#079d91)!important;color:#fff!important;border-color:transparent!important;box-shadow:0 5px 14px #285ac02c}button[type=submit]{background:linear-gradient(110deg,#2b5ecf,#0b9e94)!important;font-weight:750}input,select{background:#fff!important;border:1px solid #c7d5e7!important;font-weight:500;color:#1e314b!important;min-width:140px!important}input:focus{outline:3px solid #0b9e9444;border-color:#0b9e94!important}label{font-size:.84rem;font-weight:700;color:#354c6b}table{font-size:.86rem}th{background:#eaf1ff;color:#1d407c;font-weight:800}td{background:#fff}#notice{font-weight:650;color:#186a67}small{color:#56677f}@media(max-width:650px){header{padding:14px!important}main{padding:0 8px!important}section{padding:12px!important}form{display:grid!important;grid-template-columns:1fr!important}input{width:100%;box-sizing:border-box}}
+.operations-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0}.operations-toolbar input{min-width:250px}#recordCount{font-weight:750;color:#2356a6}button:hover{filter:brightness(.94)}tbody tr:hover td{background:#f0f6ff}tbody button{padding:7px 11px;background:#2756b7}tbody button:last-child{background:#b83c55}form{padding:16px;background:#f3f7ff;border:1px solid #d6e4f7;border-radius:12px}#heading{border-left:5px solid #078f87;padding-left:12px}header{background:linear-gradient(110deg,#173c85,#275fc7 56%,#078e88)!important}body{font-size:15px!important;-webkit-font-smoothing:auto!important}th,td{font-size:14px;line-height:1.5}label{font-weight:700}#notice{padding:9px 0;min-height:22px}section{box-shadow:0 8px 24px #1c457817!important}
+</style><header><h1>ZELIMU CBC · School Operations</h1><a id="backDashboard" href="/dashboard.html">← Dashboard</a></header><main><p>Manage school-specific operational records. Use valid learner IDs for allocations. Live GPS, biometric devices and provider integrations are not connected.</p><div id="notice" role="status"></div><section><div class="field"><label for="school">School ID</label><input id="school" placeholder="School UUID" autocomplete="off"></div><nav id="tabs"></nav></section><section><h2 id="heading"></h2><form id="entry"></form><h3>Saved school records</h3><div class="operations-toolbar"><label for="recordSearch">Search records <input id="recordSearch" type="search" placeholder="Find a learner, route, room or staff member"></label><span id="recordCount" aria-live="polite"></span></div><div style="overflow:auto"><table><thead id="columns"></thead><tbody id="records"></tbody></table></div></section></main><script>
+const schemas={transport_routes:['name','route_code','pickup_point','driver_name','vehicle_registration','fee_amount','notes'],transport_allocations:['learner_id','route_id','pickup_point','status','notes'],boarding_rooms:['name','dormitory','capacity','gender','notes'],boarding_allocations:['learner_id','room_id','bed_number','status','notes'],hr_leave:['staff_name','leave_type','start_date','end_date','status','reason'],hr_training:['title','staff_name','training_date','provider','status','notes'],transport_trips:['route_id','trip_date','departure_time','arrival_time','driver_name','status','notes'],transport_maintenance:['vehicle_registration','service_date','service_type','cost','next_service_date','notes'],transport_incidents:['incident_date','vehicle_registration','description','action_taken','reported_by','status'],boarding_rollcalls:['rollcall_date','dormitory','supervisor','present_count','absent_count','notes'],boarding_welfare:['learner_id','record_date','category','description','action_taken','recorded_by'],boarding_supplies:['item_name','quantity','unit','issued_date','issued_to','notes'],hr_recruitment:['position','department','opening_date','closing_date','status','notes'],hr_appraisals:['staff_name','review_date','reviewer','rating','strengths','development_plan'],hr_documents:['staff_name','document_type','reference','expiry_date','notes']};let type=(schemas[decodeURIComponent(location.hash.slice(1))]?decodeURIComponent(location.hash.slice(1)):'transport_routes');let editingId=null;let cachedRows=[];const $=id=>document.getElementById(id);const notice=t=>$('notice').textContent=t;const token=()=>localStorage.getItem('token')||sessionStorage.getItem('token')||localStorage.getItem('pm_token')||sessionStorage.getItem('pm_token');
+$('school').value=localStorage.getItem('school_id')||sessionStorage.getItem('school_id')||'';window.addEventListener('hashchange',()=>{const t=decodeURIComponent(location.hash.slice(1));if(schemas[t]){type=t;render();load()}});
+function render(){editingId=null; $('tabs').replaceChildren();Object.keys(schemas).filter(k=>k.split('_')[0]===type.split('_')[0]).forEach(k=>{const b=document.createElement('button');b.textContent=k.replaceAll('_',' ').replace(/\b\w/g,x=>x.toUpperCase());b.className=k===type?'active':'';b.onclick=()=>{type=k;location.hash=k;render();load()};$('tabs').append(b)});$('heading').textContent=type.replaceAll('_',' ').replace(/\b\w/g,x=>x.toUpperCase());$('entry').replaceChildren();schemas[type].forEach(f=>{const d=document.createElement('label');d.className='field';d.textContent=f.replaceAll('_',' ');let i;
+const choices={status:['ACTIVE','INACTIVE','PENDING','APPROVED','REJECTED','CANCELLED','COMPLETED'],gender:['MALE','FEMALE','MIXED'],leave_type:['ANNUAL','SICK','MATERNITY','PATERNITY','COMPASSIONATE','STUDY','OTHER']};
+if(choices[f]){i=document.createElement('select');const empty=document.createElement('option');empty.value='';empty.textContent='Select '+f.replaceAll('_',' ');i.append(empty);choices[f].forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;i.append(o)})}
+else {i=document.createElement('input');i.placeholder='Enter '+f.replaceAll('_',' ');if(f.endsWith('_date')||['opening_date','closing_date','record_date','rollcall_date','expiry_date'].includes(f))i.type='date';else if(f.endsWith('_time'))i.type='time';else if(['capacity','present_count','absent_count','quantity','cost','fee_amount','rating'].includes(f)){i.type='number';i.min='0';i.step=['cost','fee_amount'].includes(f)?'0.01':'1';}else i.type='text';}
+i.name=f;i.required=(requiredFields[type]||[]).includes(f);d.append(i);$('entry').append(d)});const b=document.createElement('button');b.textContent='Save record';b.type='submit';$('entry').append(b);const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Cancel edit';cancel.style.background='#66768a';cancel.hidden=true;cancel.id='cancelEdit';cancel.onclick=()=>{editingId=null;$('entry').reset();b.textContent='Save record';cancel.hidden=true};$('entry').append(cancel);}
+
+const requiredFields={
+  transport_routes:['name','route_code'],
+  transport_allocations:['learner_id','route_id'],
+  transport_trips:['route_id','trip_date'],
+  transport_maintenance:['vehicle_registration','service_date'],
+  transport_incidents:['incident_date','description'],
+  boarding_rooms:['name','dormitory','capacity'],
+  boarding_allocations:['learner_id','room_id'],
+  boarding_rollcalls:['rollcall_date','dormitory'],
+  boarding_welfare:['learner_id','record_date','description'],
+  boarding_supplies:['item_name','quantity'],
+  hr_leave:['staff_name','leave_type','start_date','end_date'],
+  hr_training:['title','training_date'],
+  hr_recruitment:['position','opening_date'],
+  hr_appraisals:['staff_name','review_date'],
+  hr_documents:['staff_name','document_type']
+};
+
+// Match required fields to the real operational schemas.
+for(const [module,fields] of Object.entries(requiredFields)){
+  if(!Array.isArray(schemas[module])){
+    throw Error('Unknown operational module: '+module);
+  }
+
+  const unknown=fields.filter(field=>!schemas[module].includes(field));
+
+  if(unknown.length){
+    throw Error(
+      'Invalid fields in '+module+': '+unknown.join(', ')
+    );
+  }
+}
+
+function validateOperationalRecord(form){
+  const data=Object.fromEntries(new FormData(form));
+
+  for(const field of requiredFields[type]||[]){
+    if(!String(data[field]||'').trim()){
+      const input=form.elements.namedItem(field);
+      input?.focus();
+      notice('Required field: '+field.replaceAll('_',' '));
+      return false;
+    }
+  }
+
+  if(type==='hr_leave' &&
+     data.start_date &&
+     data.end_date &&
+     data.end_date<data.start_date){
+    notice('Leave end date cannot precede the start date.');
+    form.elements.namedItem('end_date')?.focus();
+    return false;
+  }
+
+  for(const field of ['capacity','quantity','fee_amount','cost']){
+    if(data[field]!==undefined &&
+       data[field]!=='' &&
+       Number(data[field])<0){
+      notice(field.replaceAll('_',' ')+' cannot be negative.');
+      form.elements.namedItem(field)?.focus();
+      return false;
+    }
+  }
+
+  return true;
+}
+
+async function request(method,path,body){const response=await fetch('/api/extended/'+encodeURIComponent($('school').value)+'/'+path,{method,headers:{Authorization:'Bearer '+token(),'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined});const data=await response.json();if(!response.ok)throw Error(data.error||'Request failed');return data}
+async function load(){if(!$('school').value)return notice('Enter your school ID.');try{const rows=await request('GET',type);cachedRows=rows;$('columns').replaceChildren();$('records').replaceChildren();const tr=document.createElement('tr');[...schemas[type],'Actions'].forEach(k=>{const th=document.createElement('th');th.textContent=k;tr.append(th)});$('columns').append(tr);rows.forEach(r=>{const tr=document.createElement('tr');schemas[type].forEach(f=>{const td=document.createElement('td');td.textContent=r.data[f]??'—';tr.append(td)});const td=document.createElement('td');const edit=document.createElement('button');edit.textContent='Edit';edit.style.marginRight='6px';edit.onclick=()=>{editingId=r.id;for(const f of schemas[type]){const el=$('entry').elements.namedItem(f);if(el)el.value=r.data[f]??'';}$('entry').querySelector('button[type=submit]').textContent='Save changes';$('cancelEdit').hidden=false;$('entry').scrollIntoView({behavior:'smooth',block:'start'})};td.append(edit);const del=document.createElement('button');del.textContent='Delete';del.onclick=async()=>{if(!confirm('Delete this record?'))return;try{await request('DELETE',type+'/'+r.id);load()}catch(e){notice(e.message)}};td.append(del);tr.append(td);$('records').append(tr)});$('recordCount').textContent=rows.length+' records';notice(rows.length+' saved records loaded')}catch(e){notice(e.message)}}
+$('entry').onsubmit=async e=>{e.preventDefault();if(!validateOperationalRecord(e.target))return;try{const data=Object.fromEntries(new FormData(e.target));await request(editingId?'PATCH':'POST',editingId?type+'/'+editingId:type,data);editingId=null;e.target.reset();e.target.querySelector('button[type=submit]').textContent='Save record';$('cancelEdit').hidden=true;await load()}catch(err){notice(err.message)}};$('recordSearch').addEventListener('input',()=>{const q=$('recordSearch').value.toLowerCase();const trs=[...$('records').querySelectorAll('tr')];let count=0;trs.forEach((tr,i)=>{const match=JSON.stringify(cachedRows[i]?.data||{}).toLowerCase().includes(q);tr.hidden=!match;if(match)count++});$('recordCount').textContent=count+' matching records'});$('school').onchange=load;render();if($('school').value)load();
+</script></html>
