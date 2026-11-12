@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verify learner ID card</title>
+  <style>
+    :root{font-family:Arial,sans-serif;color:#14243a;background:#f2f5f8}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;box-sizing:border-box}
+    main{width:min(100%,520px);box-sizing:border-box;padding:28px;background:#fff;border:1px solid #dce3eb;border-radius:14px;box-shadow:0 12px 35px #18304a12}
+    h1{margin-top:0;font-size:1.55rem}.muted{color:#607086;line-height:1.5}
+    label{display:block;margin:22px 0 8px;font-weight:700}
+    input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #bac7d5;border-radius:8px;font-size:1rem}
+    button{margin-top:14px;padding:12px 16px;border:0;border-radius:8px;background:#17365d;color:#fff;font-weight:700;cursor:pointer}
+    #result{margin-top:20px;padding:14px;border-radius:8px;background:#f2f5f8;line-height:1.6}
+    .valid{color:#17643a}.invalid{color:#9a302d}
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Learner ID card verification</h1>
+    <p class="muted">Check whether a school-issued card is current. This page does not reveal the learner's personal details.</p>
+    <form id="verifyForm">
+      <label for="token">Verification token</label>
+      <input id="token" name="token" autocomplete="off" required>
+      <button type="submit">VERIFY CARD</button>
+    </form>
+    <div id="result" role="status" aria-live="polite" hidden></div>
+  </main>
+  <script>
+    const form=document.querySelector('#verifyForm');
+    const tokenInput=document.querySelector('#token');
+    const result=document.querySelector('#result');
+    tokenInput.value=new URLSearchParams(location.search).get('token')||'';
+    form.addEventListener('submit',async event=>{
+      event.preventDefault();
+      result.hidden=false;result.textContent='Checking card status…';result.className='';
+      try{
+        const response=await fetch(`/api/school-certificates/verify-id?token=${encodeURIComponent(tokenInput.value.trim())}`,{cache:'no-store'});
+        const body=await response.json();
+        if(!response.ok)throw Error(body.error||'Unable to verify this card.');
+        result.className=body.valid?'valid':'invalid';
+        result.textContent=body.valid
+          ?`Valid active card · ${body.school_name} · ${body.card_reference}`
+          :`Card is ${String(body.status||'INVALID').toLowerCase()}. Contact the issuing school.`;
+      }catch(error){result.className='invalid';result.textContent=error.message;}
+    });
+    if(tokenInput.value)form.requestSubmit();
+  </script>
+</body>
+</html>

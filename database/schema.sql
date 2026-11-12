@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS user_school_roles(id uuid PRIMARY KEY DEFAULT gen_ran
 CREATE TABLE IF NOT EXISTS academic_years(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),school_id uuid REFERENCES schools(id) ON DELETE CASCADE,year_label text NOT NULL,start_date date,end_date date,status year_status DEFAULT 'PLANNED',created_at timestamptz DEFAULT now(),UNIQUE(school_id,year_label));
 CREATE TABLE IF NOT EXISTS terms(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),school_id uuid REFERENCES schools(id) ON DELETE CASCADE,academic_year_id uuid REFERENCES academic_years(id) ON DELETE CASCADE,term_no int CHECK(term_no between 1 and 3),name text NOT NULL,start_date date,end_date date,status text DEFAULT 'PLANNED',reopening_date date,UNIQUE(academic_year_id,term_no));
 
-CREATE TABLE IF NOT EXISTS teachers(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),school_id uuid REFERENCES schools(id) ON DELETE CASCADE,staff_no text NOT NULL,first_name text NOT NULL,last_name text NOT NULL,email text,is_active boolean DEFAULT true,created_at timestamptz DEFAULT now(),UNIQUE(school_id,staff_no));
+CREATE TABLE IF NOT EXISTS teachers(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),school_id uuid REFERENCES schools(id) ON DELETE CASCADE,user_id uuid REFERENCES users(id) ON DELETE SET NULL,staff_no text NOT NULL,first_name text NOT NULL,last_name text NOT NULL,email text,signature_url text,is_active boolean DEFAULT true,created_at timestamptz DEFAULT now(),UNIQUE(school_id,staff_no));
 CREATE TABLE IF NOT EXISTS classes(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),school_id uuid REFERENCES schools(id) ON DELETE CASCADE,school_level_id uuid REFERENCES school_levels(id),name text NOT NULL,stream text DEFAULT '',is_active boolean DEFAULT true,UNIQUE(school_id,name,stream));
 CREATE TABLE IF NOT EXISTS learners(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),school_id uuid REFERENCES schools(id) ON DELETE CASCADE,admission_no text NOT NULL,first_name text NOT NULL,middle_name text DEFAULT '',last_name text NOT NULL,date_of_birth date,gender text,class_id uuid REFERENCES classes(id),is_active boolean DEFAULT true,created_at timestamptz DEFAULT now(),UNIQUE(school_id,admission_no));
 CREATE TABLE IF NOT EXISTS subjects(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),school_id uuid REFERENCES schools(id) ON DELETE CASCADE,code text NOT NULL,name text NOT NULL,subject_type text DEFAULT 'LEARNING_AREA',is_active boolean DEFAULT true,UNIQUE(school_id,code));
@@ -50,6 +50,17 @@ CREATE TABLE IF NOT EXISTS school_academic_certificates (
  category text NOT NULL DEFAULT 'ACADEMIC_ACHIEVEMENT' CHECK(category IN ('ACADEMIC_ACHIEVEMENT','SUBJECT_PERFORMANCE','MOST_IMPROVED','COMPLETION','CO_CURRICULAR','SPORTS','SCHOOL_RECOGNITION')),
  title text NOT NULL CHECK(length(btrim(title)) BETWEEN 3 AND 120),
  achievement_statement text NOT NULL CHECK(length(btrim(achievement_statement)) BETWEEN 4 AND 1000),
+ subject_or_activity text,
+ achievement_date date,
+ signer_name text,
+ signer_title text,
+ second_signer_name text,
+ second_signer_title text,
+ replaces_certificate_id uuid REFERENCES school_academic_certificates(id) ON DELETE SET NULL,
+ template_id text,
+ snapshot jsonb,
+ verification_token_hash text UNIQUE,
+ verification_token_ciphertext text,
  status text NOT NULL DEFAULT 'DRAFT' CHECK(status IN ('DRAFT','ISSUED','REVOKED')),
  issued_on date,
  created_by uuid NOT NULL REFERENCES users(id),
@@ -68,6 +79,47 @@ CREATE TABLE IF NOT EXISTS school_academic_certificates (
 );
 CREATE INDEX IF NOT EXISTS school_academic_certificates_learner_idx ON school_academic_certificates(school_id,learner_id,created_at DESC);
 CREATE INDEX IF NOT EXISTS school_academic_certificates_status_idx ON school_academic_certificates(school_id,status,created_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS school_academic_certificates_replacement_idx
+ ON school_academic_certificates(school_id,replaces_certificate_id) WHERE replaces_certificate_id IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS school_document_template_preferences (
+ id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+ school_id uuid NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+ document_type text NOT NULL CHECK(document_type IN ('ID_CARD','CERTIFICATE')),
+ category text NOT NULL DEFAULT 'DEFAULT',
+ template_id text NOT NULL,
+ updated_by uuid REFERENCES users(id),
+ created_at timestamptz NOT NULL DEFAULT now(),
+ updated_at timestamptz NOT NULL DEFAULT now(),
+ UNIQUE(school_id,document_type,category),
+ CHECK((document_type='ID_CARD' AND category='DEFAULT') OR
+  (document_type='CERTIFICATE' AND category IN ('ACADEMIC_ACHIEVEMENT','SUBJECT_PERFORMANCE','MOST_IMPROVED','COMPLETION','CO_CURRICULAR','SPORTS','SCHOOL_RECOGNITION','DEFAULT')))
+);
+CREATE INDEX IF NOT EXISTS school_document_template_preferences_scope_idx
+ ON school_document_template_preferences(school_id,document_type,category);
+
+CREATE TABLE IF NOT EXISTS school_learner_cards (
+ id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+ school_id uuid NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+ learner_id uuid NOT NULL REFERENCES learners(id) ON DELETE CASCADE,
+ academic_year_id uuid REFERENCES academic_years(id) ON DELETE SET NULL,
+ card_reference text NOT NULL,
+ verification_token_hash text NOT NULL UNIQUE,
+ verification_token_ciphertext text NOT NULL,
+ template_id text NOT NULL CHECK(template_id IN ('classic','modern','academic')),
+ status text NOT NULL DEFAULT 'ACTIVE' CHECK(status IN ('ACTIVE','REPLACED','REVOKED')),
+ snapshot jsonb NOT NULL,
+ replaced_by uuid REFERENCES school_learner_cards(id) ON DELETE SET NULL,
+ issued_by uuid REFERENCES users(id),
+ issued_at timestamptz NOT NULL DEFAULT now(),
+ created_at timestamptz NOT NULL DEFAULT now(),
+ UNIQUE(school_id,id),
+ UNIQUE(school_id,card_reference)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS school_learner_cards_one_active_idx
+ ON school_learner_cards(school_id,learner_id) WHERE status='ACTIVE';
+CREATE INDEX IF NOT EXISTS school_learner_cards_scope_idx
+ ON school_learner_cards(school_id,learner_id,issued_at DESC);
 
 CREATE INDEX IF NOT EXISTS idx_learners_school ON learners(school_id);
 CREATE INDEX IF NOT EXISTS idx_teachers_school ON teachers(school_id);

@@ -18,7 +18,7 @@
 <body>
   <main class="card">
     <h1>Academic Certificate Verification</h1>
-    <p>Enter the certificate reference and the learner admission number printed on the certificate. This check does not reveal the learner’s personal details.</p>
+    <p>Enter the certificate reference and learner admission number, or open this page by scanning the certificate QR code. Verification does not reveal the learner’s personal details.</p>
     <form id="verifyForm">
       <label>Certificate reference<input name="certificate_no" required autocomplete="off" placeholder="ZAC-2026-…"></label>
       <label>Learner admission number<input name="admission_no" required autocomplete="off"></label>
@@ -33,18 +33,30 @@
     const params=new URLSearchParams(location.search);
     if(params.has('certificate_no'))form.elements.certificate_no.value=params.get('certificate_no');
     if(params.has('admission_no'))form.elements.admission_no.value=params.get('admission_no');
-    form.addEventListener('submit',async event=>{
-      event.preventDefault();button.disabled=true;result.className='result';result.textContent='Checking the issuing school register…';result.style.display='block';
-      const query=new URLSearchParams(Object.fromEntries(new FormData(form)));
+    async function showResult(url){
+      button.disabled=true;result.className='result';result.textContent='Checking the issuing school register…';result.style.display='block';
       try{
-        const response=await fetch(`/api/school-certificates/verify?${query}`,{cache:'no-store'});
+        const response=await fetch(url,{cache:'no-store'});
         const data=await response.json();
         if(!response.ok)throw new Error(data.error||'Certificate verification is unavailable.');
         result.className=`result ${data.valid?'valid':'invalid'}`;
-        result.innerHTML=`<strong>${data.valid?'Certificate is valid':'Certificate has been revoked'}</strong><br>${escapeHtml(data.school_name)}<br>${escapeHtml(data.title)}<br>Issued: ${escapeHtml(String(data.issued_on||'').slice(0,10))}<br>Reference: ${escapeHtml(data.certificate_no)}`;
+        if(!data.valid&&data.status==='INVALID'){
+          result.textContent='No matching issued certificate was found.';
+        }else{
+          result.innerHTML=`<strong>${data.valid?'Certificate is valid':'Certificate has been revoked'}</strong><br>${escapeHtml(data.school_name)}<br>${escapeHtml(data.title)}<br>Issued: ${escapeHtml(String(data.issued_on||'').slice(0,10))}<br>Reference: ${escapeHtml(data.certificate_no)}`;
+        }
       }catch(error){result.className='result invalid';result.textContent=error.message;}
       finally{button.disabled=false;}
+    }
+    form.addEventListener('submit',async event=>{
+      event.preventDefault();
+      const query=new URLSearchParams(Object.fromEntries(new FormData(form)));
+      await showResult(`/api/school-certificates/verify?${query}`);
     });
+    if(params.has('token')){
+      form.hidden=true;
+      showResult(`/api/school-certificates/verify-token?token=${encodeURIComponent(params.get('token'))}`);
+    }
   </script>
 </body>
 </html>

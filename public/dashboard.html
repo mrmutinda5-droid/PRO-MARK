@@ -559,9 +559,71 @@ body, main, .main-content, .dashboard-main {
 <section id="feeStructurePrint" class="nav-managed-section card"><div class="section-title"><h2>Fee Structure Generator</h2><span class="pill">Printable PDF</span></div><p>Generate an official fee structure from a saved school finance fee item. Create or edit fee items under Finance → School Fees &amp; Receipts.</p><button class="btn secondary" id="feeStructureReload">Refresh fee structures</button><div id="feeStructureList" class="table-wrap">Select this module to load fee structures.</div></section>
 <section id="documentCentre" class="nav-managed-section card admin-or-leadership">
  <div class="section-title"><div><h2>Document Centre</h2><p class="muted small">Generate learner ID cards and issue auditable academic certificates. Award wording is entered by the school and must be verified before issue.</p></div><span class="pill">ID cards · Academic certificates · Verification</span></div>
- <div class="card-subsection"><h3>Learner ID card</h3><p class="muted small">Uses the learner’s current school record and existing passport photo, if one is on file. No date of birth or guardian contact details are printed. Choose a print-ready design to preview or download.</p><div class="grid"><label>Class filter<select id="dcClass"><option value="">All classes</option></select></label><label>Find learner<input id="dcLearnerSearch" type="search" placeholder="Name or admission number"></label><label>Learner<select id="dcLearner" required><option value="">Search and select a learner</option></select></label><label>ID card design<select id="dcIdTemplate"><option value="classic">Classic School ID · school colors</option><option value="modern">Modern Color-Block · clean layout</option><option value="academic">Academic Crest · formal style</option></select></label><div class="actions"><button class="btn secondary" type="button" id="dcIdCard">PREVIEW / PRINT ID CARD</button><button class="btn secondary" type="button" id="dcIdDownload">DOWNLOAD ID CARD PDF</button></div></div><div id="dcIdStatus" class="muted small" role="status"></div></div>
- <div class="card-subsection" id="dcCertificateEditor"><h3>Academic certificate · Draft and issue</h3><p class="muted small">Create and preview a draft first. An authorised school leader must review and issue it. Issued certificates cannot be edited; revoke an incorrect certificate and create a replacement.</p><form id="dcCertificateForm" class="grid"><input type="hidden" name="certificate_id"><label>Certificate category<select name="category" required><option value="ACADEMIC_ACHIEVEMENT">Academic achievement</option><option value="SUBJECT_PERFORMANCE">Subject performance</option><option value="MOST_IMPROVED">Most improved learner</option><option value="COMPLETION">Completion</option><option value="CO_CURRICULAR">Co-curricular achievement</option><option value="SPORTS">Sports / extracurricular</option><option value="SCHOOL_RECOGNITION">School-specific recognition</option></select></label><label>Certificate title<input name="title" maxlength="120" required placeholder="e.g. Certificate of Achievement"></label><label>Academic year<select name="academic_year_id"><option value="">Not specified</option></select></label><label>Term<select name="term_id"><option value="">Not specified</option></select></label><label style="grid-column:1/-1">Achievement statement<textarea name="achievement_statement" maxlength="1000" rows="3" required placeholder="Enter the specific achievement approved by the school"></textarea></label><div class="actions"><button type="submit" class="btn primary" id="dcCertificateSave">SAVE CERTIFICATE DRAFT</button><button type="button" class="btn secondary" id="dcCertificateCancel" hidden>Cancel edit</button></div></form><div id="dcCertificateMessage" class="muted small" role="status"></div></div>
- <div class="card-subsection"><div class="section-title"><h3>Academic certificate register</h3><div class="actions"><label>Status<select id="dcCertificateStatus"><option value="">All statuses</option><option value="DRAFT">Draft</option><option value="ISSUED">Issued</option><option value="REVOKED">Revoked</option></select></label><label>Certificate design<select id="dcCertificateTemplate"><option value="classic">Classic Formal · navy and gold frame</option><option value="modern">Modern Clean · contemporary layout</option><option value="academic">Academic Honour · ceremonial crest</option></select></label><button type="button" class="btn secondary" id="dcCertificateRefresh">REFRESH REGISTER</button></div></div><p class="muted small">Certificates are A4 landscape PDFs. Preview to print from your browser, or download the selected design.</p><div id="dcCertificateList" class="table-wrap">Open the Document Centre to load certificates.</div></div>
+ <style>
+ #documentCentre .dc-studio-grid{display:grid;grid-template-columns:minmax(290px,.92fr) minmax(360px,1.08fr);gap:18px;align-items:start}
+ #documentCentre .dc-template-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+ #documentCentre .dc-template-choice{padding:9px;border:2px solid #d9e2ec;border-radius:12px;background:#fff;text-align:left;cursor:pointer;color:#10294d;min-width:0}
+ #documentCentre .dc-template-choice:hover{border-color:#b99142}
+ #documentCentre .dc-template-choice.is-selected{border-color:#d4a52c;box-shadow:0 0 0 2px #d4a52c33;background:#fffdf5}
+ #documentCentre .dc-template-choice strong,#documentCentre .dc-template-choice small{display:block;margin-top:6px}
+ #documentCentre .dc-template-choice small{color:#64748b;font-size:.76rem;line-height:1.35}
+ #documentCentre .dc-template-choice .dc-selected-label{display:none;color:#805d15;font-weight:800;font-size:.7rem;letter-spacing:.04em}
+ #documentCentre .dc-template-choice.is-selected .dc-selected-label{display:block}
+ #documentCentre .dc-thumb{position:relative;overflow:hidden;aspect-ratio:1.586;background:#fff;border:1px solid #cbd5e1;border-radius:6px;box-shadow:0 2px 6px #10294d18}
+ #documentCentre .dc-thumb.certificate{aspect-ratio:1.414}
+ #documentCentre .dc-thumb:before{content:"";position:absolute;inset:5px;border:2px solid #071f49;border-radius:3px}
+ #documentCentre .dc-thumb:after{content:"";position:absolute;left:15%;right:15%;top:43%;height:2px;background:#d4a52c}
+ #documentCentre .dc-thumb .crest{position:absolute;left:7%;top:12%;width:14%;aspect-ratio:1;border-radius:50%;background:#d4a52c;border:2px solid #fff;z-index:1}
+ #documentCentre .dc-thumb .photo{position:absolute;left:8%;top:33%;width:22%;height:48%;background:#dce4ec;border:1px solid #9aabba;border-radius:3px;z-index:1}
+ #documentCentre .dc-thumb .line{position:absolute;left:36%;right:8%;height:4%;border-radius:8px;background:#66758a;top:38%}
+ #documentCentre .dc-thumb .line.second{top:50%;right:17%;background:#b3bfca}
+ #documentCentre .dc-thumb .line.third{top:62%;right:14%;background:#b3bfca}
+ #documentCentre .dc-thumb .line.fourth{top:74%;right:24%;background:#d4a52c}
+ #documentCentre .dc-thumb.modern{border:0;background:#fff}
+ #documentCentre .dc-thumb.modern:before{inset:0 0 auto;height:24%;border:0;border-radius:0;background:#1456a0}
+ #documentCentre .dc-thumb.modern:after{left:92%;right:-2%;top:0;width:8%;height:26%;background:#d4a52c;transform:skew(-22deg)}
+ #documentCentre .dc-thumb.modern .crest{top:5%;width:12%;background:#fff}
+ #documentCentre .dc-thumb.modern .photo{top:34%;height:54%;width:25%}
+ #documentCentre .dc-thumb.academic{background:#fffdf5}
+ #documentCentre .dc-thumb.academic:before{border-color:#071f49;box-shadow:inset 0 0 0 3px #d4a52c}
+ #documentCentre .dc-thumb.academic .crest{left:44%;top:8%;width:14%;background:#071f49}
+ #documentCentre .dc-thumb.academic .photo{top:35%;height:52%;border:2px solid #d4a52c}
+ #documentCentre .dc-thumb.certificate .photo{display:none}
+ #documentCentre .dc-thumb.certificate .line{left:24%;right:24%;top:47%;height:3%}
+ #documentCentre .dc-thumb.certificate .line.second{top:60%;left:30%;right:30%}
+ #documentCentre .dc-thumb.certificate .line.third{top:70%;left:38%;right:38%}
+ #documentCentre .dc-thumb.certificate .line.fourth{top:82%;left:19%;right:19%;height:2%}
+ #documentCentre .dc-thumb.subject-champion .crest,#documentCentre .dc-thumb.most-improved .crest{background:#d4a52c;box-shadow:0 0 0 3px #1456a0}
+ #documentCentre .dc-thumb.sports-achievement:before{border-color:#166534}
+ #documentCentre .dc-thumb.sports-achievement .crest{background:#166534}
+ #documentCentre .dc-thumb.participation:before{border-color:#583556}
+ #documentCentre .dc-thumb.participation .crest{background:#583556}
+ #documentCentre .dc-live-preview{border:1px solid #d9e2ec;border-radius:14px;background:#f8fafc;padding:10px;min-height:320px}
+ #documentCentre .dc-live-preview iframe{display:block;width:100%;height:420px;border:0;border-radius:8px;background:#fff}
+ #documentCentre .dc-id-live-preview iframe{height:310px}
+ #documentCentre .dc-preview-empty{display:grid;place-items:center;min-height:280px;color:#64748b;text-align:center;padding:20px}
+ #documentCentre .dc-studio-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+ @media(max-width:850px){#documentCentre .dc-studio-grid{grid-template-columns:1fr}#documentCentre .dc-live-preview iframe{height:340px}}
+ @media(max-width:560px){#documentCentre .dc-template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#documentCentre .dc-studio-actions>*{width:100%}#documentCentre .dc-live-preview iframe{height:300px}}
+ </style>
+ <div class="card-subsection"><div class="section-title"><div><h3>Learner ID Card Studio</h3><p class="muted small">CR80 print-ready landscape card · 85.60 × 53.98 mm. Learner photos are cropped proportionally; no date of birth, address or guardian information is shown.</p></div></div>
+  <div class="dc-studio-grid">
+   <div><div class="grid"><label>Class filter<select id="dcClass"><option value="">All classes</option></select></label><label>Find learner<input id="dcLearnerSearch" type="search" placeholder="Name or admission number"></label><label>Learner<select id="dcLearner" required><option value="">Search and select a learner</option></select></label><label>Academic year<select id="dcIdYear"><option value="">Current learner class</option></select></label></div>
+    <h4>Choose an ID card design</h4><div id="dcIdTemplateGallery" class="dc-template-grid"></div><label>Selected design<select id="dcIdTemplate" aria-label="Selected ID card design"></select></label>
+    <label>Print sides<select id="dcIdSides"><option value="front">Front only</option><option value="both">Front and verification back</option></select></label>
+    <div class="dc-studio-actions"><button class="btn secondary" type="button" id="dcIdCard">ISSUE / PRINT ID CARD</button><button class="btn secondary" type="button" id="dcIdDownload">ISSUE / DOWNLOAD ID CARD PDF</button><button class="btn danger" type="button" id="dcIdReplace" hidden>REPLACE CURRENT CARD</button><button class="btn secondary" type="button" id="dcIdAnother">GENERATE ANOTHER CARD</button><button class="btn secondary" type="button" id="dcIdSaveDefault">SET AS SCHOOL DEFAULT</button></div>
+    <label>Bulk card recipients (up to 25)<select id="dcBulkLearners" multiple size="7" aria-describedby="dcBulkHelp"></select></label><p id="dcBulkHelp" class="muted small">Use Ctrl/⌘ to select multiple learners. Bulk issue can create individual PDFs in a ZIP or one combined PDF.</p><button class="btn secondary" type="button" id="dcIdBulkDownload" data-format="zip" hidden>ISSUE SELECTED CARDS · DOWNLOAD ZIP</button><button class="btn secondary" type="button" id="dcIdBulkPdf" data-format="pdf" hidden>ISSUE SELECTED CARDS · COMBINED PDF</button>
+    <div id="dcIdStatus" class="muted small" role="status"></div><div id="dcIdRecord" class="muted small" role="status"></div><button class="btn danger" type="button" id="dcIdRevoke" hidden>REVOKE ACTIVE CARD</button>
+   </div>
+   <div><h4>Live learner card preview</h4><div id="dcIdPreviewEmpty" class="dc-live-preview dc-id-live-preview"><div class="dc-preview-empty">Select a learner to preview their actual ID card using the selected school design.</div></div><iframe id="dcIdPreview" title="Selected learner ID card preview" class="dc-live-preview" hidden></iframe></div>
+  </div>
+ </div>
+ <div class="card-subsection" id="dcCertificateEditor"><h3>Academic certificate · Draft and issue</h3><p class="muted small">Create and preview a draft first. An authorised school leader must review and issue it. Issued certificates cannot be edited; revoke an incorrect certificate and create a replacement.</p><form id="dcCertificateForm" class="grid"><input type="hidden" name="certificate_id"><input type="hidden" name="replaces_certificate_id"><label>Certificate category<select name="category" required><option value="ACADEMIC_ACHIEVEMENT">Academic achievement</option><option value="SUBJECT_PERFORMANCE">Subject performance</option><option value="MOST_IMPROVED">Most improved learner</option><option value="COMPLETION">Completion</option><option value="CO_CURRICULAR">Co-curricular achievement</option><option value="SPORTS">Sports / extracurricular</option><option value="SCHOOL_RECOGNITION">School-specific recognition</option></select></label><label>Certificate title<input name="title" maxlength="120" required placeholder="e.g. Certificate of Achievement"></label><label>Academic year<select name="academic_year_id"><option value="">Not specified</option></select></label><label>Term<select name="term_id"><option value="">Not specified</option></select></label><label>Subject or activity<input name="subject_or_activity" maxlength="120" placeholder="Subject, sport or activity being recognised"></label><label>Achievement date<input name="achievement_date" type="date"></label><label>Primary signer name<input name="signer_name" maxlength="100" placeholder="Defaults to the issuing leader"></label><label>Primary signer title<input name="signer_title" maxlength="100" placeholder="Defaults to the issuing leader’s role"></label><label>Second signer name<input name="second_signer_name" maxlength="100"></label><label>Second signer title<input name="second_signer_title" maxlength="100"></label><label style="grid-column:1/-1">Achievement statement<textarea name="achievement_statement" maxlength="1000" rows="3" required placeholder="Enter the specific achievement approved by the school"></textarea></label><div class="actions"><button type="submit" class="btn primary" id="dcCertificateSave">SAVE CERTIFICATE DRAFT</button><button type="button" class="btn secondary" id="dcCertificateCancel" hidden>Cancel edit</button></div></form><div id="dcCertificateMessage" class="muted small" role="status"></div></div>
+ <div class="card-subsection"><div class="section-title"><h3>Academic Certificate Design Studio &amp; Register</h3><div class="actions"><label>Design category<select id="dcCertificateDesignCategory"><option value="ACADEMIC_ACHIEVEMENT">Academic achievement</option><option value="SUBJECT_PERFORMANCE">Subject performance</option><option value="MOST_IMPROVED">Most improved learner</option><option value="COMPLETION">Completion</option><option value="CO_CURRICULAR">Co-curricular achievement</option><option value="SPORTS">Sports achievement</option><option value="SCHOOL_RECOGNITION">School-specific recognition</option></select></label><label>Certificate design<select id="dcCertificateTemplate" aria-label="Selected certificate design"></select></label><button type="button" class="btn secondary" id="dcCertificateSaveDefault">SET CATEGORY DEFAULT</button></div></div><p class="muted small">Select a distinct design for each award. Certificates are A4 landscape PDFs; preview the actual learner and award details, then print or download.</p>
+  <h4>Certificate Template Library</h4><div id="dcCertificateTemplateGallery" class="dc-template-grid"></div>
+  <div class="dc-studio-grid"><div><h4>Selected certificate preview</h4><p class="muted small">Use Preview on a register row to load its actual certificate here.</p><div id="dcCertificatePreviewEmpty" class="dc-live-preview"><div class="dc-preview-empty">Select a certificate row to preview its branded, print-ready design.</div></div><iframe id="dcCertificatePreview" title="Academic certificate preview" class="dc-live-preview" hidden></iframe></div>
+   <div><div class="grid"><label>Search learner or reference<input id="dcCertificateSearch" type="search" placeholder="Learner name or ZAC reference"></label><label>Status<select id="dcCertificateStatus"><option value="">All statuses</option><option value="DRAFT">Draft</option><option value="ISSUED">Issued</option><option value="REVOKED">Revoked</option></select></label><label>Category<select id="dcCertificateCategory"><option value="">All categories</option><option value="ACADEMIC_ACHIEVEMENT">Academic achievement</option><option value="SUBJECT_PERFORMANCE">Subject performance</option><option value="MOST_IMPROVED">Most improved learner</option><option value="COMPLETION">Completion</option><option value="CO_CURRICULAR">Co-curricular achievement</option><option value="SPORTS">Sports achievement</option><option value="SCHOOL_RECOGNITION">School-specific recognition</option></select></label><label>Academic year<select id="dcCertificateYear"><option value="">All years</option></select></label><label>Term<select id="dcCertificateTerm"><option value="">All terms</option></select></label><label>Class<select id="dcCertificateClass"><option value="">All classes</option></select></label></div><div id="dcCertificateList" class="table-wrap">Open the Document Centre to load certificates.</div><div class="dc-studio-actions"><button type="button" class="btn secondary" id="dcCertificatePrevious" disabled>PREVIOUS</button><span id="dcCertificatePage" class="muted small" aria-live="polite"></span><button type="button" class="btn secondary" id="dcCertificateNext" disabled>NEXT</button><button type="button" class="btn secondary" id="dcCertificateRefresh">REFRESH REGISTER</button></div></div></div>
+ </div>
  <div class="card-subsection"><h3>Public certificate verification</h3><p class="muted small">A verifier must enter the certificate reference and the learner’s admission number. The verification result does not disclose learner details.</p><a class="btn secondary" href="/certificate-verification.html" target="_blank" rel="noopener">OPEN VERIFICATION PAGE</a></div>
 </section>
 <section id="leavingCertificates" class="nav-managed-section card"><div class="section-title"><h2>School Leaving Certificates</h2><span class="pill">School Administration</span></div><form id="leavingCertificateForm" class="card-subsection"><div class="lc-chooser"><label>1. Grade / Class<select id="lcClass" required><option value="">Select class first</option></select></label><label>2. Search learner<input id="lcSearch" type="search" placeholder="Name or admission number" disabled></label><label>3. Learner<select name="learner_id" required id="lcLearner" disabled><option value="">Select class first</option></select></label><small id="lcSearchStatus">Choose a class first.</small></div><div class="grid"><label>Admission date (if known)<input name="admission_date" type="date"></label><label>Leaving date<input name="leaving_date" type="date" required></label></div><label>Reason for leaving<input name="reason" maxlength="250" placeholder="Transfer / completed studies / other"></label><label>Conduct<input name="conduct" maxlength="250"></label><label>Destination<input name="destination" maxlength="250"></label><label>Headteacher name<input name="headteacher" maxlength="120"></label><label>Remarks<textarea name="remarks" maxlength="250"></textarea></label><button class="btn" type="submit">Issue certificate</button><span id="lcMessage" role="status"></span></form><h3>Issued certificates</h3><button class="btn secondary" id="lcRefresh" type="button">Refresh register</button><div id="lcList" class="table-wrap"></div></section>
@@ -3194,7 +3256,97 @@ function dcLearnerFilter(){
  const previous=learnerSelect.value;
  learnerSelect.replaceChildren(new Option('Select learner',''),...matches.slice(0,100).map(l=>new Option(`${[l.first_name,l.middle_name,l.last_name].filter(Boolean).join(' ')} (${l.admission_no||'—'})`,l.id)));
  if(matches.some(l=>String(l.id)===previous))learnerSelect.value=previous;
+ const bulk=$('dcBulkLearners');
+ if(bulk){
+  const selected=new Set([...bulk.selectedOptions].map(option=>option.value));
+  bulk.replaceChildren(...matches.slice(0,100).map(l=>new Option(`${[l.first_name,l.middle_name,l.last_name].filter(Boolean).join(' ')} (${l.admission_no||'—'})`,l.id)));
+  [...bulk.options].forEach(option=>{option.selected=selected.has(option.value);});
+ }
  if(matches.length>100)learnerSelect.setAttribute('aria-label',`${matches.length} matches; narrow by class or search`);
+}
+const dcFallbackTemplates={
+ ID_CARD:[{id:'classic',name:'Classic School ID',description:'Navy and gold with a formal school header.'},{id:'modern',name:'Modern Color-Block',description:'Clean blue-and-white ID with a large portrait.'},{id:'academic',name:'Academic Crest',description:'Formal navy panels and a gold identification ribbon.'}],
+ CERTIFICATE:[{id:'classic',name:'Classic Formal',description:'Navy and gold decorative frame.'},{id:'modern',name:'Modern Clean',description:'Contemporary white and blue layout.'},{id:'academic',name:'Academic Honour',description:'Ceremonial crest and academic award styling.'},{id:'subject-champion',name:'Subject Champion',description:'Royal-blue subject award with a gold medal.'},{id:'most-improved',name:'Most Improved Learner',description:'Navy and gold recognition with an achievement star.'},{id:'sports-achievement',name:'Sports Achievement',description:'Green-and-gold sporting award with trophy accents.'},{id:'participation',name:'Certificate of Participation',description:'Navy, purple and gold co-curricular design.'}]
+};
+function dcRenderTemplateGallery(type,options,selected,galleryId,selectId){
+ const gallery=$(galleryId),select=$(selectId);if(!gallery||!select)return;
+ select.replaceChildren(...options.map(option=>new Option(option.name,option.id)));
+ select.value=selected;
+ gallery.innerHTML=options.map(option=>{
+  const active=option.id===selected?' is-selected':'';
+  return `<button type="button" class="dc-template-choice${active}" data-doc-template="${esc(type)}" data-template-id="${esc(option.id)}" aria-pressed="${option.id===selected}"><span class="dc-thumb ${type==='CERTIFICATE'?'certificate ':''}${esc(option.id)}"><i class="crest"></i><i class="photo"></i><i class="line"></i><i class="line second"></i><i class="line third"></i><i class="line fourth"></i></span><strong>${esc(option.name)}</strong><small>${esc(option.description)}</small><span class="dc-selected-label">SELECTED</span></button>`;
+ }).join('');
+}
+async function dcLoadTemplatePreference(type,category='DEFAULT'){
+ const selectId=type==='ID_CARD'?'dcIdTemplate':'dcCertificateTemplate';
+ const galleryId=type==='ID_CARD'?'dcIdTemplateGallery':'dcCertificateTemplateGallery';
+ try{
+  const query=new URLSearchParams({document_type:type,category});
+  const result=await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/templates?${query}`);
+  dcRenderTemplateGallery(type,result.templates,result.selected,galleryId,selectId);
+ }catch(error){
+  dcRenderTemplateGallery(type,dcFallbackTemplates[type],dcFallbackTemplates[type][0].id,galleryId,selectId);
+  const status=type==='ID_CARD'?'dcIdStatus':'dcCertificateMessage';
+  const message=`Saved school defaults unavailable: ${error.message}`;
+  if($(status))$(status).textContent=message;
+ }
+}
+function dcUpdateTemplateGallery(type){
+ const galleryId=type==='ID_CARD'?'dcIdTemplateGallery':'dcCertificateTemplateGallery';
+ const selectId=type==='ID_CARD'?'dcIdTemplate':'dcCertificateTemplate';
+ const selected=$(selectId)?.value;
+ $(galleryId)?.querySelectorAll('[data-template-id]').forEach(button=>{
+  const active=button.dataset.templateId===selected;
+  button.classList.toggle('is-selected',active);button.setAttribute('aria-pressed',String(active));
+ });
+}
+async function dcSaveTemplatePreference(type,category='DEFAULT'){
+ const selectId=type==='ID_CARD'?'dcIdTemplate':'dcCertificateTemplate';
+ const status=$(type==='ID_CARD'?'dcIdStatus':'dcCertificateMessage');
+ try{
+  await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/templates`,{method:'PUT',body:{document_type:type,category,template_id:$(selectId).value}});
+  status.textContent='School-specific design default saved.';
+ }catch(error){status.textContent=error.message;}
+}
+async function dcLoadPdfPreview(url,frameId,emptyId,statusId){
+ const frame=$(frameId),empty=$(emptyId),status=$(statusId);
+ if(!frame||!empty)return;
+ try{
+  status&&(status.textContent='Generating document preview…');
+  const token=localStorage.getItem('token')||sessionStorage.getItem('token')||localStorage.getItem('pm_token');
+  const response=await fetch(url,{headers:{Authorization:'Bearer '+token},cache:'no-store'});
+  if(!response.ok){const body=await response.json().catch(()=>({}));throw Error(body.error||'Unable to generate document preview.');}
+  const blob=await response.blob(),nextUrl=URL.createObjectURL(blob),previousUrl=frame.dataset.objectUrl;
+  frame.onload=()=>{if(previousUrl)URL.revokeObjectURL(previousUrl);};
+  frame.dataset.objectUrl=nextUrl;frame.src=nextUrl;frame.hidden=false;empty.hidden=true;
+  status&&(status.textContent='Preview uses the selected learner and print-ready PDF template.');
+ }catch(error){status&&(status.textContent=error.message);throw error;}
+}
+function dcIdPreviewUrl(download=false,issue=false){
+ const learnerId=$('dcLearner')?.value;if(!learnerId)return null;
+ const query=new URLSearchParams({template:$('dcIdTemplate').value,side:$('dcIdSides')?.value||'front'});
+ if($('dcIdYear')?.value)query.set('academic_year_id',$('dcIdYear').value);
+ if(download)query.set('download','1');
+ if(issue)query.set('issue','1');
+ return `/api/school-certificates/${encodeURIComponent(state.schoolId)}/learners/${encodeURIComponent(learnerId)}/id-card.pdf?${query}`;
+}
+async function dcRefreshIdPreview(){
+ const learnerId=$('dcLearner')?.value,status=$('dcIdStatus');
+ if(!learnerId){$('dcIdPreview').hidden=true;$('dcIdPreviewEmpty').hidden=false;return;}
+ const learner=(state.learners||[]).find(item=>String(item.id)===String(learnerId));
+ if(!learner?.passport_photo_url)status.textContent='No passport photo is on file. The PDF will show a professional placeholder; add a photo before issuing a physical ID card.';
+ try{await dcLoadPdfPreview(dcIdPreviewUrl(), 'dcIdPreview','dcIdPreviewEmpty','dcIdStatus');}
+ catch(error){status.textContent=error.message;}
+}
+async function dcLoadLearnerCardStatus(){
+ const learnerId=$('dcLearner')?.value,recordBox=$('dcIdRecord'),revoke=$('dcIdRevoke');
+ if(!learnerId){recordBox.textContent='';revoke.hidden=true;return;}
+ try{
+  const record=await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/learners/${encodeURIComponent(learnerId)}/id-card`);
+  if(!record){recordBox.textContent='No ID card has been issued for this learner.';revoke.hidden=true;return;}
+  recordBox.textContent=`Latest card: ${record.card_reference} · ${record.status} · ${new Date(record.issued_at).toLocaleDateString()}`;
+  revoke.hidden=!dcRoleCanIssue||record.status!=='ACTIVE';revoke.dataset.cardId=record.id;
+ }catch(error){recordBox.textContent=`Unable to load card status: ${error.message}`;revoke.hidden=true;}
 }
 function dcTermRows(){
  const configured=state.terms||{};
@@ -3215,25 +3367,53 @@ function dcResetCertificateForm(){
  const form=$('dcCertificateForm');form.reset();form.elements.namedItem('certificate_id').value='';
  $('dcCertificateSave').textContent='SAVE CERTIFICATE DRAFT';$('dcCertificateCancel').hidden=true;dcUpdateTerms();
 }
-async function dcLoadCertificates(){
- const list=$('dcCertificateList'),status=$('dcCertificateStatus').value;list.innerHTML='<div class="notice">Loading certificate register…</div>';
+let dcCertificateCurrentPage=1,dcCertificateTotalPages=1,dcCertificateRows=[];
+async function dcLoadCertificates(resetPage=true){
+ if(resetPage)dcCertificateCurrentPage=1;
+ const list=$('dcCertificateList');list.innerHTML='<div class="notice">Loading certificate register…</div>';
  try{
-  const rows=await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates${status?'?status='+encodeURIComponent(status):''}`);
-  list.innerHTML=`<table><thead><tr><th>Reference</th><th>Learner</th><th>Certificate</th><th>Academic context</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows.map(row=>{
+  const query=new URLSearchParams({page:String(dcCertificateCurrentPage),page_size:'25'});
+  const filters={status:$('dcCertificateStatus').value,category:$('dcCertificateCategory').value,academic_year_id:$('dcCertificateYear').value,term_id:$('dcCertificateTerm').value,class_id:$('dcCertificateClass').value,search:$('dcCertificateSearch').value.trim()};
+  Object.entries(filters).forEach(([key,value])=>{if(value)query.set(key,value);});
+  const result=await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates?${query}`);
+  const rows=Array.isArray(result)?result:(result.rows||[]);
+  dcCertificateRows=rows;
+  dcCertificateTotalPages=result.pagination?.pages||1;
+  $('dcCertificatePage').textContent=`Page ${result.pagination?.page||1} of ${dcCertificateTotalPages} · ${result.pagination?.total||rows.length} certificate(s)`;
+  $('dcCertificatePrevious').disabled=dcCertificateCurrentPage<=1;
+  $('dcCertificateNext').disabled=dcCertificateCurrentPage>=dcCertificateTotalPages;
+  list.innerHTML=`<table><thead><tr><th>Reference</th><th>Learner</th><th>Certificate</th><th>Academic context</th><th>Template</th><th>Status · issued by</th><th>Actions</th></tr></thead><tbody>${rows.map(row=>{
    const learner=[row.first_name,row.middle_name,row.last_name].filter(Boolean).join(' ');
-   const context=[row.year_label,row.term_no?`Term ${row.term_no}`:row.term_name].filter(Boolean).join(' · ');
+   const context=[row.year_label,row.term_no?`Term ${row.term_no}`:row.term_name,[row.class_name,row.stream].filter(Boolean).join(' ')].filter(Boolean).join(' · ');
    const edit=dcRoleCanDraft&&row.status==='DRAFT'?`<button class="btn secondary" data-dc-action="edit" data-id="${esc(row.id)}">EDIT DRAFT</button>`:'';
    const issue=dcRoleCanIssue&&row.status==='DRAFT'?`<button class="btn primary" data-dc-action="issue" data-id="${esc(row.id)}">ISSUE</button>`:'';
    const revoke=dcRoleCanIssue&&row.status==='ISSUED'?`<button class="btn danger" data-dc-action="revoke" data-id="${esc(row.id)}">REVOKE</button>`:'';
-   const pdf=`<button class="btn secondary" data-dc-action="pdf" data-id="${esc(row.id)}">PREVIEW / PRINT</button><button class="btn secondary" data-dc-action="download" data-id="${esc(row.id)}">DOWNLOAD PDF</button>`;
-   return `<tr><td><b>${esc(row.certificate_no)}</b><br><small>${esc(row.admission_no||'')}</small></td><td>${esc(learner)}</td><td>${esc(row.title)}<br><small>${esc(row.category.replaceAll('_',' '))} · ${esc(row.achievement_statement)}</small></td><td>${esc(context||'—')}</td><td><b>${esc(row.status)}</b>${row.revocation_reason?`<br><small>${esc(row.revocation_reason)}</small>`:''}</td><td><div class="sf-row-actions">${edit}${issue}${revoke}${pdf}</div></td></tr>`;
-  }).join('')||'<tr><td colspan="6">No academic certificates match this filter.</td></tr>'}</tbody></table>`;
+   const replace=dcRoleCanDraft&&row.status==='REVOKED'&&!row.replacement_certificate_no?`<button class="btn secondary" data-dc-action="replace" data-id="${esc(row.id)}">CREATE REPLACEMENT</button>`:'';
+   const pdf=`<button class="btn secondary" data-dc-action="pdf" data-id="${esc(row.id)}">PREVIEW</button><button class="btn secondary" data-dc-action="print" data-id="${esc(row.id)}">PRINT</button><button class="btn secondary" data-dc-action="download" data-id="${esc(row.id)}">DOWNLOAD PDF</button>`;
+   return `<tr><td><b>${esc(row.certificate_no)}</b><br><small>${esc(row.admission_no||'')}</small>${row.replaced_certificate_no?`<br><small>Replaces ${esc(row.replaced_certificate_no)}</small>`:''}${row.replacement_certificate_no?`<br><small>Replaced by ${esc(row.replacement_certificate_no)}</small>`:''}</td><td>${esc(learner)}</td><td>${esc(row.title)}<br><small>${esc(row.category.replaceAll('_',' '))} · ${esc(row.achievement_statement)}</small></td><td>${esc(context||'—')}</td><td>${esc(row.template_id||$('dcCertificateTemplate').selectedOptions[0]?.textContent||'Classic Formal')}</td><td><b>${esc(row.status)}</b>${row.issuer_first_name?`<br><small>${esc([row.issuer_first_name,row.issuer_last_name].filter(Boolean).join(' '))}</small>`:''}${row.revocation_reason?`<br><small>${esc(row.revocation_reason)}</small>`:''}</td><td><div class="sf-row-actions">${edit}${issue}${revoke}${replace}${pdf}</div></td></tr>`;
+  }).join('')||'<tr><td colspan="7">No academic certificates match these filters.</td></tr>'}</tbody></table>`;
  }catch(error){list.innerHTML=`<div class="notice" role="alert">${esc(error.message)}</div>`;}
 }
 async function dcInitialize(){
  const yearSelect=$('dcCertificateForm')?.elements.namedItem('academic_year_id');
  if(yearSelect)yearSelect.replaceChildren(new Option('Not specified',''),...(state.years||[]).map(year=>new Option(year.year_label||year.name||'Academic year',year.id)));
+ const idYear=$('dcIdYear');
+ if(idYear)idYear.replaceChildren(new Option('Current learner class',''),...(state.years||[]).map(year=>new Option(year.year_label||year.name||'Academic year',year.id)));
+ const certYear=$('dcCertificateYear');
+ if(certYear)certYear.replaceChildren(new Option('All years',''),...(state.years||[]).map(year=>new Option(year.year_label||year.name||'Academic year',year.id)));
  await dcUpdateTerms();dcLearnerFilter();
+ await dcLoadTemplatePreference('ID_CARD');
+ $('dcCertificateDesignCategory').value=$('dcCertificateForm')?.elements.namedItem('category')?.value||'ACADEMIC_ACHIEVEMENT';
+ const category=$('dcCertificateDesignCategory').value;
+ await dcLoadTemplatePreference('CERTIFICATE',category);
+ const classes=Array.isArray(state.classes)?state.classes:[];
+ $('dcCertificateClass').replaceChildren(new Option('All classes',''),...classes.filter(row=>row.id).map(row=>new Option(`${row.name||row.class_name||'Class'} ${row.stream||''}`.trim(),row.id)));
+ const canSave=['SCHOOL_ADMIN','ADMIN','PLATFORM_OWNER'].includes(String(user.role||'').toUpperCase());
+ $('dcIdSaveDefault').hidden=!canSave;$('dcCertificateSaveDefault').hidden=!canSave;
+ $('dcIdReplace').hidden=!dcRoleCanIssue;
+ $('dcIdBulkDownload').hidden=!dcRoleCanIssue;
+ $('dcIdBulkPdf').hidden=!dcRoleCanIssue;
+ $('dcIdRevoke').hidden=true;
  if(!dcRoleCanDraft)$('dcCertificateEditor').hidden=true;
 }
 function zelimuLCFilter(){
@@ -3267,13 +3447,62 @@ $('lcClass')?.addEventListener('change',()=>{$('lcSearch').value='';zelimuLCFilt
 let zelimuLCSearchTimer;
 $('lcSearch')?.addEventListener('input',()=>{clearTimeout(zelimuLCSearchTimer);zelimuLCSearchTimer=setTimeout(zelimuLCFilter,160);});
 $('dcClass')?.addEventListener('change',dcLearnerFilter);$('dcLearnerSearch')?.addEventListener('input',dcLearnerFilter);
+$('dcLearner')?.addEventListener('change',()=>{dcRefreshIdPreview();dcLoadLearnerCardStatus();});
+$('dcIdYear')?.addEventListener('change',dcRefreshIdPreview);
+$('dcIdTemplate')?.addEventListener('change',()=>{dcUpdateTemplateGallery('ID_CARD');dcRefreshIdPreview();});
+$('dcCertificateTemplate')?.addEventListener('change',()=>dcUpdateTemplateGallery('CERTIFICATE'));
+$('dcIdTemplateGallery')?.addEventListener('click',event=>{
+ const button=event.target.closest('button[data-template-id]');if(!button)return;
+ $('dcIdTemplate').value=button.dataset.templateId;dcUpdateTemplateGallery('ID_CARD');dcRefreshIdPreview();
+});
+$('dcCertificateTemplateGallery')?.addEventListener('click',event=>{
+ const button=event.target.closest('button[data-template-id]');if(!button)return;
+ $('dcCertificateTemplate').value=button.dataset.templateId;dcUpdateTemplateGallery('CERTIFICATE');
+});
+$('dcIdSaveDefault')?.addEventListener('click',()=>dcSaveTemplatePreference('ID_CARD'));
+$('dcCertificateSaveDefault')?.addEventListener('click',()=>{
+ const category=$('dcCertificateDesignCategory')?.value||'DEFAULT';
+ dcSaveTemplatePreference('CERTIFICATE',category);
+});
+$('dcCertificateForm')?.elements.namedItem('category')?.addEventListener('change',event=>{
+ $('dcCertificateDesignCategory').value=event.target.value;
+ dcLoadTemplatePreference('CERTIFICATE',event.target.value);
+});
+$('dcCertificateDesignCategory')?.addEventListener('change',event=>dcLoadTemplatePreference('CERTIFICATE',event.target.value));
+$('dcCertificateStatus')?.addEventListener('change',()=>dcLoadCertificates());
+$('dcCertificateCategory')?.addEventListener('change',()=>dcLoadCertificates());
+$('dcCertificateYear')?.addEventListener('change',async event=>{
+ const yearId=event.target.value,termSelect=$('dcCertificateTerm');
+ termSelect.replaceChildren(new Option('All terms',''));
+ if(yearId){
+  try{
+   const rows=state.terms[yearId]||await api(`/api/school/${encodeURIComponent(state.schoolId)}/terms/${encodeURIComponent(yearId)}`);
+   state.terms[yearId]=Array.isArray(rows)?rows:(Array.isArray(rows.terms)?rows.terms:[]);
+   termSelect.append(...state.terms[yearId].map(term=>new Option(term.name||`Term ${term.term_no||''}`,term.id)));
+  }catch(error){$('dcCertificateMessage').textContent=error.message;}
+ }
+ dcLoadCertificates();
+});
+$('dcCertificateTerm')?.addEventListener('change',dcLoadCertificates);
+$('dcCertificateClass')?.addEventListener('change',dcLoadCertificates);
+$('dcCertificatePrevious')?.addEventListener('click',()=>{if(dcCertificateCurrentPage>1){dcCertificateCurrentPage--;dcLoadCertificates(false);}});
+$('dcCertificateNext')?.addEventListener('click',()=>{if(dcCertificateCurrentPage<dcCertificateTotalPages){dcCertificateCurrentPage++;dcLoadCertificates(false);}});
+$('dcCertificateSearch')?.addEventListener('input',()=>{
+ clearTimeout(window.dcCertificateSearchTimer);
+ window.dcCertificateSearchTimer=setTimeout(dcLoadCertificates,250);
+});
+$('dcIdAnother')?.addEventListener('click',()=>{
+ $('dcLearnerSearch').value='';$('dcLearner').value='';dcLearnerFilter();$('dcLearner').value='';
+ $('dcIdPreview').hidden=true;$('dcIdPreviewEmpty').hidden=false;
+ $('dcIdStatus').textContent='Select another learner to generate a card.';
+});
 $('dcCertificateForm')?.elements.namedItem('academic_year_id')?.addEventListener('change',()=>dcUpdateTerms());
 $('dcCertificateCancel')?.addEventListener('click',dcResetCertificateForm);
 $('dcCertificateForm')?.addEventListener('submit',async event=>{
  event.preventDefault();const form=event.currentTarget,button=$('dcCertificateSave'),message=$('dcCertificateMessage'),learnerId=$('dcLearner').value;
  if(!learnerId){message.textContent='Select a learner before saving the certificate draft.';return;}
  const values=Object.fromEntries(new FormData(form)),id=values.certificate_id;
- const payload={learner_id:learnerId,category:values.category,title:values.title,achievement_statement:values.achievement_statement,academic_year_id:values.academic_year_id||null,term_id:values.term_id||null};
+ const payload={learner_id:learnerId,category:values.category,title:values.title,achievement_statement:values.achievement_statement,academic_year_id:values.academic_year_id||null,term_id:values.term_id||null,subject_or_activity:values.subject_or_activity||null,achievement_date:values.achievement_date||null,signer_name:values.signer_name||null,signer_title:values.signer_title||null,second_signer_name:values.second_signer_name||null,second_signer_title:values.second_signer_title||null,replaces_certificate_id:values.replaces_certificate_id||null};
  button.disabled=true;message.textContent=id?'Saving draft changes…':'Saving certificate draft…';
  try{await api(id?`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates/${encodeURIComponent(id)}`:`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates`,{method:id?'PATCH':'POST',body:payload});message.textContent=id?'Draft updated.':'Certificate draft saved.';dcResetCertificateForm();await dcLoadCertificates();}
  catch(error){message.textContent=error.message;}finally{button.disabled=false;}
@@ -3281,48 +3510,112 @@ $('dcCertificateForm')?.addEventListener('submit',async event=>{
 $('dcIdCard')?.addEventListener('click',async event=>{
  const learnerId=$('dcLearner').value,status=$('dcIdStatus'),button=event.currentTarget;
  if(!learnerId){status.textContent='Select a learner first.';return;}
+ const learner=(state.learners||[]).find(item=>String(item.id)===String(learnerId));
+ if(!learner?.passport_photo_url&&!confirm('This learner has no passport photo on file. The card will show a placeholder. Continue to preview or print anyway?'))return;
+ if(!confirm('Issue or reprint this learner ID card? This creates an auditable card reference and verification QR.'))return;
  button.disabled=true;status.textContent='Generating learner ID card…';
- const url=`/api/school-certificates/${encodeURIComponent(state.schoolId)}/learners/${encodeURIComponent(learnerId)}/id-card.pdf?template=${encodeURIComponent($('dcIdTemplate').value)}`;
- try{await openPdf(url);status.textContent='ID card preview opened. Use your PDF viewer to print.';}
+ const url=dcIdPreviewUrl(false,true);
+ try{await openPdf(url);status.textContent='ID card issued. Use your PDF viewer to print.';}
  catch(error){status.textContent=error.message;}finally{button.disabled=false;}
+ await dcLoadLearnerCardStatus();
 });
 $('dcIdDownload')?.addEventListener('click',async event=>{
  const learnerId=$('dcLearner').value,status=$('dcIdStatus'),button=event.currentTarget;
  if(!learnerId){status.textContent='Select a learner first.';return;}
+ const learner=(state.learners||[]).find(item=>String(item.id)===String(learnerId));
+ if(!learner?.passport_photo_url&&!confirm('This learner has no passport photo on file. The downloaded card will show a placeholder. Continue?'))return;
+ if(!confirm('Issue or reprint this learner ID card and download the PDF?'))return;
  button.disabled=true;status.textContent='Preparing ID card download…';
- const url=`/api/school-certificates/${encodeURIComponent(state.schoolId)}/learners/${encodeURIComponent(learnerId)}/id-card.pdf?template=${encodeURIComponent($('dcIdTemplate').value)}&download=1`;
+ const url=dcIdPreviewUrl(true,true);
  try{await downloadPdf(url);status.textContent='ID card downloaded.';}
  catch(error){status.textContent=error.message;}finally{button.disabled=false;}
+ await dcLoadLearnerCardStatus();
+});
+$('dcIdReplace')?.addEventListener('click',async event=>{
+ const learnerId=$('dcLearner').value,status=$('dcIdStatus'),button=event.currentTarget;
+ if(!learnerId){status.textContent='Select a learner first.';return;}
+ const reason=prompt('Replace the learner’s current active ID card. Enter the reason; the old verification token will be invalid:');
+ if(reason===null)return;
+ if(reason.trim().length<4){status.textContent='Enter a replacement reason of at least four characters.';return;}
+ button.disabled=true;status.textContent='Replacing learner ID card…';
+ try{
+  await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/learners/${encodeURIComponent(learnerId)}/id-card/replace`,{method:'POST',body:{template_id:$('dcIdTemplate').value,academic_year_id:$('dcIdYear').value||null,reason:reason.trim()}});
+  await downloadPdf(dcIdPreviewUrl(true,true));status.textContent='Replacement card issued and downloaded.';
+ }catch(error){status.textContent=error.message;}finally{button.disabled=false;}
+ await dcLoadLearnerCardStatus();
+});
+$('dcIdRevoke')?.addEventListener('click',async event=>{
+ const button=event.currentTarget,cardId=button.dataset.cardId;
+ if(!cardId)return;
+ const reason=prompt('Revoke the active ID card. Enter the reason:');
+ if(reason===null)return;
+ if(reason.trim().length<4){$('dcIdRecord').textContent='Enter a revocation reason of at least four characters.';return;}
+ button.disabled=true;
+ try{
+  await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/id-cards/${encodeURIComponent(cardId)}/revoke`,{method:'POST',body:{reason:reason.trim()}});
+  $('dcIdRecord').textContent='ID card revoked. Its QR verification will now report that it is invalid.';
+  await dcLoadLearnerCardStatus();
+ }catch(error){$('dcIdRecord').textContent=error.message;}finally{button.disabled=false;}
+});
+$('dcIdBulkDownload')?.parentElement?.addEventListener('click',async event=>{
+ const button=event.target.closest('button[data-format]');if(!button)return;
+ const format=button.dataset.format,status=$('dcIdStatus'),learnerIds=[...$('dcBulkLearners').selectedOptions].map(option=>option.value);
+ if(!learnerIds.length){status.textContent='Select one or more learners for bulk card issue.';return;}
+ if(learnerIds.length>25){status.textContent='Select no more than 25 learners per ZIP.';return;}
+ if(!confirm(`Issue ${learnerIds.length} ID card(s) and download ${format==='zip'?'individual PDFs in a ZIP':'one combined PDF'}?`))return;
+ button.disabled=true;status.textContent='Preparing bulk ID cards…';
+ try{
+  const token=localStorage.getItem('token')||sessionStorage.getItem('token')||localStorage.getItem('pm_token');
+  const response=await fetch(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/id-cards/bulk.${format}`,{
+   method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+   body:JSON.stringify({learner_ids:learnerIds,template_id:$('dcIdTemplate').value,academic_year_id:$('dcIdYear').value||null,side:$('dcIdSides').value,issue:true})
+  });
+  if(!response.ok){const body=await response.json().catch(()=>({}));throw Error(body.error||'Bulk ID card generation failed.');}
+  const blob=await response.blob(),objectUrl=URL.createObjectURL(blob),link=document.createElement('a'),disposition=response.headers.get('Content-Disposition')||'',match=disposition.match(/filename="([^"]+)"/i);
+  link.href=objectUrl;link.download=match?.[1]||'learner-id-cards.zip';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(objectUrl),60000);
+  status.textContent=`Issued and downloaded ${learnerIds.length} ID card(s) as ${format.toUpperCase()}.`;
+ }catch(error){status.textContent=error.message;}finally{button.disabled=false;}
 });
 $('dcCertificateList')?.addEventListener('click',async event=>{
  const button=event.target.closest('button[data-dc-action]');if(!button)return;
  const rowId=button.dataset.id,action=button.dataset.dcAction;
- let rows,row;
- try{rows=await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates`);row=rows.find(item=>String(item.id)===String(rowId));}
- catch(error){alert(error.message);return;}
+ const row=dcCertificateRows.find(item=>String(item.id)===String(rowId));
  if(!row)return;
  if(action==='edit'){
-  const form=$('dcCertificateForm');form.elements.namedItem('certificate_id').value=row.id;form.elements.namedItem('category').value=row.category||'ACADEMIC_ACHIEVEMENT';form.elements.namedItem('title').value=row.title;form.elements.namedItem('achievement_statement').value=row.achievement_statement;form.elements.namedItem('academic_year_id').value=row.academic_year_id||'';await dcUpdateTerms();form.elements.namedItem('term_id').value=row.term_id||'';
+  const form=$('dcCertificateForm');form.elements.namedItem('certificate_id').value=row.id;form.elements.namedItem('replaces_certificate_id').value=row.replaces_certificate_id||'';form.elements.namedItem('category').value=row.category||'ACADEMIC_ACHIEVEMENT';form.elements.namedItem('title').value=row.title;form.elements.namedItem('achievement_statement').value=row.achievement_statement;form.elements.namedItem('academic_year_id').value=row.academic_year_id||'';form.elements.namedItem('term_id').value=row.term_id||'';form.elements.namedItem('subject_or_activity').value=row.subject_or_activity||'';form.elements.namedItem('achievement_date').value=String(row.achievement_date||'').slice(0,10);form.elements.namedItem('signer_name').value=row.signer_name||'';form.elements.namedItem('signer_title').value=row.signer_title||'';form.elements.namedItem('second_signer_name').value=row.second_signer_name||'';form.elements.namedItem('second_signer_title').value=row.second_signer_title||'';
   const classId=String(state.learners.find(item=>String(item.id)===String(row.learner_id))?.class_id||'');if(classId)$('dcClass').value=classId;
   const learner=state.learners.find(item=>String(item.id)===String(row.learner_id));$('dcLearnerSearch').value=learner?[learner.first_name,learner.last_name,learner.admission_no].filter(Boolean).join(' '):'';
   dcLearnerFilter();$('dcLearner').value=row.learner_id;$('dcCertificateSave').textContent='SAVE DRAFT CHANGES';$('dcCertificateCancel').hidden=false;form.scrollIntoView({behavior:'smooth',block:'center'});return;
  }
+ if(action==='replace'){
+  const form=$('dcCertificateForm');form.reset();form.elements.namedItem('certificate_id').value='';form.elements.namedItem('replaces_certificate_id').value=row.id;
+  form.elements.namedItem('category').value=row.category||'ACADEMIC_ACHIEVEMENT';form.elements.namedItem('title').value=`${row.title} (Replacement)`.slice(0,120);form.elements.namedItem('achievement_statement').value=row.achievement_statement;
+  form.elements.namedItem('academic_year_id').value=row.academic_year_id||'';await dcUpdateTerms();form.elements.namedItem('term_id').value=row.term_id||'';
+  form.elements.namedItem('subject_or_activity').value=row.subject_or_activity||'';form.elements.namedItem('achievement_date').value=String(row.achievement_date||'').slice(0,10);
+  form.elements.namedItem('signer_name').value='';form.elements.namedItem('signer_title').value='';form.elements.namedItem('second_signer_name').value='';form.elements.namedItem('second_signer_title').value='';
+  const learner=state.learners.find(item=>String(item.id)===String(row.learner_id));$('dcLearnerSearch').value=learner?[learner.first_name,learner.last_name,learner.admission_no].filter(Boolean).join(' '):'';
+  dcLearnerFilter();$('dcLearner').value=row.learner_id;$('dcCertificateSave').textContent='SAVE REPLACEMENT DRAFT';$('dcCertificateCancel').hidden=false;form.scrollIntoView({behavior:'smooth',block:'center'});return;
+ }
  if(action==='issue'){
   if(!confirm(`Issue ${row.certificate_no} for ${[row.first_name,row.last_name].filter(Boolean).join(' ')}? Check the learner, title and achievement statement first.`))return;
-  button.disabled=true;try{await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates/${encodeURIComponent(rowId)}/issue`,{method:'POST',body:{}});await dcLoadCertificates();}catch(error){alert(error.message);}finally{button.disabled=false;}return;
+  button.disabled=true;try{await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates/${encodeURIComponent(rowId)}/issue`,{method:'POST',body:{template_id:$('dcCertificateTemplate').value}});await dcLoadCertificates();}catch(error){alert(error.message);}finally{button.disabled=false;}return;
  }
  if(action==='revoke'){
   const reason=prompt(`Revoke certificate ${row.certificate_no}. Enter the reason:`);if(reason===null)return;if(reason.trim().length<4){alert('Enter a revocation reason of at least four characters.');return;}
   button.disabled=true;try{await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates/${encodeURIComponent(rowId)}/revoke`,{method:'POST',body:{reason:reason.trim()}});await dcLoadCertificates();}catch(error){alert(error.message);}finally{button.disabled=false;}return;
  }
- if(action==='pdf'||action==='download'){
-  const query=new URLSearchParams({template:$('dcCertificateTemplate').value});
+ if(action==='pdf'||action==='print'||action==='download'){
+  const query=new URLSearchParams({template:row.template_id||$('dcCertificateTemplate').value});
   if(action==='download')query.set('download','1');
   const url=`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates/${encodeURIComponent(rowId)}/pdf?${query}`;
-  try{if(action==='download')await downloadPdf(url);else await openPdf(url);}catch(error){alert(error.message);}
+  try{
+   if(action==='download')await downloadPdf(url);
+   else if(action==='print')await openPdf(url);
+   else await dcLoadPdfPreview(url,'dcCertificatePreview','dcCertificatePreviewEmpty','dcCertificateMessage');
+  }catch(error){alert(error.message);}
  }
 });
-$('dcCertificateRefresh')?.addEventListener('click',dcLoadCertificates);$('dcCertificateStatus')?.addEventListener('change',dcLoadCertificates);
+$('dcCertificateRefresh')?.addEventListener('click',()=>dcLoadCertificates());
 $('feeStructureReload')?.addEventListener('click',fees);$('lcRefresh')?.addEventListener('click',certificates);
 $('feeStructureList')?.addEventListener('click',e=>{const b=e.target.closest('[data-fee]');if(b)openPdf(`/api/school-documents/${state.schoolId}/fee-structures/${b.dataset.fee}/pdf`)});
 $('lcList')?.addEventListener('click',e=>{const b=e.target.closest('[data-certificate]');if(b)openPdf(`/api/school-documents/${state.schoolId}/leaving-certificates/${b.dataset.certificate}/pdf`).catch(error=>alert(error.message))});
