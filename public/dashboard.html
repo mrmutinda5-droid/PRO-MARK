@@ -433,7 +433,7 @@ body, main, .main-content, .dashboard-main {
 </head>
 <body><main class="page">
 <section class="zelimu-command zelimu-command-v1" aria-label="School Command Centre"></section>
-<script src="/js/zelimu-approved-dashboard.js?v=instant-complete-20261109"></script>
+<script src="/js/zelimu-approved-dashboard.js?v=module-nav-20261112"></script>
 <script src="/js/docx-import-modal.js?v=1"></script>
 <div id="zelimuLegacyBridge" hidden style="display:none !important">
 <header><div class="brand-lockup"><div class="pm-brand"><img src="/assets/zelimu-cbc-logo.svg" alt="ZELIMU CBC logo"><div><strong>ZELIMU CBC</strong><div class="muted small">School Management Portal</div></div></div><div><div class="muted small" id="schoolTitle">School workspace</div><div class="small role-caption" id="roleCaption">Secure school portal</div></div></div><div class="header-actions"><select id="ownerSchoolSwitch" class="owner-school-switch" style="display:none"></select><span id="who"></span><button class="btn secondary" id="signOut">Sign out</button></div></header><section class="portal-hero card"><div><span class="eyebrow">SCHOOL MANAGEMENT PLATFORM</span><h1 id="portalHeading">School workspace</h1><p id="portalSubtitle">Manage academic operations with a clear, role-aware workspace.</p></div><div><div class="hero-badge" id="roleBadge">LOADING ROLE…</div><div class="user-greeting" id="userGreeting"></div></div></section><div id="announcementBanner" class="notice" style="display:none;margin-top:12px"></div><section id="passwordPanel" class="card password-panel"><div class="section-title"><h2>My Password</h2><span class="pill">Secure account</span></div><p class="muted small">Change your password at any time. ZELIMU CBC never displays existing passwords because they are securely stored as one-way hashes.</p><form id="passwordForm"><label>Current password<input id="currentPassword" type="password" autocomplete="current-password" required></label><label>New password<input id="newPassword" type="password" minlength="10" autocomplete="new-password" required></label><label>Confirm new password<input id="confirmPassword" type="password" minlength="10" autocomplete="new-password" required></label><button class="btn primary" type="submit">Change password</button></form><div id="passwordMessage" class="notice" style="display:none"></div></section><section id="teacherMarking" class="nav-managed-section card teacher-only">
@@ -3166,7 +3166,7 @@ async function dcLoadCertificates(){
   }).join('')||'<tr><td colspan="6">No academic certificates match this filter.</td></tr>'}</tbody></table>`;
  }catch(error){list.innerHTML=`<div class="notice" role="alert">${esc(error.message)}</div>`;}
 }
-function dcInitialize(){
+async function dcInitialize(){
  const yearSelect=$('dcCertificateForm')?.elements.namedItem('academic_year_id');
  if(yearSelect)yearSelect.replaceChildren(new Option('Not specified',''),...(state.years||[]).map(year=>new Option(year.year_label||year.name||'Academic year',year.id)));
  await dcUpdateTerms();dcLearnerFilter();

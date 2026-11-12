@@ -14,11 +14,12 @@ const nav=[
   ['◉','Biometrics & Access Attendance','biometrics'],
   ['⚖','Discipline & Welfare Records','pm24_14'],
   ['📋','Class Lists & Registers','pm24_26'],
+  ['🪪','Academic Certificates & ID Cards','documentCentre'],
   ['🎓','School Leaving Certificates','leavingCertificates'],
   ['♙','Teacher & Staff Registration','pm24_3']
  ]],
  ['SCHOOL MANAGEMENT',[['♙','Admissions','admissions'],['▣','Academics','pm24_6'],['☑','Assessments','pm24_7'],['▦','Timetable','pm24_19']]],
- ['FINANCE & RESOURCES',[['◫','Finance','pm24_28'],['▰','Transport','transport'],['⌂','Boarding','boarding'],['✣','Resources','pm24_25']]],
+ ['FINANCE & RESOURCES',[['◫','School Fees & Receipts','pm24_28'],['📑','Fee Structure Generator & PDF','feeStructurePrint'],['▰','Transport','transport'],['⌂','Boarding','boarding'],['✣','Resources','pm24_25']]],
  ['PEOPLE & COMMUNICATION',[['♟','Staff / HR','staff_hr'],['✉','Communications','pm24_15'],['♟','Parent Portal','pm24_5']]],
  ['ANALYTICS & REPORTS',[['▥','Analytics','pm24_10'],['▤','Reports','pm24_11']]],
  ['SYSTEM CONTROL',[['◉','School Branding','pm24_21'],['⚙','Settings','pm24_2'],['◎','User Management','pm24_27']]]
