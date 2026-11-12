@@ -21,10 +21,16 @@ const engine=fs.readFileSync(path.join(root,'backend/services/report-engine.js')
 // Navigation integrity: every static module target must resolve to a workspace.
 const targets=[...dash.matchAll(/<button\s+data-target="([^"]+)"/g)].map(x=>x[1]);
 const ids=new Set([...dash.matchAll(/\bid="([^"]+)"/g)].map(x=>x[1]));
+const managedMatch=dash.match(/const MANAGED_SECTIONS=\[([^\]]+)\]/);
+if(!managedMatch)throw Error('Missing managed-section navigation registry.');
+const managedSections=new Set([...managedMatch[1].matchAll(/'([^']+)'/g)].map(x=>x[1]));
 for(const target of targets){
  if(/^pm24_\d+$/.test(target)){
   if(!dash.includes(`${Number(target.slice(5))}:`) && !dash.includes(`${Number(target.slice(5))}:[`))throw Error('Missing module mapping '+target);
- }else if(!ids.has(target))throw Error('Missing navigation target '+target);
+ }else{
+  if(!ids.has(target))throw Error('Missing navigation target '+target);
+  if(dash.includes(`id="${target}" class="nav-managed-section`)&&!managedSections.has(target))throw Error('Missing managed-section navigation entry '+target);
+ }
 }
 if(!ids.has('zelimuModuleSearch')||!ids.has('zelimuClearSearch'))throw Error('Module discovery controls missing');
 if(!ids.has('parents')||!ids.has('documents')||!ids.has('announcements'))throw Error('Separated parent, official assets, and announcement workspaces missing');

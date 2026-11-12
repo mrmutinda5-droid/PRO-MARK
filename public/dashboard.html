@@ -494,6 +494,7 @@ body, main, .main-content, .dashboard-main {
    <button data-target="biometrics"><span class="pm-icon" style="background:#e5f8f3;color:#07836b">◉</span><span>Biometrics &amp; Access Attendance</span></button>
    <button data-target="pm24_14"><span class="pm-icon">⚖️</span><span>Discipline &amp; Welfare Records</span></button>
    <button data-target="pm24_26"><span class="pm-icon">📋</span><span>Class Lists &amp; Registers</span></button>
+   <button data-target="documentCentre"><span class="pm-icon">🪪</span><span>Document Centre · IDs &amp; Certificates</span></button>
    <button data-target="leavingCertificates"><span class="pm-icon">🎓</span><span>School Leaving Certificates</span></button>
    <button data-target="pm24_3"><span class="pm-icon">👩‍🏫</span><span>Teacher &amp; Staff Registration</span></button>
   </div></div>
@@ -556,6 +557,13 @@ body, main, .main-content, .dashboard-main {
 <section class="card owner-only" aria-label="Platform owner controls"><div class="pm-module-group owner-only"><h3>PLATFORM OWNER · SEPARATE CONTROL</h3><div class="pm-admin-menu"><a class="zelimu-owner-link" href="/owner.html">🏢 Open Platform Owner Control Centre</a><button data-target="pm24_17"><span class="pm-icon">💳</span><span>Platform Subscription Billing</span></button></div></div></section>
 
 <section id="feeStructurePrint" class="nav-managed-section card"><div class="section-title"><h2>Fee Structure Generator</h2><span class="pill">Printable PDF</span></div><p>Generate an official fee structure from a saved school finance fee item. Create or edit fee items under Finance → School Fees &amp; Receipts.</p><button class="btn secondary" id="feeStructureReload">Refresh fee structures</button><div id="feeStructureList" class="table-wrap">Select this module to load fee structures.</div></section>
+<section id="documentCentre" class="nav-managed-section card admin-or-leadership">
+ <div class="section-title"><div><h2>Document Centre</h2><p class="muted small">Generate learner ID cards and issue auditable academic certificates. Award wording is entered by the school and must be verified before issue.</p></div><span class="pill">ID cards · Academic certificates · Verification</span></div>
+ <div class="card-subsection"><h3>Learner ID card</h3><p class="muted small">Uses the learner’s current school record and existing passport photo, if one is on file. No date of birth or guardian contact details are printed.</p><div class="grid"><label>Class filter<select id="dcClass"><option value="">All classes</option></select></label><label>Find learner<input id="dcLearnerSearch" type="search" placeholder="Name or admission number"></label><label>Learner<select id="dcLearner" required><option value="">Search and select a learner</option></select></label><button class="btn secondary" type="button" id="dcIdCard">GENERATE ID CARD PDF</button></div><div id="dcIdStatus" class="muted small" role="status"></div></div>
+ <div class="card-subsection" id="dcCertificateEditor"><h3>Academic certificate · Draft and issue</h3><p class="muted small">Create a draft first. An authorised school leader must review and issue it. Issued certificates cannot be edited; revoke an incorrect certificate and create a replacement.</p><form id="dcCertificateForm" class="grid"><input type="hidden" name="certificate_id"><label>Certificate title<input name="title" maxlength="120" required placeholder="e.g. Certificate of Achievement"></label><label>Academic year<select name="academic_year_id"><option value="">Not specified</option></select></label><label>Term<select name="term_id"><option value="">Not specified</option></select></label><label style="grid-column:1/-1">Achievement statement<textarea name="achievement_statement" maxlength="1000" rows="3" required placeholder="Enter the specific achievement approved by the school"></textarea></label><div class="actions"><button type="submit" class="btn primary" id="dcCertificateSave">SAVE CERTIFICATE DRAFT</button><button type="button" class="btn secondary" id="dcCertificateCancel" hidden>Cancel edit</button></div></form><div id="dcCertificateMessage" class="muted small" role="status"></div></div>
+ <div class="card-subsection"><div class="section-title"><h3>Academic certificate register</h3><div class="actions"><label>Status<select id="dcCertificateStatus"><option value="">All statuses</option><option value="DRAFT">Draft</option><option value="ISSUED">Issued</option><option value="REVOKED">Revoked</option></select></label><button type="button" class="btn secondary" id="dcCertificateRefresh">REFRESH REGISTER</button></div></div><div id="dcCertificateList" class="table-wrap">Open the Document Centre to load certificates.</div></div>
+ <div class="card-subsection"><h3>Public certificate verification</h3><p class="muted small">A verifier must enter the certificate reference and the learner’s admission number. The verification result does not disclose learner details.</p><a class="btn secondary" href="/certificate-verification.html" target="_blank" rel="noopener">OPEN VERIFICATION PAGE</a></div>
+</section>
 <section id="leavingCertificates" class="nav-managed-section card"><div class="section-title"><h2>School Leaving Certificates</h2><span class="pill">School Administration</span></div><form id="leavingCertificateForm" class="card-subsection"><div class="lc-chooser"><label>1. Grade / Class<select id="lcClass" required><option value="">Select class first</option></select></label><label>2. Search learner<input id="lcSearch" type="search" placeholder="Name or admission number" disabled></label><label>3. Learner<select name="learner_id" required id="lcLearner" disabled><option value="">Select class first</option></select></label><small id="lcSearchStatus">Choose a class first.</small></div><div class="grid"><label>Admission date (if known)<input name="admission_date" type="date"></label><label>Leaving date<input name="leaving_date" type="date" required></label></div><label>Reason for leaving<input name="reason" maxlength="250" placeholder="Transfer / completed studies / other"></label><label>Conduct<input name="conduct" maxlength="250"></label><label>Destination<input name="destination" maxlength="250"></label><label>Headteacher name<input name="headteacher" maxlength="120"></label><label>Remarks<textarea name="remarks" maxlength="250"></textarea></label><button class="btn" type="submit">Issue certificate</button><span id="lcMessage" role="status"></span></form><h3>Issued certificates</h3><button class="btn secondary" id="lcRefresh" type="button">Refresh register</button><div id="lcList" class="table-wrap"></div></section>
 <section id="operations_workspace" class="nav-managed-section card" aria-label="School operations workspace">
 <div id="zelimuOperationsFunctionTabs"
@@ -780,6 +788,7 @@ function applyRoleView(){
   if(nav){nav.querySelectorAll('button[data-target]').forEach(b=>{
     const t=b.dataset.target;
     let allowed=isBursar?t==='pm24_28':true;
+    if(t==='documentCentre') allowed=isAdmin||isLeadership;
     if(['identity','documents','academic','assign','assess','markControl','leadership','userControl'].includes(t)) allowed=isAdmin;
     if(t==='analytics') allowed=isAdmin||isLeadership||isClassTeacher||isSubjectTeacher;
     if(t==='teacherMarking') allowed=isTeacher;
@@ -791,6 +800,8 @@ function applyRoleView(){
     b.classList.toggle('role-hidden',!allowed);
     b.disabled=!allowed;
   });}
+  const certificateEditor=$('dcCertificateEditor');
+  if(certificateEditor)certificateEditor.hidden=!(isAdmin||['HEADTEACHER','DEPUTY_HEADTEACHER'].includes(user.role));
 }
 
 function roleAllowedClasses(classes){if(isAdmin||isLeadership)return classes;const ids=new Set([...(state.teacherAssignments||[]),...(state.classTeacherAssignments||[])].map(x=>String(x.class_id)));return classes.filter(x=>ids.has(String(x.id)));}
@@ -912,7 +923,7 @@ window.zelimuOpenLearnerProfile=id=>{
 
 function safeOn(id,event,handler){const el=$(id);if(el)el.addEventListener(event,handler);return el;}
 function setBusy(btn,busy,text){if(!btn)return;btn.disabled=busy;if(busy){btn.dataset.oldText=btn.textContent;btn.textContent=text||'Working…';}else if(btn.dataset.oldText){btn.textContent=btn.dataset.oldText;delete btn.dataset.oldText;}}
-const MANAGED_SECTIONS=['feeStructurePrint','leavingCertificates','operations_workspace','biometrics','pm24_workspace','teacherMarking','identity','parents','documents','announcements','billing','resources','academic','classLists','people','zelimuAdmissionsWorkspaceV2','userControl','assign','assess','gradingSystems','markControl','publishResults','results','merit','analytics','leadership','reports','resultsCentre'];
+const MANAGED_SECTIONS=['feeStructurePrint','documentCentre','leavingCertificates','operations_workspace','biometrics','pm24_workspace','teacherMarking','identity','parents','documents','announcements','billing','resources','academic','classLists','people','zelimuAdmissionsWorkspaceV2','userControl','assign','assess','gradingSystems','markControl','publishResults','results','merit','analytics','leadership','reports','resultsCentre'];
 function showSection(id){
   document.getElementById('zelimuAdmissionsWorkspaceV2')?.classList.remove('nav-active');
   // The 24-module navigation has its own controller (openPM24). Never let
@@ -3032,6 +3043,7 @@ async function renderAuditModule(){const d=await api(`/api/operations/${sid}/aud
 document.querySelectorAll('#navTabs button[data-target^="pm24_"]').forEach(b=>b.addEventListener('click',()=>openPM24(Number(b.dataset.target.split('_')[1]))));
 document.querySelectorAll('.pm-workflow-link[data-jump]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.jump;showSection(id);setTimeout(()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}),40);}));
 wireAllCore();load().catch(e=>{console.error('Dashboard load error:',e);document.body.insertAdjacentHTML('afterbegin',`<div class="notice" style="margin:10px">Dashboard error: ${e.message}</div>`);});
+window.zelimuPortalContext={api,state,user};
 })();</script><footer class="pm-site-footer"><strong>ZELIMU CBC</strong><span>Secure School Management Platform</span><span id="siteContactEmail">School contact email</span></footer>
 <script id="zelimu-module-discovery">
 (function(){
@@ -3094,10 +3106,72 @@ document.querySelectorAll('#navTabs button[data-operations]').forEach(b=>b.addEv
 </script>
 <script id="zelimu-documents-ui">
 (function(){
+const {api,state,user}=window.zelimuPortalContext||{};
+if(!api||!state||!user)return;
 const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-async function openPdf(url){try{const token=localStorage.getItem('token')||sessionStorage.getItem('token')||localStorage.getItem('pm_token');const r=await fetch(url,{headers:{Authorization:'Bearer '+token}});if(!r.ok){let j=await r.json().catch(()=>({}));throw Error(j.error||'PDF generation failed')}const blob=await r.blob();const u=URL.createObjectURL(blob);window.open(u,'_blank');setTimeout(()=>URL.revokeObjectURL(u),60000)}catch(e){alert(e.message)}}
+async function openPdf(url){const popup=window.open('about:blank','_blank');if(!popup)throw Error('Allow pop-ups to open the generated PDF.');try{const token=localStorage.getItem('token')||sessionStorage.getItem('token')||localStorage.getItem('pm_token');const r=await fetch(url,{headers:{Authorization:'Bearer '+token}});if(!r.ok){let j=await r.json().catch(()=>({}));throw Error(j.error||'PDF generation failed')}const blob=await r.blob();const u=URL.createObjectURL(blob);popup.location.href=u;setTimeout(()=>URL.revokeObjectURL(u),60000)}catch(error){popup.close();throw error}}
 async function fees(){const id=state.schoolId,el=$('feeStructureList');el.textContent='Loading…';try{const d=await api(`/api/finance/${id}/overview`);el.innerHTML='<table><thead><tr><th>Fee item</th><th>Class</th><th>Academic year</th><th>Amount</th><th>Status</th><th>Printable information</th><th>PDF</th></tr></thead><tbody>'+(d.structures||[]).map(f=>`<tr><td>${esc(f.name)}</td><td>${esc([f.class_name,f.stream].filter(Boolean).join(' ')||'Not specified')}</td><td>${esc(f.year_label||'—')}</td><td>KES ${Number(f.amount).toLocaleString('en-KE',{minimumFractionDigits:2,maximumFractionDigits:2})}</td><td>${f.is_active?'Active':'Archived'}</td><td>${esc(f.print_notes||'—')}</td><td><button class="btn secondary" data-fee="${esc(f.id)}">Generate PDF</button></td></tr>`).join('')+'</tbody></table>';if(!d.structures?.length)el.textContent='No fee structures yet. Create one in School Fees & Receipts.'}catch(e){el.textContent=e.message}}
 async function certificates(){const id=state.schoolId,el=$('lcList');el.textContent='Loading…';try{const d=await api(`/api/school-documents/${id}/leaving-certificates`);const fin={learners:state.learners||[]};zelimuLCFilter();el.innerHTML='<table><thead><tr><th>Certificate</th><th>Learner</th><th>Leaving date</th><th>PDF</th></tr></thead><tbody>'+d.map(r=>`<tr><td>${esc(r.data.certificate_number)}</td><td>${esc([r.first_name,r.middle_name,r.last_name].filter(Boolean).join(' '))}</td><td>${esc(r.data.leaving_date)}</td><td><button class="btn secondary" data-certificate="${esc(r.id)}">Open PDF</button></td></tr>`).join('')+'</tbody></table>';if(!d.length)el.textContent='No certificates issued yet.'}catch(e){el.textContent=e.message}}
+const dcRoleCanDraft=['SCHOOL_ADMIN','ADMIN','HEADTEACHER','DEPUTY_HEADTEACHER'].includes(user.role);
+const dcRoleCanIssue=['SCHOOL_ADMIN','ADMIN','HEADTEACHER'].includes(user.role);
+function dcLearnerFilter(){
+ const classSelect=$('dcClass'),search=$('dcLearnerSearch'),learnerSelect=$('dcLearner');
+ if(!classSelect||!search||!learnerSelect)return;
+ const classes=Array.isArray(state.classes)?state.classes:[];
+ const learners=Array.isArray(state.learners)?state.learners:[];
+ const className=cl=>[cl.name||cl.class_name||cl.level_name||'Class',cl.stream||''].filter(Boolean).join(' ');
+ const previousClass=classSelect.value;
+ classSelect.replaceChildren(new Option('All classes',''),...classes.filter(cl=>cl.id).map(cl=>new Option(className(cl),cl.id)));
+ if(classes.some(cl=>String(cl.id)===previousClass))classSelect.value=previousClass;
+ const classId=classSelect.value,query=search.value.trim().toLocaleLowerCase();
+ const matches=learners.filter(l=>l.is_active!==false&&String(l.status||'ACTIVE').toUpperCase()!=='INACTIVE')
+  .filter(l=>!classId||String(l.enrollment_class_id||l.class_id||'')===classId)
+  .filter(l=>!query||[l.first_name,l.middle_name,l.last_name,l.admission_no].some(v=>String(v||'').toLocaleLowerCase().includes(query)));
+ const previous=learnerSelect.value;
+ learnerSelect.replaceChildren(new Option('Select learner',''),...matches.slice(0,100).map(l=>new Option(`${[l.first_name,l.middle_name,l.last_name].filter(Boolean).join(' ')} (${l.admission_no||'—'})`,l.id)));
+ if(matches.some(l=>String(l.id)===previous))learnerSelect.value=previous;
+ if(matches.length>100)learnerSelect.setAttribute('aria-label',`${matches.length} matches; narrow by class or search`);
+}
+function dcTermRows(){
+ const configured=state.terms||{};
+ return Array.isArray(configured)?configured:Object.entries(configured).flatMap(([yearId,rows])=>(Array.isArray(rows)?rows:[]).map(term=>({...term,academic_year_id:term.academic_year_id||yearId})));
+}
+async function dcUpdateTerms(){
+ const form=$('dcCertificateForm'),yearId=form?.elements.namedItem('academic_year_id').value||'';
+ const termSelect=form?.elements.namedItem('term_id');if(!termSelect)return;
+ if(yearId&&!state.terms[yearId]){
+  try{const response=await api(`/api/school/${encodeURIComponent(state.schoolId)}/terms/${encodeURIComponent(yearId)}`);state.terms[yearId]=Array.isArray(response)?response:(Array.isArray(response?.terms)?response.terms:[]);}
+  catch(error){$('dcCertificateMessage').textContent=`Unable to load terms for this academic year: ${error.message}`;}
+ }
+ const previous=termSelect.value,terms=dcTermRows().filter(term=>!yearId||String(term.academic_year_id||'')===yearId);
+ termSelect.replaceChildren(new Option('Not specified',''),...terms.map(term=>new Option(term.name||term.term_name||`Term ${term.term_no||''}`,term.id)));
+ if(terms.some(term=>String(term.id)===previous))termSelect.value=previous;
+}
+function dcResetCertificateForm(){
+ const form=$('dcCertificateForm');form.reset();form.elements.namedItem('certificate_id').value='';
+ $('dcCertificateSave').textContent='SAVE CERTIFICATE DRAFT';$('dcCertificateCancel').hidden=true;dcUpdateTerms();
+}
+async function dcLoadCertificates(){
+ const list=$('dcCertificateList'),status=$('dcCertificateStatus').value;list.innerHTML='<div class="notice">Loading certificate register…</div>';
+ try{
+  const rows=await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates${status?'?status='+encodeURIComponent(status):''}`);
+  list.innerHTML=`<table><thead><tr><th>Reference</th><th>Learner</th><th>Certificate</th><th>Academic context</th><th>Status</th><th>Actions</th></tr></thead><tbody>${rows.map(row=>{
+   const learner=[row.first_name,row.middle_name,row.last_name].filter(Boolean).join(' ');
+   const context=[row.year_label,row.term_no?`Term ${row.term_no}`:row.term_name].filter(Boolean).join(' · ');
+   const edit=dcRoleCanDraft&&row.status==='DRAFT'?`<button class="btn secondary" data-dc-action="edit" data-id="${esc(row.id)}">EDIT DRAFT</button>`:'';
+   const issue=dcRoleCanIssue&&row.status==='DRAFT'?`<button class="btn primary" data-dc-action="issue" data-id="${esc(row.id)}">ISSUE</button>`:'';
+   const revoke=dcRoleCanIssue&&row.status==='ISSUED'?`<button class="btn danger" data-dc-action="revoke" data-id="${esc(row.id)}">REVOKE</button>`:'';
+   const pdf=row.status!=='DRAFT'?`<button class="btn secondary" data-dc-action="pdf" data-id="${esc(row.id)}">OPEN PDF</button>`:'';
+   return `<tr><td><b>${esc(row.certificate_no)}</b><br><small>${esc(row.admission_no||'')}</small></td><td>${esc(learner)}</td><td>${esc(row.title)}<br><small>${esc(row.achievement_statement)}</small></td><td>${esc(context||'—')}</td><td><b>${esc(row.status)}</b>${row.revocation_reason?`<br><small>${esc(row.revocation_reason)}</small>`:''}</td><td><div class="sf-row-actions">${edit}${issue}${revoke}${pdf}</div></td></tr>`;
+  }).join('')||'<tr><td colspan="6">No academic certificates match this filter.</td></tr>'}</tbody></table>`;
+ }catch(error){list.innerHTML=`<div class="notice" role="alert">${esc(error.message)}</div>`;}
+}
+function dcInitialize(){
+ const yearSelect=$('dcCertificateForm')?.elements.namedItem('academic_year_id');
+ if(yearSelect)yearSelect.replaceChildren(new Option('Not specified',''),...(state.years||[]).map(year=>new Option(year.year_label||year.name||'Academic year',year.id)));
+ await dcUpdateTerms();dcLearnerFilter();
+ if(!dcRoleCanDraft)$('dcCertificateEditor').hidden=true;
+}
 function zelimuLCFilter(){
  const cl=$('lcClass'),q=$('lcSearch'),sel=$('lcLearner'),msg=$('lcSearchStatus');
  if(!cl||!q||!sel||!msg)return;
@@ -3128,11 +3202,54 @@ function zelimuLCFilter(){
 $('lcClass')?.addEventListener('change',()=>{$('lcSearch').value='';zelimuLCFilter();});
 let zelimuLCSearchTimer;
 $('lcSearch')?.addEventListener('input',()=>{clearTimeout(zelimuLCSearchTimer);zelimuLCSearchTimer=setTimeout(zelimuLCFilter,160);});
+$('dcClass')?.addEventListener('change',dcLearnerFilter);$('dcLearnerSearch')?.addEventListener('input',dcLearnerFilter);
+$('dcCertificateForm')?.elements.namedItem('academic_year_id')?.addEventListener('change',()=>dcUpdateTerms());
+$('dcCertificateCancel')?.addEventListener('click',dcResetCertificateForm);
+$('dcCertificateForm')?.addEventListener('submit',async event=>{
+ event.preventDefault();const form=event.currentTarget,button=$('dcCertificateSave'),message=$('dcCertificateMessage'),learnerId=$('dcLearner').value;
+ if(!learnerId){message.textContent='Select a learner before saving the certificate draft.';return;}
+ const values=Object.fromEntries(new FormData(form)),id=values.certificate_id;
+ const payload={learner_id:learnerId,title:values.title,achievement_statement:values.achievement_statement,academic_year_id:values.academic_year_id||null,term_id:values.term_id||null};
+ button.disabled=true;message.textContent=id?'Saving draft changes…':'Saving certificate draft…';
+ try{await api(id?`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates/${encodeURIComponent(id)}`:`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates`,{method:id?'PATCH':'POST',body:payload});message.textContent=id?'Draft updated.':'Certificate draft saved.';dcResetCertificateForm();await dcLoadCertificates();}
+ catch(error){message.textContent=error.message;}finally{button.disabled=false;}
+});
+$('dcIdCard')?.addEventListener('click',async event=>{
+ const learnerId=$('dcLearner').value,status=$('dcIdStatus'),button=event.currentTarget;
+ if(!learnerId){status.textContent='Select a learner first.';return;}
+ button.disabled=true;status.textContent='Generating learner ID card…';
+ try{await openPdf(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/learners/${encodeURIComponent(learnerId)}/id-card.pdf`);status.textContent='ID card PDF generated.';}
+ catch(error){status.textContent=error.message;}finally{button.disabled=false;}
+});
+$('dcCertificateList')?.addEventListener('click',async event=>{
+ const button=event.target.closest('button[data-dc-action]');if(!button)return;
+ const rowId=button.dataset.id,action=button.dataset.dcAction;
+ let rows,row;
+ try{rows=await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates`);row=rows.find(item=>String(item.id)===String(rowId));}
+ catch(error){alert(error.message);return;}
+ if(!row)return;
+ if(action==='edit'){
+  const form=$('dcCertificateForm');form.elements.namedItem('certificate_id').value=row.id;form.elements.namedItem('title').value=row.title;form.elements.namedItem('achievement_statement').value=row.achievement_statement;form.elements.namedItem('academic_year_id').value=row.academic_year_id||'';await dcUpdateTerms();form.elements.namedItem('term_id').value=row.term_id||'';
+  const classId=String(state.learners.find(item=>String(item.id)===String(row.learner_id))?.class_id||'');if(classId)$('dcClass').value=classId;
+  const learner=state.learners.find(item=>String(item.id)===String(row.learner_id));$('dcLearnerSearch').value=learner?[learner.first_name,learner.last_name,learner.admission_no].filter(Boolean).join(' '):'';
+  dcLearnerFilter();$('dcLearner').value=row.learner_id;$('dcCertificateSave').textContent='SAVE DRAFT CHANGES';$('dcCertificateCancel').hidden=false;form.scrollIntoView({behavior:'smooth',block:'center'});return;
+ }
+ if(action==='issue'){
+  if(!confirm(`Issue ${row.certificate_no} for ${[row.first_name,row.last_name].filter(Boolean).join(' ')}? Check the learner, title and achievement statement first.`))return;
+  button.disabled=true;try{await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates/${encodeURIComponent(rowId)}/issue`,{method:'POST',body:{}});await dcLoadCertificates();}catch(error){alert(error.message);}finally{button.disabled=false;}return;
+ }
+ if(action==='revoke'){
+  const reason=prompt(`Revoke certificate ${row.certificate_no}. Enter the reason:`);if(reason===null)return;if(reason.trim().length<4){alert('Enter a revocation reason of at least four characters.');return;}
+  button.disabled=true;try{await api(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates/${encodeURIComponent(rowId)}/revoke`,{method:'POST',body:{reason:reason.trim()}});await dcLoadCertificates();}catch(error){alert(error.message);}finally{button.disabled=false;}return;
+ }
+ if(action==='pdf')try{await openPdf(`/api/school-certificates/${encodeURIComponent(state.schoolId)}/academic-certificates/${encodeURIComponent(rowId)}/pdf`);}catch(error){alert(error.message);}
+});
+$('dcCertificateRefresh')?.addEventListener('click',dcLoadCertificates);$('dcCertificateStatus')?.addEventListener('change',dcLoadCertificates);
 $('feeStructureReload')?.addEventListener('click',fees);$('lcRefresh')?.addEventListener('click',certificates);
 $('feeStructureList')?.addEventListener('click',e=>{const b=e.target.closest('[data-fee]');if(b)openPdf(`/api/school-documents/${state.schoolId}/fee-structures/${b.dataset.fee}/pdf`)});
-$('lcList')?.addEventListener('click',e=>{const b=e.target.closest('[data-certificate]');if(b)openPdf(`/api/school-documents/${state.schoolId}/leaving-certificates/${b.dataset.certificate}/pdf`)});
+$('lcList')?.addEventListener('click',e=>{const b=e.target.closest('[data-certificate]');if(b)openPdf(`/api/school-documents/${state.schoolId}/leaving-certificates/${b.dataset.certificate}/pdf`).catch(error=>alert(error.message))});
 $('leavingCertificateForm')?.addEventListener('submit',async e=>{e.preventDefault();$('lcMessage').textContent='Issuing…';try{await api(`/api/school-documents/${state.schoolId}/leaving-certificates`,{method:'POST',body:Object.fromEntries(new FormData(e.target))});$('lcMessage').textContent='Certificate issued and saved.';e.target.reset();await certificates()}catch(x){$('lcMessage').textContent=x.message}});
-document.querySelectorAll('#navTabs button[data-target="feeStructurePrint"],#navTabs button[data-target="leavingCertificates"]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.target==='feeStructurePrint')fees();else certificates()}));
+document.querySelectorAll('#navTabs button[data-target="feeStructurePrint"],#navTabs button[data-target="leavingCertificates"],#navTabs button[data-target="documentCentre"]').forEach(b=>b.addEventListener('click',()=>{if(b.dataset.target==='feeStructurePrint')fees();else if(b.dataset.target==='leavingCertificates')certificates();else{dcInitialize().then(dcLoadCertificates).catch(error=>{$('dcCertificateList').textContent=error.message;});}}));
 })();
 </script>
 

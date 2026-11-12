@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Academic Certificate Verification · ZELIMU CBC</title>
+  <style>
+    :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#172b45;background:#f3f6fa}
+    body{margin:0;padding:24px}.card{max-width:620px;margin:6vh auto;background:#fff;border:1px solid #dbe4ef;border-radius:16px;padding:24px;box-shadow:0 12px 36px #17365d12}
+    h1{font-size:1.55rem;margin:0 0 8px;color:#17365d}p{line-height:1.55;color:#52647a}
+    form{display:grid;gap:14px;margin-top:22px}label{display:grid;gap:6px;font-weight:650}
+    input{font:inherit;padding:12px;border:1px solid #cbd5e1;border-radius:8px}button{font:inherit;font-weight:700;padding:12px;border:0;border-radius:8px;background:#17365d;color:#fff;cursor:pointer}
+    button:disabled{opacity:.6;cursor:wait}.result{margin-top:20px;padding:16px;border-radius:10px;display:none}
+    .valid{display:block;background:#ecfdf3;border:1px solid #86efac;color:#166534}.invalid{display:block;background:#fff1f2;border:1px solid #fda4af;color:#9f1239}
+    .muted{font-size:.9rem;color:#64748b}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Academic Certificate Verification</h1>
+    <p>Enter the certificate reference and the learner admission number printed on the certificate. This check does not reveal the learner’s personal details.</p>
+    <form id="verifyForm">
+      <label>Certificate reference<input name="certificate_no" required autocomplete="off" placeholder="ZAC-2026-…"></label>
+      <label>Learner admission number<input name="admission_no" required autocomplete="off"></label>
+      <button type="submit">VERIFY CERTIFICATE</button>
+    </form>
+    <div id="verifyResult" class="result" role="status" aria-live="polite"></div>
+    <p class="muted">For assistance, contact the issuing school directly.</p>
+  </main>
+  <script>
+    const form=document.getElementById('verifyForm'),result=document.getElementById('verifyResult'),button=form.querySelector('button');
+    const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    const params=new URLSearchParams(location.search);
+    if(params.has('certificate_no'))form.elements.certificate_no.value=params.get('certificate_no');
+    if(params.has('admission_no'))form.elements.admission_no.value=params.get('admission_no');
+    form.addEventListener('submit',async event=>{
+      event.preventDefault();button.disabled=true;result.className='result';result.textContent='Checking the issuing school register…';result.style.display='block';
+      const query=new URLSearchParams(Object.fromEntries(new FormData(form)));
+      try{
+        const response=await fetch(`/api/school-certificates/verify?${query}`,{cache:'no-store'});
+        const data=await response.json();
+        if(!response.ok)throw new Error(data.error||'Certificate verification is unavailable.');
+        result.className=`result ${data.valid?'valid':'invalid'}`;
+        result.innerHTML=`<strong>${data.valid?'Certificate is valid':'Certificate has been revoked'}</strong><br>${escapeHtml(data.school_name)}<br>${escapeHtml(data.title)}<br>Issued: ${escapeHtml(String(data.issued_on||'').slice(0,10))}<br>Reference: ${escapeHtml(data.certificate_no)}`;
+      }catch(error){result.className='result invalid';result.textContent=error.message;}
+      finally{button.disabled=false;}
+    });
+  </script>
+</body>
+</html>

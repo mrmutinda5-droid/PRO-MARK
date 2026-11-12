@@ -24,6 +24,7 @@ app.use("/api/communications",require("./routes/communications"));
 app.use("/api/billing",require("./routes/billing"));
 app.use("/api/finance",require("./routes/finance"));
 app.use("/api/school-documents",require("./routes/school-documents"));
+app.use("/api/school-certificates",require("./routes/school-certificates"));
 app.use("/api/operations",require("./routes/operations"));
 app.use("/api/biometrics",require("./routes/biometrics"));
 app.use("/api/timetable-generator",require("./routes/timetable-generator"));
