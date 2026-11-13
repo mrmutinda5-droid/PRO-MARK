@@ -2,50 +2,98 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Verify learner ID card</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Verify Official School ID Card — ZELIMU CBC</title>
+  <link rel="stylesheet" href="/css/app.css">
   <style>
-    :root{font-family:Arial,sans-serif;color:#14243a;background:#f2f5f8}
-    body{margin:0;min-height:100vh;display:grid;place-items:center;padding:20px;box-sizing:border-box}
-    main{width:min(100%,520px);box-sizing:border-box;padding:28px;background:#fff;border:1px solid #dce3eb;border-radius:14px;box-shadow:0 12px 35px #18304a12}
-    h1{margin-top:0;font-size:1.55rem}.muted{color:#607086;line-height:1.5}
-    label{display:block;margin:22px 0 8px;font-weight:700}
-    input{box-sizing:border-box;width:100%;padding:12px;border:1px solid #bac7d5;border-radius:8px;font-size:1rem}
-    button{margin-top:14px;padding:12px 16px;border:0;border-radius:8px;background:#17365d;color:#fff;font-weight:700;cursor:pointer}
-    #result{margin-top:20px;padding:14px;border-radius:8px;background:#f2f5f8;line-height:1.6}
-    .valid{color:#17643a}.invalid{color:#9a302d}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#eef3f1;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#12212f;padding:18px}
+    .verify-card{width:min(620px,100%);background:#fff;border:1px solid #d7e2dd;border-radius:16px;padding:26px;box-shadow:0 14px 34px rgba(15,34,56,.08)}
+    .brand{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid #e6ece9;padding-bottom:14px;margin-bottom:18px}
+    .brand strong{color:#0f5132;font-size:17px}
+    .status{display:inline-flex;align-items:center;padding:5px 12px;border-radius:999px;font-weight:700;font-size:12px;letter-spacing:.04em}
+    .status.ok{background:#e6f6ec;color:#0f5132;border:1px solid #9fd4b2}
+    .status.warn{background:#fff4db;color:#854d0e;border:1px solid #f4d06f}
+    .status.bad{background:#fdeaea;color:#991b1b;border:1px solid #f5b4b4}
+    .grid{display:grid;grid-template-columns:170px 1fr;gap:10px 14px;font-size:14px}
+    .grid dt{color:#5b6b7a;font-weight:600}
+    .grid dd{margin:0;color:#12212f;font-weight:600}
+    @media(max-width:520px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <main>
-    <h1>Learner ID card verification</h1>
-    <p class="muted">Check whether a school-issued card is current. This page does not reveal the learner's personal details.</p>
-    <form id="verifyForm">
-      <label for="token">Verification token</label>
-      <input id="token" name="token" autocomplete="off" required>
-      <button type="submit">VERIFY CARD</button>
-    </form>
-    <div id="result" role="status" aria-live="polite" hidden></div>
+  <main class="verify-card">
+    <div class="brand">
+      <div><strong>ZELIMU CBC</strong><div style="font-size:12px;color:#5b6b7a">Official ID Card Verification</div></div>
+      <span id="badge" class="status">Checking...</span>
+    </div>
+    <h1 id="headline" style="font-size:20px;margin:0 0 8px">Verifying card...</h1>
+    <p id="message" style="color:#516271;margin:0 0 18px;font-size:14px">Please wait while the card record is verified.</p>
+    <dl id="details" class="grid" hidden></dl>
   </main>
   <script>
-    const form=document.querySelector('#verifyForm');
-    const tokenInput=document.querySelector('#token');
-    const result=document.querySelector('#result');
-    tokenInput.value=new URLSearchParams(location.search).get('token')||'';
-    form.addEventListener('submit',async event=>{
-      event.preventDefault();
-      result.hidden=false;result.textContent='Checking card status…';result.className='';
+    const params = new URLSearchParams(location.search);
+    const token = (params.get('token') || '').trim();
+    const badge = document.getElementById('badge');
+    const headline = document.getElementById('headline');
+    const message = document.getElementById('message');
+    const details = document.getElementById('details');
+    function row(label, value){
+      if(!value) return;
+      const dt = document.createElement('dt'); dt.textContent = label;
+      const dd = document.createElement('dd'); dd.textContent = value;
+      details.append(dt, dd);
+    }
+    async function verify(){
+      if(!token){
+        badge.className = 'status bad'; badge.textContent = 'INVALID';
+        headline.textContent = 'Verification token missing';
+        message.textContent = 'Scan the QR code printed on the official school ID card.';
+        return;
+      }
       try{
-        const response=await fetch(`/api/school-certificates/verify-id?token=${encodeURIComponent(tokenInput.value.trim())}`,{cache:'no-store'});
-        const body=await response.json();
-        if(!response.ok)throw Error(body.error||'Unable to verify this card.');
-        result.className=body.valid?'valid':'invalid';
-        result.textContent=body.valid
-          ?`Valid active card · ${body.school_name} · ${body.card_reference}`
-          :`Card is ${String(body.status||'INVALID').toLowerCase()}. Contact the issuing school.`;
-      }catch(error){result.className='invalid';result.textContent=error.message;}
-    });
-    if(tokenInput.value)form.requestSubmit();
+        const res = await fetch('/api/school-certificates/verify-id?token=' + encodeURIComponent(token));
+        const data = await res.json().catch(() => ({}));
+        if(!res.ok || !data.card){
+          badge.className = 'status bad'; badge.textContent = 'NOT VERIFIED';
+          headline.textContent = 'ID card not found';
+          message.textContent = data.error || 'No official ID card matches this verification token.';
+          return;
+        }
+        const c = data.card;
+        const effectiveStatus = c.status || data.status;
+        const ok = effectiveStatus === 'ACTIVE';
+        badge.className = 'status ' + (ok ? 'ok' : (effectiveStatus === 'REPLACED' || effectiveStatus === 'EXPIRED' ? 'warn' : 'bad'));
+        badge.textContent = effectiveStatus;
+        headline.textContent = ok
+          ? ('Valid Official ' + (c.card_type === 'STAFF' ? 'Staff' : 'Learner') + ' ID Card')
+          : effectiveStatus === 'EXPIRED'
+            ? 'Official ID Card Expired'
+            : ('Official ID Card ' + effectiveStatus);
+        message.textContent = ok
+          ? 'This official school ID card is active and issued to the holder below.'
+          : effectiveStatus === 'EXPIRED'
+            ? 'This card has passed its validity period and must be renewed by the school.'
+            : (c.revocation_reason ? ('Status reason: ' + c.revocation_reason) : 'This card is no longer active.');
+        row('Card Type', c.card_type === 'STAFF' ? 'Staff / Teacher ID' : 'Learner ID');
+        row('School', c.school_name || data.school_name || 'School');
+        row('Holder', c.holder_name || c.learner_name || '-');
+        row(c.card_type === 'STAFF' ? 'Staff No.' : 'Admission No.', c.staff_no || c.admission_no || 'Not assigned');
+        if (c.assessment_no) row('UPI / Assessment No.', c.assessment_no);
+        row(c.card_type === 'STAFF' ? 'Role / Department' : 'Class', c.department || c.class_name || '-');
+        if (c.residence_type) row('Status / House', c.residence_type);
+        row('Academic Year', c.year_label || '-');
+        if (c.valid_from || c.valid_until) row('Validity', [c.valid_from || '-', c.valid_until || '-'].join(' to '));
+        row('Card Reference', c.card_reference || data.card_reference);
+        row('Issued On', c.issued_at ? new Date(c.issued_at).toLocaleDateString() : '-');
+        if (c.school_phone) row('School Office', c.school_phone);
+        details.hidden = false;
+      }catch(_){
+        badge.className = 'status bad'; badge.textContent = 'ERROR';
+        headline.textContent = 'Verification unavailable';
+        message.textContent = 'Unable to reach the verification service right now.';
+      }
+    }
+    verify();
   </script>
 </body>
 </html>

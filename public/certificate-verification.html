@@ -2,61 +2,96 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Academic Certificate Verification · ZELIMU CBC</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Verify Official School Certificate — ZELIMU CBC</title>
+  <link rel="stylesheet" href="/css/app.css">
   <style>
-    :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#172b45;background:#f3f6fa}
-    body{margin:0;padding:24px}.card{max-width:620px;margin:6vh auto;background:#fff;border:1px solid #dbe4ef;border-radius:16px;padding:24px;box-shadow:0 12px 36px #17365d12}
-    h1{font-size:1.55rem;margin:0 0 8px;color:#17365d}p{line-height:1.55;color:#52647a}
-    form{display:grid;gap:14px;margin-top:22px}label{display:grid;gap:6px;font-weight:650}
-    input{font:inherit;padding:12px;border:1px solid #cbd5e1;border-radius:8px}button{font:inherit;font-weight:700;padding:12px;border:0;border-radius:8px;background:#17365d;color:#fff;cursor:pointer}
-    button:disabled{opacity:.6;cursor:wait}.result{margin-top:20px;padding:16px;border-radius:10px;display:none}
-    .valid{display:block;background:#ecfdf3;border:1px solid #86efac;color:#166534}.invalid{display:block;background:#fff1f2;border:1px solid #fda4af;color:#9f1239}
-    .muted{font-size:.9rem;color:#64748b}
+    body{margin:0;min-height:100vh;display:grid;place-items:center;background:#eef3f1;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#12212f;padding:18px}
+    .verify-card{width:min(640px,100%);background:#fff;border:1px solid #d7e2dd;border-radius:16px;padding:26px;box-shadow:0 14px 34px rgba(15,34,56,.08)}
+    .brand{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid #e6ece9;padding-bottom:14px;margin-bottom:18px}
+    .brand strong{color:#0f5132;font-size:17px}
+    .status{display:inline-flex;align-items:center;padding:5px 12px;border-radius:999px;font-weight:700;font-size:12px;letter-spacing:.04em}
+    .status.ok{background:#e6f6ec;color:#0f5132;border:1px solid #9fd4b2}
+    .status.bad{background:#fdeaea;color:#991b1b;border:1px solid #f5b4b4}
+    .grid{display:grid;grid-template-columns:180px 1fr;gap:10px 14px;font-size:14px}
+    .grid dt{color:#5b6b7a;font-weight:600}
+    .grid dd{margin:0;color:#12212f;font-weight:600}
+    @media(max-width:520px){.grid{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <main class="card">
-    <h1>Academic Certificate Verification</h1>
-    <p>Enter the certificate reference and learner admission number, or open this page by scanning the certificate QR code. Verification does not reveal the learner’s personal details.</p>
-    <form id="verifyForm">
-      <label>Certificate reference<input name="certificate_no" required autocomplete="off" placeholder="ZAC-2026-…"></label>
-      <label>Learner admission number<input name="admission_no" required autocomplete="off"></label>
-      <button type="submit">VERIFY CERTIFICATE</button>
-    </form>
-    <div id="verifyResult" class="result" role="status" aria-live="polite"></div>
-    <p class="muted">For assistance, contact the issuing school directly.</p>
+  <main class="verify-card">
+    <div class="brand">
+      <div><strong>ZELIMU CBC</strong><div style="font-size:12px;color:#5b6b7a">Official Certificate Verification</div></div>
+      <span id="badge" class="status">Checking...</span>
+    </div>
+    <h1 id="headline" style="font-size:20px;margin:0 0 8px">Verifying certificate...</h1>
+    <p id="message" style="color:#516271;margin:0 0 18px;font-size:14px">Please wait while the certificate record is checked.</p>
+    <dl id="details" class="grid" hidden></dl>
   </main>
   <script>
-    const form=document.getElementById('verifyForm'),result=document.getElementById('verifyResult'),button=form.querySelector('button');
-    const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-    const params=new URLSearchParams(location.search);
-    if(params.has('certificate_no'))form.elements.certificate_no.value=params.get('certificate_no');
-    if(params.has('admission_no'))form.elements.admission_no.value=params.get('admission_no');
-    async function showResult(url){
-      button.disabled=true;result.className='result';result.textContent='Checking the issuing school register…';result.style.display='block';
+    const params = new URLSearchParams(location.search);
+    const token = (params.get('token') || '').trim();
+    const badge = document.getElementById('badge');
+    const headline = document.getElementById('headline');
+    const message = document.getElementById('message');
+    const details = document.getElementById('details');
+    function row(label, value){
+      if(!value) return;
+      const dt = document.createElement('dt'); dt.textContent = label;
+      const dd = document.createElement('dd'); dd.textContent = value;
+      details.append(dt, dd);
+    }
+    async function verify(){
+      if(!token){
+        badge.className = 'status bad'; badge.textContent = 'INVALID';
+        headline.textContent = 'Verification token missing';
+        message.textContent = 'Scan the QR code printed on the official school certificate.';
+        return;
+      }
       try{
-        const response=await fetch(url,{cache:'no-store'});
-        const data=await response.json();
-        if(!response.ok)throw new Error(data.error||'Certificate verification is unavailable.');
-        result.className=`result ${data.valid?'valid':'invalid'}`;
-        if(!data.valid&&data.status==='INVALID'){
-          result.textContent='No matching issued certificate was found.';
-        }else{
-          result.innerHTML=`<strong>${data.valid?'Certificate is valid':'Certificate has been revoked'}</strong><br>${escapeHtml(data.school_name)}<br>${escapeHtml(data.title)}<br>Issued: ${escapeHtml(String(data.issued_on||'').slice(0,10))}<br>Reference: ${escapeHtml(data.certificate_no)}`;
+        const res = await fetch('/api/school-certificates/verify-token?token=' + encodeURIComponent(token));
+        const data = await res.json().catch(() => ({}));
+        if(!res.ok || !data.certificate){
+          badge.className = 'status bad'; badge.textContent = 'NOT VERIFIED';
+          headline.textContent = 'Certificate not found';
+          message.textContent = data.error || 'No issued school certificate matches this verification token.';
+          return;
         }
-      }catch(error){result.className='result invalid';result.textContent=error.message;}
-      finally{button.disabled=false;}
+        const c = data.certificate;
+        const ok = c.status === 'ISSUED';
+        badge.className = 'status ' + (ok ? 'ok' : 'bad');
+        badge.textContent = c.status;
+        headline.textContent = ok ? 'Authentic School Certificate' : ('Certificate ' + c.status);
+        message.textContent = ok
+          ? 'This certificate was officially issued by the school below.'
+          : (c.revocation_reason ? ('Revocation reason: ' + c.revocation_reason) : 'This certificate is no longer valid.');
+        row('School', c.school_name || data.school_name || 'School');
+        row('Category', c.category_label || c.category || 'Academic');
+        row('Certificate Title', c.title);
+        row('Recipient', c.learner_name || '-');
+        row('Admission No.', c.admission_no || 'Not assigned');
+        if (c.assessment_no) row('UPI / Assessment No.', c.assessment_no);
+        if (c.subject_or_activity) row('Subject / Activity', c.subject_or_activity);
+        if (c.leaving_details) {
+          if (c.leaving_details.last_class) row('Last Class Attended', c.leaving_details.last_class);
+          if (c.leaving_details.admission_date) row('Date Admitted', c.leaving_details.admission_date);
+          if (c.leaving_details.leaving_date) row('Date Left', c.leaving_details.leaving_date);
+          if (c.leaving_details.conduct_remark) row('Conduct', c.leaving_details.conduct_remark);
+          if (c.leaving_details.kcpe_or_kpsea_index) row('KPSEA / KCPE Index', c.leaving_details.kcpe_or_kpsea_index);
+        }
+        if (c.achievement_date) row('Date', c.achievement_date);
+        if (c.signers && c.signers.length) row('Authorized Signatories', c.signers.join(' • '));
+        row('Certificate No.', c.certificate_no || data.certificate_no);
+        row('Issued On', c.issued_at ? new Date(c.issued_at).toLocaleDateString() : '-');
+        details.hidden = false;
+      }catch(_){
+        badge.className = 'status bad'; badge.textContent = 'ERROR';
+        headline.textContent = 'Verification unavailable';
+        message.textContent = 'Unable to reach the verification service right now.';
+      }
     }
-    form.addEventListener('submit',async event=>{
-      event.preventDefault();
-      const query=new URLSearchParams(Object.fromEntries(new FormData(form)));
-      await showResult(`/api/school-certificates/verify?${query}`);
-    });
-    if(params.has('token')){
-      form.hidden=true;
-      showResult(`/api/school-certificates/verify-token?token=${encodeURIComponent(params.get('token'))}`);
-    }
+    verify();
   </script>
 </body>
 </html>
