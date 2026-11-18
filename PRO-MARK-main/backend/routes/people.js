@@ -677,32 +677,18 @@ router.post('/:schoolId/learners/bulk',schoolBoundary,roles('SCHOOL_ADMIN','ADMI
    const pName = clean(r.parent_name)||clean(r.guardian_name)||null;
    const pPhone = clean(r.parent_phone)||null;
    if (pName || pPhone) {
-     try {
-       const pParts = (pName || 'Parent').split(/\s+/).filter(Boolean);
-       const pFirst = pParts[0] || 'Parent', pLast = pParts.slice(1).join(' ') || 'Guardian';
-       let pg = null;
-       if (pPhone) {
-         pg = (await c.query(`SELECT id FROM parent_guardians WHERE school_id=$1 AND phone=$2 LIMIT 1`, [sid, pPhone])).rows[0];
-       }
-       if (!pg) {
-         pg = (await c.query(`INSERT INTO parent_guardians(school_id, first_name, last_name, phone, relationship) VALUES($1, $2, $3, $4, 'Parent/Guardian') RETURNING id`, [sid, pFirst, pLast, pPhone])).rows[0];
-       }
-       if (pg) {
-         await c.query(`INSERT INTO learner_guardians(learner_id, parent_guardian_id, is_primary) VALUES($1, $2, true) ON CONFLICT DO NOTHING`, [learner.id, pg.id]);
-       }
-     } catch(e) {}
-   }
-   if (pathway) {
-     try {
-       await c.query(
-         `INSERT INTO report_pathway_guidance (
-            school_id, learner_id, academic_year_id, selected_pathway, track_specialisation
-          ) VALUES ($1, $2, $3, $4, $5)
-          ON CONFLICT (school_id, learner_id, academic_year_id)
-          DO UPDATE SET selected_pathway = EXCLUDED.selected_pathway, track_specialisation = EXCLUDED.track_specialisation`,
-         [sid, learner.id, b.academic_year_id, pathway, clean(r.pathway_track) || (pathway === 'STEM' ? 'Pure Sciences' : 'General')]
-       );
-     } catch(e) {}
+    const pParts = (pName || 'Parent').split(/\s+/).filter(Boolean);
+    const pFirst = pParts[0] || 'Parent', pLast = pParts.slice(1).join(' ') || 'Guardian';
+    let pg = null;
+    if (pPhone) {
+     pg = (await c.query(`SELECT id FROM parent_guardians WHERE school_id=$1 AND phone=$2 LIMIT 1`, [sid, pPhone])).rows[0];
+    }
+    if (!pg) {
+     pg = (await c.query(`INSERT INTO parent_guardians(school_id, first_name, last_name, phone, relationship) VALUES($1, $2, $3, $4, 'Parent/Guardian') RETURNING id`, [sid, pFirst, pLast, pPhone])).rows[0];
+    }
+    if (pg) {
+     await c.query(`INSERT INTO learner_guardians(learner_id, parent_guardian_id, is_primary) VALUES($1, $2, true) ON CONFLICT DO NOTHING`, [learner.id, pg.id]);
+    }
    }
   }
   await c.query('COMMIT');
