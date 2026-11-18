@@ -214,8 +214,8 @@ function make(){
  function installHeaderControls(){
   const schoolSelect=$('z7SchoolSelect'), yearSelect=$('z7YearSelect'), termSelect=$('z7TermSelect');
   const schoolSource=$('ownerSchoolSwitch');
-  const yearSources=[$('reportYear'),$('resYear'),$('markYear'),$('anYear'),$('mYear')];
-  const termSources=[$('anTerm'),$('resTerm'),$('markTerm'),$('reportTerm'),$('mTerm')];
+  const yearSources=()=>[$('reportYear'),$('resYear'),$('markYear'),$('anYear'),$('mYear')];
+  const termSources=()=>[$('anTerm'),$('resTerm'),$('markTerm'),$('reportTerm'),$('mTerm')];
   const periodStatus=$('z7PeriodStatus');
   function copyOptions(source,dest,placeholder){
    if(!source||!dest)return;
@@ -237,11 +237,11 @@ function make(){
     const label=document.querySelector('.z7-school-label');if(label)label.hidden=true;
    }
    if(!yearSelect?.dataset.periodTouched)copyOptions(
-    yearSources.find(source=>source&&[...source.options].some(option=>option.value))||yearSources.find(Boolean),
+    yearSources().find(source=>source&&[...source.options].some(option=>option.value))||yearSources().find(Boolean),
     yearSelect
    );
    if(!termSelect?.dataset.periodTouched)copyOptions(
-    termSources.find(source=>source&&[...source.options].some(option=>option.value))||termSources.find(Boolean),
+    termSources().find(source=>source&&[...source.options].some(option=>option.value))||termSources().find(Boolean),
     termSelect
    );
    const account=(()=>{try{return JSON.parse(localStorage.getItem('user')||'{}')}catch{return {}}})();
