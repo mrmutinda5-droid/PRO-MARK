@@ -23,6 +23,8 @@ function isCatAssessment(assessment) {
 }
 
 function assessmentKey(assessment) {
+  const type = normalizeLabel(assessment && assessment.assessment_type);
+  if (type === 'OPENER' || type.startsWith('OPENER ')) return 'EXAM:OPENER';
   const name = normalizeLabel(assessment && assessment.name);
   return `${isCatAssessment(assessment) ? 'CAT' : 'EXAM'}:${name}`;
 }
@@ -73,7 +75,7 @@ function buildExamColumns(assessments, classId) {
     );
     columns.push({
       key,
-      name: String(representative.name || '').trim(),
+      name: key === 'EXAM:OPENER' ? 'Opener' : String(representative.name || '').trim(),
       type: normalizeLabel(representative.assessment_type) ||
         (isCatAssessment(representative) ? 'CAT' : 'EXAM'),
       cat: isCatAssessment(representative),
@@ -172,15 +174,18 @@ function subjectEntries(marks, assessments, classId, subjectId, columns) {
     const raw = mark ? finite(mark.mark) : null;
     const percent = raw === null || maxMark <= 0 ? null : (raw / maxMark) * 100;
     const includeInAverage =
-      !(mark && mark.include_in_term_average === false) &&
-      !(assessment && assessment.include_in_term_average === false);
+      mark && typeof mark.include_in_term_average === 'boolean'
+        ? mark.include_in_term_average
+        : !(assessment && assessment.include_in_term_average === false);
     const includeInMerit = mark && typeof mark.include_in_merit === 'boolean'
       ? mark.include_in_merit
       : !(assessment && assessment.include_in_merit === false);
     return {
       column_key: column.key,
       assessment_id: assessment ? assessment.id : null,
-      name: assessment ? assessment.name : column.name,
+      name: column.key === 'EXAM:OPENER'
+        ? 'Opener'
+        : assessment ? assessment.name : column.name,
       type: normalizeLabel(assessment && assessment.assessment_type) || column.type,
       cat: column.cat,
       max_mark: maxMark,
@@ -258,14 +263,10 @@ function scoreSubject({ entries, profile, inclusionField = 'include_in_term_aver
     };
   }
 
-  const main = available.filter(entry =>
-    !entry.cat && entry.include_in_final !== false
-  );
-  const pool = main.length ? main : available;
   return {
-    average: averageOf(pool.map(entry => entry.percent)),
-    basis: main.length ? 'DEFAULT_MAIN_EXAMS' : 'DEFAULT_ALL_EXAMS',
-    counted_keys: pool.map(entry => entry.column_key)
+    average: averageOf(available.map(entry => entry.percent)),
+    basis: 'INCLUDED_ASSESSMENTS',
+    counted_keys: available.map(entry => entry.column_key)
   };
 }
 

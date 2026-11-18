@@ -222,10 +222,15 @@ async function buildTermReportCore(schoolId, learnerId, yearId, termId) {
            th2.staff_no entered_teacher_staff_no,th2.first_name entered_teacher_first_name,th2.last_name entered_teacher_last_name,
            u2.first_name entered_user_first_name,u2.last_name entered_user_last_name,
            COALESCE((SELECT ac.include_in_term_average FROM assessment_configurations ac
-             WHERE ac.school_id=m.school_id AND ac.assessment_id=m.assessment_id
+             WHERE ac.school_id=m.school_id
+               AND (ac.assessment_id=m.assessment_id OR ac.assessment_id IS NULL)
                AND (ac.subject_id=m.subject_id OR ac.subject_id IS NULL)
-               AND (ac.section_id=$5 OR ac.section_id IS NULL) AND (ac.level_id=$6 OR ac.level_id IS NULL)
-             ORDER BY (ac.subject_id IS NOT NULL) DESC,(ac.level_id IS NOT NULL) DESC,(ac.section_id IS NOT NULL) DESC LIMIT 1),true) include_in_term_average
+               AND (ac.class_id=$7 OR ac.class_id IS NULL)
+               AND (ac.section_id=$5 OR ac.section_id IS NULL)
+               AND (ac.level_id=$6 OR ac.level_id IS NULL)
+             ORDER BY (ac.subject_id IS NOT NULL) DESC,(ac.assessment_id IS NOT NULL) DESC,
+                      (ac.class_id IS NOT NULL) DESC,(ac.level_id IS NOT NULL) DESC,
+                      (ac.section_id IS NOT NULL) DESC LIMIT 1),true) include_in_term_average
     FROM marks m JOIN subjects s ON s.id=m.subject_id
     JOIN assessments a ON a.id=m.assessment_id
     LEFT JOIN LATERAL (
@@ -243,7 +248,7 @@ async function buildTermReportCore(schoolId, learnerId, yearId, termId) {
     LEFT JOIN teachers th2 ON th2.user_id=m.entered_by AND th2.school_id=m.school_id AND th2.is_active=true
     LEFT JOIN users u2 ON u2.id=m.entered_by AND u2.is_active=true
     WHERE m.school_id=$1 AND m.learner_id=$2 AND m.academic_year_id=$3 AND m.term_id=$4
-    ORDER BY s.name,a.assessment_order,a.name`,[schoolId,learnerId,yearId,termId,meta.section_id,meta.level_id]).then(q=>q.rows);
+    ORDER BY s.name,a.assessment_order,a.name`,[schoolId,learnerId,yearId,termId,meta.section_id,meta.level_id,meta.class_id]).then(q=>q.rows);
 
   // Subject-teacher assignments are read live for every report build.  This is
   // intentional: an administrator can assign/reassign a teacher and the very next

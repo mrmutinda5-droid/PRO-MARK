@@ -32,19 +32,19 @@ function assessment(overrides) {
 }
 
 const assessments = [
-  assessment({ id: 'opener-math', name: 'Opener Exam', assessment_type: 'OPENER', subject_id: MATH, assessment_order: 1 }),
-  assessment({ id: 'opener-english', name: 'Opener Exam', assessment_type: 'OPENER', subject_id: ENGLISH, assessment_order: 1 }),
+  assessment({ id: 'opener-math', name: 'Mathematics Opener', assessment_type: 'OPENER', subject_id: MATH, assessment_order: 1 }),
+  assessment({ id: 'opener-english', name: 'English Opener', assessment_type: 'OPENER', subject_id: ENGLISH, assessment_order: 1 }),
   assessment({ id: 'cat1-math', name: 'CAT 1', assessment_type: 'CAT', subject_id: MATH, max_mark: 30, assessment_order: 2, include_in_final: false }),
   assessment({ id: 'cat1-english', name: 'CAT 1', assessment_type: 'CAT', subject_id: ENGLISH, max_mark: 30, assessment_order: 2, include_in_final: false }),
   assessment({ id: 'end-all', name: 'End Term', assessment_type: 'END_TERM', subject_id: null, assessment_order: 3 }),
-  assessment({ id: 'opener-math-b', name: 'Opener Exam', assessment_type: 'OPENER', subject_id: MATH, assessment_order: 1, class_id: CLASS_B }),
+  assessment({ id: 'opener-math-b', name: 'Mathematics Opener', assessment_type: 'OPENER', subject_id: MATH, assessment_order: 1, class_id: CLASS_B }),
   assessment({ id: 'end-all-b', name: 'End Term', assessment_type: 'END_TERM', subject_id: null, assessment_order: 3, class_id: CLASS_B })
 ];
 
 const columns = buildExamColumns(assessments, CLASS_A);
 
 test('exam columns include every configured exam and CAT once', () => {
-  assert.deepEqual(columns.map(column => column.name), ['Opener Exam', 'CAT 1', 'End Term']);
+  assert.deepEqual(columns.map(column => column.name), ['Opener', 'CAT 1', 'End Term']);
   assert.deepEqual(columns.map(column => column.cat), [false, true, false]);
 });
 
@@ -62,7 +62,23 @@ test('subject entries resolve per-subject and class-wide assessments', () => {
   assert.equal(entries[2].percent, 80);
 });
 
-test('default term average uses main exams and ignores CATs', () => {
+test('default term average includes exactly assessments enabled by the admin', () => {
+  const marks = [
+    { learner_id: 'l1', subject_id: MATH, assessment_id: 'opener-math', mark: 50, max_mark: 100 },
+    { learner_id: 'l1', subject_id: MATH, assessment_id: 'cat1-math', mark: 15, max_mark: 30 },
+    { learner_id: 'l1', subject_id: MATH, assessment_id: 'end-all', mark: 80, max_mark: 100 }
+  ];
+  const configuredAssessments = assessments.map(item =>
+    item.id === 'cat1-math' ? { ...item, include_in_term_average: false } : item
+  );
+  const entries = subjectEntries(marks, configuredAssessments, CLASS_A, MATH, columns);
+  const result = scoreSubject({ entries, profile: null });
+  assert.equal(result.average, 65);
+  assert.equal(result.basis, 'INCLUDED_ASSESSMENTS');
+  assert.deepEqual(result.counted_keys, ['EXAM:OPENER', 'EXAM:END TERM']);
+});
+
+test('admin-included CATs contribute to term average even when not final exams', () => {
   const marks = [
     { learner_id: 'l1', subject_id: MATH, assessment_id: 'opener-math', mark: 50, max_mark: 100 },
     { learner_id: 'l1', subject_id: MATH, assessment_id: 'cat1-math', mark: 15, max_mark: 30 },
@@ -70,9 +86,24 @@ test('default term average uses main exams and ignores CATs', () => {
   ];
   const entries = subjectEntries(marks, assessments, CLASS_A, MATH, columns);
   const result = scoreSubject({ entries, profile: null });
-  assert.equal(result.average, 65);
-  assert.equal(result.basis, 'DEFAULT_MAIN_EXAMS');
-  assert.deepEqual(result.counted_keys, ['EXAM:OPENER EXAM', 'EXAM:END TERM']);
+  assert.equal(result.average, 60);
+  assert.equal(result.basis, 'INCLUDED_ASSESSMENTS');
+  assert.deepEqual(result.counted_keys, ['EXAM:OPENER', 'CAT:CAT 1', 'EXAM:END TERM']);
+});
+
+test('mark-specific inclusion overrides broader assessment inclusion', () => {
+  const configuredAssessments = assessments.map(item =>
+    item.id === 'opener-math' ? { ...item, include_in_term_average: false } : item
+  );
+  const entries = subjectEntries([{
+    learner_id: 'l1',
+    subject_id: MATH,
+    assessment_id: 'opener-math',
+    mark: 70,
+    max_mark: 100,
+    include_in_term_average: true
+  }], configuredAssessments, CLASS_A, MATH, columns);
+  assert.equal(scoreSubject({ entries, profile: null }).average, 70);
 });
 
 test('Merit includes marks by include_in_merit without changing term-average eligibility', () => {
@@ -95,7 +126,7 @@ test('Merit includes marks by include_in_merit without changing term-average eli
     inclusionField: 'include_in_merit'
   });
   assert.deepEqual(ranks.get('l1').subjects, [
-    { subject_id: MATH, average: 86, basis: 'DEFAULT_MAIN_EXAMS' }
+    { subject_id: MATH, average: 86, basis: 'INCLUDED_ASSESSMENTS' }
   ]);
   const reportRanks = computeRanks({
     learners: [{ learner_id: 'l1', class_id: CLASS_A }],
@@ -105,7 +136,7 @@ test('Merit includes marks by include_in_merit without changing term-average eli
     classes: [{ id: CLASS_A, name: 'Grade 7' }]
   });
   assert.deepEqual(reportRanks.get('l1').subjects, [
-    { subject_id: ENGLISH, average: 78, basis: 'DEFAULT_MAIN_EXAMS' }
+    { subject_id: ENGLISH, average: 78, basis: 'INCLUDED_ASSESSMENTS' }
   ]);
 });
 
@@ -177,7 +208,7 @@ test('ranks use the same scoring as the report subjects', () => {
   assert.equal(ranks.get('l1').subject_ranks[MATH].total, 2);
 });
 
-test('one learner retains marks entered across multiple subjects', () => {
+test('one learner retains subject marks under a single opener column', () => {
   const ranks = computeRanks({
     learners: [{ learner_id: 'l1', class_id: CLASS_A }],
     marks: [
@@ -193,6 +224,11 @@ test('one learner retains marks entered across multiple subjects', () => {
     [ENGLISH, MATH].sort()
   );
   assert.equal(ranks.get('l1').subjects.length, 2);
+  assert.equal(columns.filter(column => column.key === 'EXAM:OPENER').length, 1);
+  assert.deepEqual(columns.find(column => column.key === 'EXAM:OPENER').ids.slice().sort(), [
+    'opener-english',
+    'opener-math'
+  ]);
 });
 
 test('saved marks remain attached to their subject when assessment setup is scoped elsewhere', () => {
@@ -217,6 +253,6 @@ test('saved marks remain attached to their subject when assessment setup is scop
     classes: [{ id: CLASS_A, name: 'Grade 7' }]
   });
   assert.deepEqual(ranks.get('l1').subjects, [
-    { subject_id: ENGLISH, average: 72, basis: 'DEFAULT_MAIN_EXAMS' }
+    { subject_id: ENGLISH, average: 72, basis: 'INCLUDED_ASSESSMENTS' }
   ]);
 });

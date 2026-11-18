@@ -264,9 +264,14 @@ async function loadMarks(schoolId, yearId, termId, learnerIds) {
             a.name assessment_name,a.assessment_type,a.max_mark,a.weight,a.assessment_order,
             COALESCE((SELECT ac.include_in_term_average
                FROM assessment_configurations ac
-               WHERE ac.school_id=m.school_id AND ac.assessment_id=m.assessment_id
+               WHERE ac.school_id=m.school_id
+                 AND (ac.assessment_id=m.assessment_id OR ac.assessment_id IS NULL)
                  AND (ac.subject_id=m.subject_id OR ac.subject_id IS NULL)
-               ORDER BY (ac.subject_id IS NOT NULL) DESC,(ac.class_id IS NOT NULL) DESC,
+                 AND (ac.class_id=COALESCE(m.class_id,me.class_id,l.class_id) OR ac.class_id IS NULL)
+                 AND (ac.level_id=mc.school_level_id OR ac.level_id IS NULL)
+                 AND (ac.section_id=ml.school_section_id OR ac.section_id IS NULL)
+               ORDER BY (ac.subject_id IS NOT NULL) DESC,(ac.assessment_id IS NOT NULL) DESC,
+                        (ac.class_id IS NOT NULL) DESC,
                         (ac.level_id IS NOT NULL) DESC,(ac.section_id IS NOT NULL) DESC
                LIMIT 1),true) include_in_term_average,
             COALESCE((SELECT ac.include_in_merit
