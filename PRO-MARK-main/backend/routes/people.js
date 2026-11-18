@@ -498,7 +498,7 @@ router.get('/:schoolId/year-registers/:yearId',schoolBoundary,
   const rows=(await db.query(`SELECT e.learner_id AS id,e.class_id,e.academic_year_id,e.status AS enrollment_status,l.first_name,l.middle_name,l.last_name,l.admission_no,l.assessment_no,l.is_active
     FROM learner_enrollments e JOIN learners l ON l.id=e.learner_id AND l.school_id=e.school_id
     WHERE e.school_id=$1 AND e.academic_year_id=$2${scope}
-    ORDER BY l.last_name,l.first_name,l.id`,params)).rows;
+    ORDER BY LOWER(CONCAT_WS(' ',l.first_name,l.middle_name,l.last_name)),l.id`,params)).rows;
   res.setHeader('Cache-Control','no-store');res.json(rows);
  }catch(e){res.status(e.status||500).json({error:e.message||'Year register unavailable'});}
 });
@@ -654,9 +654,9 @@ router.post('/:schoolId/learners/bulk',schoolBoundary,roles('SCHOOL_ADMIN','ADMI
       [sid,first,last,clean(r.middle_name)||null])).rows[0];
     learner=exact;
    }
+   const photo=clean(r.passport_photo_url)||clean(r.photo_url)||clean(r.photo)||null;
+   const pathway=clean(r.cbc_pathway)||clean(r.pathway)||clean(r.track)||null;
    if(learner){
-    const photo=clean(r.passport_photo_url)||clean(r.photo_url)||clean(r.photo)||null;
-    const pathway=clean(r.cbc_pathway)||clean(r.pathway)||clean(r.track)||null;
     const upd=(await c.query(`UPDATE learners SET admission_no=COALESCE($3,admission_no),assessment_no=COALESCE($4,assessment_no),
       first_name=$5,middle_name=$6,last_name=$7,date_of_birth=COALESCE($8,date_of_birth),gender=COALESCE($9,gender),
       parent_phone=COALESCE($10,parent_phone),class_id=$11,
@@ -771,7 +771,7 @@ router.get('/:schoolId/learners',schoolBoundary,async(req,res)=>{
    const subjectTeacher=`EXISTS (SELECT 1 FROM teacher_subject_assignments tsa JOIN teachers tt ON tt.id=tsa.teacher_id AND tt.school_id=tsa.school_id WHERE tsa.school_id=l.school_id AND tsa.class_id=l.class_id AND tt.user_id=$2 AND tsa.academic_year_id=${latestYear} AND COALESCE(tsa.is_active,true)=true)`;
    extra=role==='CLASS_TEACHER'?` AND ${classTeacher}`:` AND (${classTeacher} OR ${subjectTeacher})`;
   }
-  res.json((await db.query(`SELECT l.*,cl.name class_name,cl.stream,lv.name level_name,ss.name section_name FROM learners l LEFT JOIN classes cl ON cl.id=l.class_id LEFT JOIN school_levels lv ON lv.id=cl.school_level_id LEFT JOIN school_sections ss ON ss.id=lv.school_section_id WHERE l.school_id=$1${extra} ORDER BY l.last_name,l.first_name`,params)).rows);
+  res.json((await db.query(`SELECT l.*,cl.name class_name,cl.stream,lv.name level_name,ss.name section_name FROM learners l LEFT JOIN classes cl ON cl.id=l.class_id LEFT JOIN school_levels lv ON lv.id=cl.school_level_id LEFT JOIN school_sections ss ON ss.id=lv.school_section_id WHERE l.school_id=$1${extra} ORDER BY LOWER(CONCAT_WS(' ',l.first_name,l.middle_name,l.last_name)),l.id`,params)).rows);
  }catch(e){res.status(500).json({error:'Unable to load learners'});}
 });
 router.post('/:schoolId/learners',schoolBoundary,roles('SCHOOL_ADMIN','ADMIN','CLASS_TEACHER','SENIOR_TEACHER'),async(req,res)=>{const b=req.body,sid=req.params.schoolId,c=await db.pool.connect();try{if(!clean(b.first_name)||!clean(b.last_name))return res.status(400).json({error:'First name and last name are required'});if(b.class_id)await assertBelongs('classes',b.class_id,sid);if(req.user.role==='CLASS_TEACHER'){if(!b.class_id)return res.status(400).json({error:'Class Teacher must select the assigned class.'});const ok=(await db.query(`SELECT 1 FROM class_teacher_assignments a JOIN teachers t ON t.id=a.teacher_id WHERE a.school_id=$1 AND t.user_id=$2 AND a.class_id=$3 AND a.academic_year_id=$4 AND (a.term_id=$5 OR a.term_id IS NULL) LIMIT 1`,[sid,req.user.user_id,b.class_id,b.academic_year_id,b.term_id||null])).rows[0];if(!ok)return res.status(403).json({error:'You can only add learners to a class assigned to you as Class Teacher.'});}if(b.academic_year_id)await assertBelongs('academic_years',b.academic_year_id,sid);
@@ -909,7 +909,7 @@ router.get('/:schoolId/classes/:classId/pdf',schoolBoundary,roles('SCHOOL_ADMIN'
   const rows=(await db.query(`SELECT l.admission_no,l.assessment_no,l.first_name,l.middle_name,l.last_name,l.gender,e.status
     FROM learner_enrollments e JOIN learners l ON l.id=e.learner_id AND l.school_id=e.school_id
     WHERE e.school_id=$1 AND e.class_id=$2 AND e.academic_year_id=$3
-    ORDER BY l.last_name,l.first_name,l.id`,[sid,cid,yearId])).rows;
+    ORDER BY LOWER(CONCAT_WS(' ',l.first_name,l.middle_name,l.last_name)),l.id`,[sid,cid,yearId])).rows;
   const PDFDocument=require('pdfkit');
   const doc=new PDFDocument({size:'A4',layout:'landscape',margin:28});
   const chunks=[];doc.on('data',x=>chunks.push(x));

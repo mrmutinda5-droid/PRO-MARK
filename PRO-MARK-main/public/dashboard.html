@@ -435,6 +435,7 @@ body, main, .main-content, .dashboard-main {
 <section class="zelimu-command zelimu-command-v1" aria-label="School Command Centre"></section>
 <script src="/js/zelimu-approved-dashboard.js?v=academic-period-20261118-2"></script>
 <script src="/js/docx-import-modal.js?v=1"></script>
+<script src="/js/learner-import-parser.js?v=1"></script>
 <div id="zelimuLegacyBridge" hidden style="display:none !important">
 <header><div class="brand-lockup"><div class="pm-brand"><img src="/assets/zelimu-cbc-logo.svg" alt="ZELIMU CBC logo"><div><strong>ZELIMU CBC</strong><div class="muted small">School Management Portal</div></div></div><div><div class="muted small" id="schoolTitle">School workspace</div><div class="small role-caption" id="roleCaption">Secure school portal</div></div></div><div class="header-actions"><select id="ownerSchoolSwitch" class="owner-school-switch" style="display:none"></select><span id="who"></span><button class="btn secondary" id="signOut">Sign out</button></div></header><section class="portal-hero card"><div><span class="eyebrow">SCHOOL MANAGEMENT PLATFORM</span><h1 id="portalHeading">School workspace</h1><p id="portalSubtitle">Manage academic operations with a clear, role-aware workspace.</p></div><div><div class="hero-badge" id="roleBadge">LOADING ROLE…</div><div class="user-greeting" id="userGreeting"></div></div></section><div id="announcementBanner" class="notice" style="display:none;margin-top:12px"></div><section id="passwordPanel" class="card password-panel"><div class="section-title"><h2>My Password</h2><span class="pill">Secure account</span></div><p class="muted small">Change your password at any time. ZELIMU CBC never displays existing passwords because they are securely stored as one-way hashes.</p><form id="passwordForm"><label>Current password<input id="currentPassword" type="password" autocomplete="current-password" required></label><label>New password<input id="newPassword" type="password" minlength="10" autocomplete="new-password" required></label><label>Confirm new password<input id="confirmPassword" type="password" minlength="10" autocomplete="new-password" required></label><button class="btn primary" type="submit">Change password</button></form><div id="passwordMessage" class="notice" style="display:none"></div></section><section id="teacherMarking" class="nav-managed-section card teacher-only">
 <section id="teacherLinkConfirmation" class="card portal-module" style="display:none">
@@ -999,7 +1000,7 @@ async function setupMarkControl(){
 async function load(){applyRoleView();if(isPlatformOwner){try{const ss=await api('/api/platform/schools');const sw=$('ownerSchoolSwitch');sw.style.display='block';sw.innerHTML=ss.map(x=>`<option value="${x.id}">${esc(x.name)} · ${x.status}</option>`).join('');sw.value=sid;sw.onchange=()=>{location.href='/dashboard.html?school_id='+encodeURIComponent(sw.value)};}catch(e){console.warn('Owner school switch unavailable',e.message)}}const results=await Promise.allSettled([api(`/api/school/${sid}/overview`),api(`/api/school/${sid}/structure`),api(`/api/school/${sid}/academic-years`),api(`/api/people/${sid}/classes`),api(`/api/people/${sid}/subjects`),api(`/api/people/${sid}/teachers`),api(`/api/people/${sid}/learners`),api(`/api/people/${sid}/assignments`),api(`/api/people/${sid}/class-teachers`)]);const [ovR,structureR,yearsR,classesR,subjectsR,teachersR,learnersR,assignmentsR,classTeachersR]=results;if(ovR.status!=='fulfilled')throw ovR.reason;const ov=ovR.value;const structure=structureR.status==='fulfilled'?structureR.value:[];const years=yearsR.status==='fulfilled'?yearsR.value:[];const classes=classesR.status==='fulfilled'?classesR.value:[];const subjects=subjectsR.status==='fulfilled'?subjectsR.value:[];const teachers=teachersR.status==='fulfilled'?teachersR.value:[];const learnersRaw=learnersR.status==='fulfilled'?learnersR.value:[];const learners=[...new Map(learnersRaw.map(x=>[x.id,x])).values()];const assignments=assignmentsR.status==='fulfilled'?assignmentsR.value:[];const classTeachers=classTeachersR.status==='fulfilled'?classTeachersR.value:[];Object.assign(state,{years,classes,subjects,teachers,learners,assignments,teacherAssignments:assignments,classTeacherAssignments:classTeachers,structure});initGradingEditor();await loadGradings();await loadClassLists();$('schoolTitle').textContent=`${ov.name} · ${ov.template_code}`;$('who').textContent=`${user.first_name||''} ${user.last_name||''} · ${user.role}`;$('learnerCount').textContent=ov.learner_count;$('teacherCount').textContent=ov.teacher_count;$('template').textContent=ov.template_code;$('structure').innerHTML=structure.map(x=>`<div class="item"><b>${x.section_name}</b> · ${x.name}</div>`).join('')||'No levels found.';opts($('classLevel'),structure.map(x=>({...x,id:x.level_id})),x=>`${x.section_name} · ${x.name}`);opts($('learnerClass'),classes,x=>`${x.name} ${x.stream||''} · ${x.level_name||''}`);opts($('aTeacher'),teachers,x=>`${x.staff_no} · ${x.first_name} ${x.last_name}`);opts($('ctTeacher'),teachers,x=>`${x.staff_no} · ${x.first_name} ${x.last_name}`);opts($('accountTeacher'),teachers,x=>`${x.staff_no} · ${x.first_name} ${x.last_name}`);opts($('aSubject'),subjects,x=>`${x.code} · ${x.name}`);opts($('asClass'),classes,x=>`${x.name} ${x.stream||''} · ${x.level_name||''}`,'Select class…');opts($('asSubject'),subjects,x=>`${x.code} · ${x.name}`,'Select subject…');opts($('aClass'),classes,x=>`${x.name} ${x.stream||''} · ${x.level_name||''}`);opts($('ctClass'),classes,x=>`${x.name} ${x.stream||''} · ${x.level_name||''}`);for(const id of ['aYear','ctYear','asYear','resYear','mYear','reportYear','learnerYear','mcYear','pubYear','anYear'])opts($(id),years,x=>x.year_label);opts($('mClass'),roleAllowedClasses(classes),x=>`${x.name} ${x.stream||''} · ${x.level_name||''}`);if(years[0]){$('learnerYear').value=years[0].id;await Promise.all(['asTerm','resTerm','mTerm','reportTerm','dateTerm'].map(id=>terms(years[0].id,$(id))));await Promise.all(['aTerm','ctTerm'].map(id=>terms(years[0].id,$(id),true,'All terms (recommended)')));}opts($('reportLearner'),[],x=>`${x.first_name} ${x.last_name}`,'Select class first…');opts($('reportClass'),roleAllowedClasses(classes),x=>`${x.name} ${x.stream||''} · ${x.learner_count} learners`);opts($('resourceSubject'),subjects,x=>`${x.code||''} · ${x.name||''}`,'All / General');opts($('resourceClass'),classes,x=>`${x.name||''} ${x.stream||''}`,'All / General');opts($('resourceYear'),years,x=>x.year_label,'All years');opts($('resourceFilterSubject'),subjects,x=>`${x.code||''} · ${x.name||''}`,'All subjects');opts($('resourceFilterClass'),classes,x=>`${x.name||''} ${x.stream||''}`,'All classes');opts($('resourceFilterYear'),years,x=>x.year_label,'All years');$('years').innerHTML=years.map(y=>`<div class="item"><b>${esc(y.year_label)}</b> · ${esc(String(y.start_date||'').slice(0,10)||'No start date')} → ${esc(String(y.end_date||'').slice(0,10)||'No end date')} <span class="pill">${esc(y.status||'')}</span> <button type="button" class="btn mini secondary" data-year-edit="${y.id}">EDIT</button></div>`).join('')||'No academic years yet.';$('classes').innerHTML=classes.map(x=>`<div class="item class-card"><button type="button" class="class-open" data-class-id="${x.id}"><b>${x.name} ${x.stream||''}</b> · ${x.level_name||''}<span class="pill">${x.learner_count} learners</span></button><button type="button" class="btn danger class-delete" data-class-id="${x.id}" data-class-name="${esc(x.name+' '+(x.stream||''))}">Remove</button><button type="button" class="btn mini secondary edit-class" data-class-id="${x.id}">EDIT</button></div>`).join('')||'No active classes yet.';renderTeachers(teachers);renderLearnerFilters();renderLearners();opts($('assignmentClassFilter'),classes,x=>`${x.name} ${x.stream||''}`);opts($('assignmentTeacherFilter'),teachers,x=>`${x.first_name} ${x.last_name}`);opts($('assignmentSubjectFilter'),subjects,x=>`${x.code} · ${x.name}`);opts($('tamTeacher'),teachers,x=>`${x.staff_no||''} · ${x.first_name||''} ${x.last_name||''}`);opts($('tamClass'),classes,x=>`${x.name} ${x.stream||''} · ${x.level_name||''}`);opts($('tamSubject'),subjects,x=>`${x.code} · ${x.name}`);for(const id of ['tamYear'])opts($(id),years,x=>x.year_label);if(years[0])await terms(years[0].id,$('tamTerm'),true,'All terms (recommended)');renderAssignments();renderClassTeachers(classTeachers);opts($('leadershipTeacher'),teachers,x=>`${x.staff_no} · ${x.first_name} ${x.last_name}`);initPromotion();loadLeadership();loadUserControl();try{const ident=await api(`/api/settings/${sid}/identity`);$('identityForm').school_name.value=ident.name||'';$('identityForm').motto.value=ident.motto||'';$('identityForm').primary_color.value=ident.primary_color||'#17365D';$('identityForm').secondary_color.value=ident.secondary_color||'#D9A441';applySchoolTheme(ident);$('identityForm').address.value=ident.address||'';$('identityForm').contact_phone.value=ident.contact_phone||'';$('identityForm').contact_email.value=ident.contact_email||'';$('siteContactEmail').textContent=ident.contact_email||'School contact email';$('logoBox').innerHTML=ident.logo_url?`<img class="logo-preview" src="${ident.logo_url}" alt="School logo">`:'No logo uploaded yet.';try{const assets=await api(`/api/documents/${sid}/assets`);const stamp=assets.find(a=>a.asset_type==='STAMP');$('stampBox').innerHTML=stamp?`<img class="stamp-preview" src="${stamp.file_url}" alt="School stamp"><div class="muted small">Active stamp · effective ${esc(stamp.effective_from||'')}</div>`:'No active stamp uploaded yet.';}catch{} }catch(e){console.warn('School identity could not be loaded:',e.message);}await Promise.all([loadResources(),isTeacher?setupTeacher():Promise.resolve(),setupResultFilters(),loadParentControls(),isAdmin?setupMarkControl():Promise.resolve(),(isAdmin||isLeadership)?setupAnalytics():Promise.resolve()]);if(isClassTeacher){await setupClassTeacherLearnerForm();renderLearnerFilters();renderLearners();await setupClassTeacherWorkspace();}if(isTeacher||isClassTeacher)await loadClassLists();}
 function renderTeachers(list){const q=($('teacherSearch').value||'').toLowerCase();const rows=list.filter(x=>`${x.staff_no} ${x.first_name} ${x.last_name} ${x.email||''} ${x.account_roles||''}`.toLowerCase().includes(q));$('teachers').innerHTML=rows.map(x=>`<button type="button" class="item person-card" data-teacher-id="${x.id}"><span class="avatar">${(x.first_name||'?')[0]}${(x.last_name||'')[0]}</span><span style="flex:1"><b>${esc(x.first_name||'')} ${esc(x.last_name||'')}</b><br><span class="muted small">${esc(x.staff_no||'')} · ${esc(x.email||'No email')}</span><br><span class="pill">${esc(x.account_roles||'NO LOGIN ROLE')} · Mark Entry: ${x.mark_entry_enabled?'ON':'OFF'}</span></span></button>`).join('')||'<div class="notice">No teachers match the search.</div>'}
 function renderLearnerFilters(){opts($('learnerFilterYear'),state.years,x=>x.year_label);let classes=state.classes;if(isClassTeacher&&state.classTeacherAssignments?.length){const ids=new Set(state.classTeacherAssignments.map(x=>String(x.class_id)));classes=classes.filter(x=>ids.has(String(x.id)));}opts($('learnerFilterClass'),classes,x=>`${x.name} ${x.stream||''} · ${x.level_name||''}`,'Select a class');const levels=[...new Map(classes.map(x=>[x.school_level_id,{id:x.school_level_id,name:x.level_name}])).values()];opts($('learnerFilterLevel'),levels,x=>x.name,'All levels');if(isClassTeacher&&classes[0])$('learnerFilterClass').value=classes[0].id;}
-function renderLearners(){const cls=$('learnerFilterClass').value;if(!cls){$('learners').innerHTML='';$('learnerDirectoryHint').style.display='block';return;}$('learnerDirectoryHint').style.display='none';const q=($('learnerSearch').value||'').toLowerCase(),status=$('learnerFilterStatus').value;const rows=state.learners.filter(x=>String(x.class_id)===String(cls)&&(!status||String(x.status||'ACTIVE').toUpperCase()===status)&&`${x.first_name} ${x.middle_name||''} ${x.last_name} ${x.admission_no||''}`.toLowerCase().includes(q)).sort((a,b)=>[a.last_name,a.first_name,a.middle_name].filter(Boolean).join(' ').localeCompare([b.last_name,b.first_name,b.middle_name].filter(Boolean).join(' '),undefined,{sensitivity:'base'}));$('learners').innerHTML=rows.map(x=>`<button type="button" class="item person-card" data-learner-id="${x.id}">${x.passport_photo_url?`<img class="passport-mini" src="${x.passport_photo_url}" alt="">`:`<span class="avatar">${(x.first_name||'?')[0]}${(x.last_name||'')[0]}</span>`}<span style="flex:1"><b>${x.first_name} ${x.middle_name||''} ${x.last_name}</b><br><span class="muted small">${x.admission_no||'Admission number not provided'} · ${x.status||'ACTIVE'}</span></span>${['SCHOOL_ADMIN','ADMIN','CLASS_TEACHER','SENIOR_TEACHER'].includes(user.role)?`<button type="button" class="btn mini danger learner-remove" data-learner-id="${x.id}">REMOVE FROM CLASS</button>`:''}</div>`).join('')||'<div class="notice">No learners match this class/filter.</div>';}
+function renderLearners(){const cls=$('learnerFilterClass').value;if(!cls){$('learners').innerHTML='';$('learnerDirectoryHint').style.display='block';return;}$('learnerDirectoryHint').style.display='none';const q=($('learnerSearch').value||'').toLowerCase(),status=$('learnerFilterStatus').value;const fullName=x=>[x.first_name,x.middle_name,x.last_name].filter(Boolean).join(' ');const rows=state.learners.filter(x=>String(x.class_id)===String(cls)&&(!status||String(x.status||'ACTIVE').toUpperCase()===status)&&`${fullName(x)} ${x.admission_no||''}`.toLowerCase().includes(q)).sort((a,b)=>fullName(a).localeCompare(fullName(b),undefined,{sensitivity:'base',numeric:true}));$('learners').innerHTML=rows.map(x=>`<button type="button" class="item person-card" data-learner-id="${x.id}">${x.passport_photo_url?`<img class="passport-mini" src="${x.passport_photo_url}" alt="">`:`<span class="avatar">${(x.first_name||'?')[0]}${(x.last_name||'')[0]}</span>`}<span style="flex:1"><b>${fullName(x)}</b><br><span class="muted small">${x.admission_no||'Admission number not provided'} · ${x.status||'ACTIVE'}</span></span>${['SCHOOL_ADMIN','ADMIN','CLASS_TEACHER','SENIOR_TEACHER'].includes(user.role)?`<button type="button" class="btn mini danger learner-remove" data-learner-id="${x.id}">REMOVE FROM CLASS</button>`:''}</div>`).join('')||'<div class="notice">No learners match this class/filter.</div>';}
 
 async function loadUserControl(){
   const box=$('userControlList'); if(!box||!isAdmin)return;
@@ -1251,7 +1252,8 @@ document.addEventListener('click',async e=>{
     const c=(state.classes||[]).find(x=>String(x.id)===String(classId));
     const yearId=$('learnerFilterYear')?.value||state.years?.[0]?.id;
     if(!c||!yearId)return alert('Select the class and academic year first.');
-    const rows=(state.learners||[]).filter(x=>String(x.class_id)===String(c.id)&&x.is_active!==false);
+    const nameKey=x=>[x.first_name,x.middle_name,x.last_name].filter(Boolean).join(' ');
+    const rows=(state.learners||[]).filter(x=>String(x.class_id)===String(c.id)&&x.is_active!==false).sort((a,b)=>nameKey(a).localeCompare(nameKey(b),undefined,{sensitivity:'base',numeric:true}));
     const escCsv=v=>{const x=String(v??'');return /[\",\r\n]/.test(x)?`"${x.replace(/\"/g,'\"\"')}"`:x;};
     const header=['Passport Photo URL','Assessment No','Admission No','First Name','Middle Name','Last Name','Gender','Date of Birth','CBC Pathway','Parent Phone'];
     const lines=[header.join(',')].concat(rows.map(r=>[r.passport_photo_url||'',r.assessment_no||'',r.admission_no||'',r.first_name||'',r.middle_name||'',r.last_name||'',r.gender||'',r.date_of_birth?String(r.date_of_birth).slice(0,10):'',r.cbc_pathway||r.selected_pathway||'',r.parent_phone||''].map(escCsv).join(',')));
@@ -1270,78 +1272,10 @@ document.addEventListener('click',async e=>{
   const yearId=$('learnerFilterYear')?.value||state.years?.[0]?.id;
   if(!text.trim())return alert('Paste learner rows from Excel or Word first.');
   if(!c||!yearId)return alert('Select the class and academic year first.');
-  const lines=text.trim().split(/\r?\n/).filter(Boolean);
-  const delim=lines[0].includes('\t')?'\t':(lines[0].includes(',')?',':(lines[0].includes(';')?';':'\t'));
-  const norm=s=>String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
-  const mapHeader=h=>{
-    const n=norm(h);
-    if(n.includes('photo')||n.includes('passport')||n.includes('image')||n.includes('avatar'))return'passport_photo_url';
-    if(n.includes('assessment')||n.includes('assesno')||n==='assno'||n==='assessno'||n==='upi'||n==='nemis')return'assessment_no';
-    if(n.includes('admission')||n==='admno'||n==='admnumber'||n==='admissionnumber'||n==='adm')return'admission_no';
-    if(n.includes('learnername')||n.includes('studentname')||n.includes('fullname')||n==='name'||n==='learner')return'full_name';
-    if(n==='firstname'||n==='fname'||n==='first')return'first_name';
-    if(n==='middlename'||n==='mname'||n==='middle')return'middle_name';
-    if(n==='lastname'||n==='surname'||n==='familyname'||n==='last')return'last_name';
-    if(n.includes('dob')||n.includes('dateofbirth')||n==='birthdate'||n==='birth')return'date_of_birth';
-    if(n==='gender'||n==='sex')return'gender';
-    if(n.includes('pathway')||n.includes('track')||n.includes('specialisation')||n.includes('cbcpathway'))return'cbc_pathway';
-    if(n.includes('parentname')||n.includes('guardianname')||n==='parent'||n==='guardian')return'parent_name';
-    if(n.includes('phone')||n.includes('mobile')||n.includes('guardiancontact')||n.includes('parentcontact')||n.includes('parentphone')||n.includes('guardianphone'))return'parent_phone';
-    if(n==='class'||n==='classname'||n==='grade')return'ignored_class';
-    return null;
-  };
-  const split=line=>line.split(delim).map(x=>x.trim().replace(/^"|"$/g,''));
-  const parseFullName=name=>{
-    const parts=String(name||'').trim().split(/\s+/).filter(Boolean);
-    if(!parts.length)return{};
-    if(parts.length===1)return{first_name:parts[0],last_name:parts[0]};
-    return{first_name:parts[0],last_name:parts[parts.length-1],middle_name:parts.slice(1,-1).join(' ')};
-  };
-  const hs=split(lines[0]);
-  let keys=hs.map(mapHeader);
-  let start=0;
-  let valid=keys.some(Boolean);
-  if(!valid){
-    const cols=split(lines[0]);
-    if(cols.length>=8){
-      if(/^https?:\/\/|^\/uploads\/|\.(png|jpe?g|webp)$/i.test(cols[0])){
-        keys=['passport_photo_url','assessment_no','admission_no','full_name','date_of_birth','gender','cbc_pathway','parent_name','parent_phone'];
-      }else{
-        keys=['assessment_no','admission_no','full_name','date_of_birth','gender','cbc_pathway','parent_name','parent_phone'];
-      }
-    }else if(cols.length===7){
-      keys=['admission_no','full_name','gender','date_of_birth','cbc_pathway','parent_name','parent_phone'];
-    }else{
-      keys=['admission_no','full_name','gender','date_of_birth','parent_phone'];
-    }
-  }else start=1;
-  const rows=lines.slice(start).map(line=>{
-    const cells=split(line),r={};
-    keys.forEach((k,i)=>{if(k&&k!=='ignored_class')r[k]=cells[i]||''});
-    cells.forEach(cell=>{
-      const val=(cell||'').trim();
-      if(!val)return;
-      if(!r.passport_photo_url && /^https?:\/\/|^\/uploads\/|\.(png|jpe?g|webp)$/i.test(val)) r.passport_photo_url=val;
-      else if(!r.parent_phone && /^(07|01|\+?254)\d{7,9}$/.test(val.replace(/[\s-]/g,''))) r.parent_phone=val;
-      else if(!r.gender && /^(male|female|m|f)$/i.test(val)) r.gender=/^m/i.test(val)?'Male':'Female';
-      else if(!r.date_of_birth && (/^\d{4}[-/.]\d{1,2}[-/.]\d{1,2}$/.test(val)||/^\d{1,2}[-/.]\d{1,2}[-/.]\d{4}$/.test(val))) r.date_of_birth=val;
-      else if(!r.cbc_pathway && /^(stem|social\s*sciences?|arts?\s*(?:&|and)\s*sports?|exploratory)/i.test(val)) r.cbc_pathway=val;
-    });
-    if(r.full_name){
-      const n=parseFullName(r.full_name);
-      r.first_name=r.first_name||n.first_name;
-      r.middle_name=r.middle_name||n.middle_name;
-      r.last_name=r.last_name||n.last_name;
-    }
-    if(!r.first_name||!r.last_name){
-      const n=parseFullName(cells.find(v=>v&&v.trim()&&!/^https?:\/\/|^\d+$/.test(v))||'');
-      r.first_name=r.first_name||n.first_name;
-      r.middle_name=r.middle_name||n.middle_name;
-      r.last_name=r.last_name||n.last_name;
-    }
-    return r;
-  }).filter(r=>r.first_name&&r.last_name);
-  if(!rows.length)return alert('No usable learner rows found. Paste learner rows with Assessment No, Admission No, Full Name, DOB, Gender, CBC Pathway, Parent Phone.');
+  const parsed=window.ZelimuLearnerImportParser.parseLearnerPaste(text);
+  const rows=parsed.rows;
+  if(parsed.errors.length){const message=`Please check the pasted data:\n${parsed.errors.join('\n')}`;if(msg)msg.textContent=message;return alert(message);}
+  if(!rows.length)return alert('No learner rows found. Include a header row or paste learner names in the standard column order.');
   try{
     b.disabled=true;
     if(msg)msg.textContent=`Importing ${rows.length} learner(s) with CBC details…`;
