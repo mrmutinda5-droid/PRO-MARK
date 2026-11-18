@@ -12,6 +12,7 @@ const {
   buildSubjectToppers,
   buildTeacherRows,
   buildAnalysisCsv,
+  buildSubjectColumns,
   systemForClass,
   systemForSubject
 } = require('../backend/services/results-engine');
@@ -108,6 +109,23 @@ test('subject grading overrides are scoped to that subject and class', () => {
   assert.equal(bandFor(86, systemForClass(grading, classRecord).bands).label, 'EE2');
   assert.equal(systemForSubject(grading, classRecord, 'english'), defaultSystem);
   assert.equal(systemForSubject(grading, { ...classRecord, id: 'class-west' }, 'math'), defaultSystem);
+});
+
+test('merit subject columns include configured subjects without marks', () => {
+  const columns = buildSubjectColumns(
+    [{
+      subjects: [
+        { subject_id: 'math', subject_code: 'MATH', subject_name: 'Mathematics' },
+        { subject_id: 'extra', subject_code: 'EX', subject_name: 'Extra Studies' }
+      ]
+    }],
+    ['english', 'math'],
+    new Map([
+      ['english', { code: 'ENG', name: 'English' }],
+      ['math', { code: 'MATH', name: 'Mathematics' }]
+    ])
+  );
+  assert.deepEqual(columns.map(column => column.subject_code), ['ENG', 'EX', 'MATH']);
 });
 
 test('bandLabelOrder keeps admin order and unions class systems without duplicates', () => {

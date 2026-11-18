@@ -278,6 +278,36 @@ async function loadMarks(schoolId, yearId, termId, learnerIds) {
   )).rows;
 }
 
+async function loadConfiguredSubjectIds(schoolId, yearId, termId, classIds) {
+  const ids = [...new Set((classIds || []).filter(Boolean).map(String))];
+  if (!ids.length) return [];
+  const rows = (await db.query(
+    `SELECT DISTINCT configured.subject_id
+     FROM (
+       SELECT tsa.subject_id
+       FROM teacher_subject_assignments tsa
+       WHERE tsa.school_id=$1 AND tsa.class_id=ANY($4::uuid[])
+         AND tsa.subject_id IS NOT NULL
+         AND (tsa.academic_year_id=$2 OR tsa.academic_year_id IS NULL)
+         AND (tsa.term_id=$3 OR tsa.term_id IS NULL)
+       UNION
+       SELECT a.subject_id
+       FROM assessments a
+       WHERE a.school_id=$1 AND a.academic_year_id=$2 AND a.term_id=$3
+         AND a.subject_id IS NOT NULL
+         AND (a.class_id=ANY($4::uuid[]) OR a.class_id IS NULL)
+       UNION
+       SELECT m.subject_id
+       FROM marks m
+       WHERE m.school_id=$1 AND m.academic_year_id=$2 AND m.term_id=$3
+         AND m.class_id=ANY($4::uuid[]) AND m.subject_id IS NOT NULL
+     ) configured
+     ORDER BY configured.subject_id`,
+    [schoolId, yearId, termId, ids]
+  )).rows;
+  return rows.map(row => row.subject_id);
+}
+
 async function loadProfiles(schoolId, yearId, termId) {
   try {
     const rows = (await db.query(
@@ -447,6 +477,24 @@ function competitionRanks(items, valueOf) {
     ranks.set(String(item.learner_id), rank);
   });
   return { sorted, ranks, total: sorted.length };
+}
+
+function buildSubjectColumns(rows, configuredSubjectIds, subjectMeta) {
+  const columns = new Map();
+  const add = (subjectId, fallback) => {
+    if (subjectId == null || columns.has(String(subjectId))) return;
+    const meta = subjectMeta.get(String(subjectId)) || fallback || {};
+    columns.set(String(subjectId), {
+      subject_id: subjectId,
+      subject_code: meta.code || meta.subject_code || '',
+      subject_name: meta.name || meta.subject_name || 'Subject'
+    });
+  };
+  for (const subjectId of configuredSubjectIds || []) add(subjectId);
+  for (const row of rows || []) {
+    for (const subject of row.subjects || []) add(subject.subject_id, subject);
+  }
+  return [...columns.values()].sort((a, b) => a.subject_name.localeCompare(b.subject_name));
 }
 
 function deviationOf(values) {
@@ -1140,35 +1188,13 @@ async function buildMerit(schoolId, query = {}, options = {}) {
   }
   subjectRankings.sort((a, b) => b.average - a.average || a.subject_name.localeCompare(b.subject_name));
 
-  const subjectColumns = [];
-  const subjectColumnMap = new Map();
-  if (selectedClass) {
-    for (const assessment of scopedAssessments) {
-      if (!assessment.subject_id) continue;
-      if (assessment.class_id && String(assessment.class_id) !== String(selectedClass.id)) continue;
-      const meta = subjectMeta.get(String(assessment.subject_id)) || {};
-      subjectColumnMap.set(String(assessment.subject_id), {
-        subject_id: assessment.subject_id,
-        subject_code: meta.code || '',
-        subject_name: meta.name || 'Subject'
-      });
-    }
-    subjectColumns.push(...subjectColumnMap.values());
-  }
-  for (const row of displayRows) {
-    for (const subject of row.subjects) {
-      if (!subjectColumnMap.has(String(subject.subject_id))) {
-        const column = {
-          subject_id: subject.subject_id,
-          subject_code: subject.subject_code,
-          subject_name: subject.subject_name
-        };
-        subjectColumnMap.set(String(subject.subject_id), column);
-        subjectColumns.push(column);
-      }
-    }
-  }
-  subjectColumns.sort((a, b) => a.subject_name.localeCompare(b.subject_name));
+  const configuredSubjectIds = await loadConfiguredSubjectIds(
+    schoolId,
+    year.id,
+    term.id,
+    selectedClass ? [selectedClass.id] : [...new Set(displayRows.map(row => row.class_id).filter(Boolean))]
+  );
+  const subjectColumns = buildSubjectColumns(displayRows, configuredSubjectIds, subjectMeta);
 
   let diagnostics = null;
   if (!scored.length) {
@@ -1922,6 +1948,7 @@ module.exports = {
   buildSubjectToppers,
   buildTeacherRows,
   buildAnalysisCsv,
+  buildSubjectColumns,
   systemForClass,
   systemForSubject
 };

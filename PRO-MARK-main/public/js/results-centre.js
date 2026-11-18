@@ -513,7 +513,7 @@
       });
       html.push('</div></div>');
     }
-    html.push('<div class="zrc-card"><div class="zrc-card-head"><div><h3>Ranked merit register</h3><div class="zrc-sub">' + esc(data.context.assessment_label || 'Term score') + ' · ' + rows.length + ' learner(s) shown · every subject carries its grade</div></div><div class="zrc-sub">' + esc(data.context.year_label || '') + ' · ' + esc(data.context.term_name || '') + '</div></div>' + meritTable(view) + '</div>');
+    html.push('<div class="zrc-card"><div class="zrc-card-head"><div><h3>Ranked merit register</h3><div class="zrc-sub">' + esc(data.context.assessment_label || 'Term score') + ' · ' + rows.length + ' learner(s) shown · every configured subject is listed; a dash means no usable mark in this scope</div></div><div class="zrc-sub">' + esc(data.context.year_label || '') + ' · ' + esc(data.context.term_name || '') + '</div></div>' + meritTable(view) + '</div>');
     html.push('</div></div>');
     panel('merit').innerHTML = html.join('');
     var status = root.querySelector('[data-zrc-status]');
