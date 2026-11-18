@@ -19,6 +19,7 @@
     cmd: null,
     merit: null,
     analytics: null,
+    analyticsArea: 'overview',
     identity: null,
     busy: false,
     cmdSel: { year: '', term: '', type: '', class: '' },
@@ -217,7 +218,8 @@
       '  </div>',
       '  <div class="zrc-head-actions">',
       '    <button class="zrc-btn ghost" type="button" data-zrc-action="refresh">Refresh data</button>',
-      '    <button class="zrc-btn gold" type="button" data-zrc-action="pack">Generate results pack</button>',
+      '    <button class="zrc-btn gold" type="button" data-zrc-action="pack">Build &amp; download PDF</button>',
+      '    <button class="zrc-btn ghost" type="button" data-zrc-action="pack-csv">Download results CSV</button>',
       '  </div>',
       '</div>',
       '<div class="zrc-tabs" role="tablist">',
@@ -387,7 +389,7 @@
     (data.pipeline || []).forEach(function (step, index) {
       html.push('<div class="zrc-step ' + step.status + '"><div class="dot">' + (step.status === 'complete' ? '✓' : index + 1) + '</div><div class="txt"><b>' + esc(step.label) + '</b><span>' + esc(step.detail) + '</span></div></div>');
     });
-    html.push('</div><div class="zrc-pack"><div class="zrc-sub">' + (k.merit_ready ? 'Merit is ready to reproduce for this context.' : 'Capture marks to unlock merit and report generation.') + '</div><button class="zrc-btn primary" type="button" data-zrc-action="pack">Generate results pack</button></div></div>');
+    html.push('</div><div class="zrc-pack"><div class="zrc-sub">' + (k.merit_ready ? 'Merit is ready to reproduce for this context.' : 'Capture marks to unlock merit and report generation.') + '</div><div class="zrc-downloads-actions"><button class="zrc-btn primary" type="button" data-zrc-action="pack">Build &amp; download PDF</button><button class="zrc-btn" type="button" data-zrc-action="pack-csv">Download results CSV</button></div></div></div>');
     html.push('</div>');
 
     panel('command').innerHTML = html.join('');
@@ -516,6 +518,56 @@
     panel('merit').innerHTML = html.join('');
     var status = root.querySelector('[data-zrc-status]');
     if (status) status.textContent = state.status;
+  }
+
+  function meritPrintHtml(data) {
+    var identity = state.identity || {};
+    var rows = data.rows || [];
+    if (state.meritSel.strict) {
+      rows = rows.filter(function (row) {
+        return (row.subjects || []).length > 0 && row.subjects.every(function (subject) {
+          return subject.average != null;
+        });
+      });
+    }
+    var view = Object.assign({}, data, { rows: rows });
+    var context = data.context || {};
+    return '<!doctype html><html><head><meta charset="utf-8"><title>' +
+      esc(identity.name || 'School') + ' merit list</title><style>' +
+      '@page{size:landscape;margin:12mm}*{box-sizing:border-box}body{font:12px Arial,sans-serif;color:#172033;margin:0}' +
+      'header{display:flex;align-items:center;gap:14px;border-bottom:2px solid #17365d;padding:0 0 12px;margin-bottom:12px}' +
+      'header img{width:48px;height:48px;object-fit:contain}header h1{font-size:19px;margin:0;color:#17365d}' +
+      'header p{margin:4px 0 0;color:#667085;font-size:12px}.context{margin-left:auto;text-align:right;font-size:12px;line-height:1.6}' +
+      '.summary{display:flex;gap:18px;margin:12px 0;font-size:11px}.summary b{color:#17365d}' +
+      'h2{font-size:15px;margin:14px 0 8px;color:#17365d}.zrc-table-wrap{max-height:none!important;overflow:visible!important}' +
+      '.zrc-table{width:100%;border-collapse:collapse;font-size:10px}.zrc-table th,.zrc-table td{border:1px solid #cbd5e1;padding:5px 6px;white-space:nowrap}' +
+      '.zrc-table th{position:static;background:#17365d;color:#fff;text-align:left}.zrc-table td.num,.zrc-table th.num{text-align:right}' +
+      '.zrc-table td.center,.zrc-table th.center{text-align:center}.zrc-table tfoot td{font-weight:bold;background:#f1f5f9}' +
+      '.zrc-grade{font-weight:bold}.zrc-grade.gA{color:#0f6b47}.zrc-grade.gB{color:#1b4f86}.zrc-grade.gC{color:#8a6708}.zrc-grade.gD{color:#a45a0b}.zrc-grade.gE{color:#a51f1f}' +
+      '.print-action{margin:0 0 14px;padding:8px 14px;border:0;border-radius:6px;background:#17365d;color:#fff;font-weight:bold}' +
+      '@media print{.print-action{display:none}body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}' +
+      '</style></head><body><button class="print-action" onclick="window.print()">Print / Save PDF</button><header>' +
+      (identity.logo_url ? '<img src="' + esc(identity.logo_url) + '" alt="School logo">' : '') +
+      '<div><h1>' + esc(identity.name || 'ZELIMU CBC SCHOOL') + '</h1><p>' + esc(identity.motto || 'Official merit list') + '</p></div>' +
+      '<div class="context"><b>' + esc(context.assessment_label || 'Term score') + '</b><br>' +
+      esc(context.year_label || '') + ' · ' + esc(context.term_name || '') + '<br>' +
+      esc(context.class_name || 'All classes') + '</div></header>' +
+      '<div class="summary"><span><b>Mean:</b> ' + num(data.stats && data.stats.mean, 2) + '</span>' +
+      '<span><b>Grade:</b> ' + esc(data.stats && data.stats.mean_grade || '—') + '</span>' +
+      '<span><b>Learners shown:</b> ' + rows.length + '</span>' +
+      '<span><b>Pass rate:</b> ' + pct(data.stats && data.stats.pass_rate) + '</span></div>' +
+      '<h2>Ranked merit register</h2>' + meritTable(view) + '</body></html>';
+  }
+
+  function printMerit() {
+    if (!state.merit) { toast('Reproduce the merit list before printing.', 'warn'); return; }
+    var win = window.open('', '_blank');
+    if (!win) { toast('Allow pop-ups for this site to print the merit list.', 'error'); return; }
+    win.document.open();
+    win.document.write(meritPrintHtml(state.merit));
+    win.document.close();
+    win.focus();
+    win.setTimeout(function () { win.print(); }, 300);
   }
 
   function loadMerit() {
@@ -759,6 +811,12 @@
       '<button class="zrc-btn gold" type="button" data-zrc-action="analysis-csv">Excel / CSV</button>' +
       '<button class="zrc-btn" type="button" data-zrc-action="analysis-copy">Copy analysis</button>' +
       '</div></div>');
+    html.push('<div class="zrc-analytics-nav" role="group" aria-label="Analytics areas">' +
+      '<button class="zrc-analytics-tab' + (state.analyticsArea === 'overview' ? ' is-active' : '') + '" type="button" aria-pressed="' + (state.analyticsArea === 'overview') + '" data-zrc-area-tab="overview">Overview</button>' +
+      '<button class="zrc-analytics-tab' + (state.analyticsArea === 'performance' ? ' is-active' : '') + '" type="button" aria-pressed="' + (state.analyticsArea === 'performance') + '" data-zrc-area-tab="performance">Class &amp; subject performance</button>' +
+      '<button class="zrc-analytics-tab' + (state.analyticsArea === 'support' ? ' is-active' : '') + '" type="button" aria-pressed="' + (state.analyticsArea === 'support') + '" data-zrc-area-tab="support">Learner support</button>' +
+      '</div>');
+    html.push('<section class="zrc-analytics-area" data-zrc-area="overview"' + (state.analyticsArea === 'overview' ? '' : ' hidden') + '>');
     html.push('<div class="zrc-analytics-kpis">');
     html.push(analyticsKpi('Mean score', num(k.mean, 2), '', deltaChip(k.mean_delta) + ' <span class="zrc-sub">vs ' + esc(data.by_class.series.length > 1 ? data.by_class.series[1].name : 'previous term') + '</span>', spark));
     html.push(analyticsKpi('Mean grade', esc(k.mean_grade || '—'), '', 'Admin-saved grading bands', null));
@@ -795,6 +853,8 @@
     html.push('<div class="zrc-chart-card wide"><h3>Subject mastery by class</h3><div class="zrc-sub">Mean score per class and subject — darker red is support needed, green is secure.</div>' +
       heatmap(data.heatmap.rows, data.heatmap.cols, data.heatmap.values, 'Subject mastery by class') +
       '<div class="zrc-heat-scale"><i></i><div class="zrc-heat-ticks"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div></div></div>');
+    html.push('</div></section>');
+    html.push('<section class="zrc-analytics-area" data-zrc-area="performance"' + (state.analyticsArea === 'performance' ? '' : ' hidden') + '><div class="zrc-chart-grid">');
 
     // Zeraki 1: Stream & Class Comparative League Table
     if ((data.stream_comparison || []).length > 1 || (data.stream_comparison || []).length === 1 && !state.analyticsSel.class) {
@@ -831,6 +891,8 @@
       }
       html.push('</div>');
     }
+    html.push('</div></section>');
+    html.push('<section class="zrc-analytics-area" data-zrc-area="support"' + (state.analyticsArea === 'support' ? '' : ' hidden') + '><div class="zrc-chart-grid">');
 
     // Zeraki 3: Learner Remediation & Intervention Quadrants
     if (data.intervention_quadrants) {
@@ -862,6 +924,8 @@
       }
       html.push('</div>');
     }
+    html.push('</div></section>');
+    html.push('<section class="zrc-analytics-area" data-zrc-area="performance"' + (state.analyticsArea === 'performance' ? '' : ' hidden') + '><div class="zrc-chart-grid">');
 
     if ((data.subject_analysis || []).length) {
       html.push('<div class="zrc-chart-card wide"><h3>Subject performance &amp; teacher analysis</h3><div class="zrc-sub">Mean, grade, spread and movement per subject — grades come from the grading system the admin saved for this scope.</div><div class="zrc-table-wrap"><table class="zrc-table"><thead><tr><th>Subject</th><th>Teacher</th><th class="num">Mean</th><th class="center">Grade</th><th class="num">High</th><th class="num">Low</th><th class="num">Pass %</th><th class="num">σ</th><th class="num">Δ prev</th><th class="num">Scored</th></tr></thead><tbody>');
@@ -916,6 +980,8 @@
         lineChart(data.multi_year.map(function (y) { return { label: y.year_label, mean: y.mean }; }), 'Multi-year mean') + '</div>');
     }
 
+    html.push('</div></section>');
+    html.push('<section class="zrc-analytics-area" data-zrc-area="support"' + (state.analyticsArea === 'support' ? '' : ' hidden') + '><div class="zrc-chart-grid">');
     var movement = data.movement || {};
     html.push('<div class="zrc-chart-card wide"><h3>Movement &amp; support register</h3><div class="zrc-sub">Change against the previous term — support first, then the sharpest declines and the strongest gains.</div><div class="zrc-chips" style="margin:0 0 12px">');
     html.push('<div class="zrc-chip"><span>Improved</span><strong>' + (movement.improved || 0) + '</strong><em>+0.5 or more</em></div>');
@@ -934,7 +1000,7 @@
     }
     html.push('</div>');
 
-    html.push('</div>');
+    html.push('</div></section>');
     panel('analytics').innerHTML = html.join('');
   }
 
@@ -1192,8 +1258,21 @@
 
   function bind() {
     root.addEventListener('click', function (event) {
-      var button = event.target.closest('[data-zrc-action],[data-zrc-tab],[data-zrc-type]');
+      var button = event.target.closest('[data-zrc-action],[data-zrc-tab],[data-zrc-type],[data-zrc-area-tab]');
       if (!button) return;
+      var analyticsArea = button.getAttribute('data-zrc-area-tab');
+      if (analyticsArea) {
+        state.analyticsArea = analyticsArea;
+        root.querySelectorAll('[data-zrc-area-tab]').forEach(function (tabButton) {
+          var selected = tabButton.getAttribute('data-zrc-area-tab') === analyticsArea;
+          tabButton.classList.toggle('is-active', selected);
+          tabButton.setAttribute('aria-pressed', String(selected));
+        });
+        root.querySelectorAll('[data-zrc-area]').forEach(function (area) {
+          area.hidden = area.getAttribute('data-zrc-area') !== analyticsArea;
+        });
+        return;
+      }
       var tab = button.getAttribute('data-zrc-tab');
       if (tab) { switchTab(tab); return; }
       var type = button.getAttribute('data-zrc-type');
@@ -1221,6 +1300,12 @@
         if (action === 'pack' && state.tab === 'command') {
           packParams = { academic_year_id: state.cmdSel.year, term_id: state.cmdSel.term, class_id: state.cmdSel.class };
           if (state.cmdSel.type) packParams.assessment_type = state.cmdSel.type;
+        } else if (action === 'pack' && state.tab === 'analytics') {
+          packParams = {
+            academic_year_id: state.analyticsSel.year,
+            term_id: state.analyticsSel.term,
+            class_id: state.analyticsSel.class
+          };
         } else {
           packParams = meritParams();
         }
@@ -1228,12 +1313,25 @@
         download('/api/results-centre/' + sid + '/merit.pdf?' + qs(packParams)).catch(function (error) { toast(error.message, 'error'); });
         return;
       }
+      if (action === 'pack-csv') {
+        var csvParams;
+        if (state.tab === 'command') {
+          csvParams = { academic_year_id: state.cmdSel.year, term_id: state.cmdSel.term, class_id: state.cmdSel.class };
+          if (state.cmdSel.type) csvParams.assessment_type = state.cmdSel.type;
+        } else if (state.tab === 'analytics') {
+          csvParams = { academic_year_id: state.analyticsSel.year, term_id: state.analyticsSel.term, class_id: state.analyticsSel.class };
+        } else {
+          csvParams = meritParams();
+        }
+        download('/api/results-centre/' + sid + '/merit.csv?' + qs(csvParams)).catch(function (error) { toast(error.message, 'error'); });
+        return;
+      }
       if (action === 'merit-csv') {
         download('/api/results-centre/' + sid + '/merit.csv?' + qs(meritParams())).catch(function (error) { toast(error.message, 'error'); });
         return;
       }
       if (action === 'merit-load') { loadMerit(); return; }
-      if (action === 'merit-print') { window.print(); return; }
+      if (action === 'merit-print') { printMerit(); return; }
       if (action === 'merit-copy') {
         var data = state.merit;
         if (!data || !data.rows || !data.rows.length) { toast('Nothing to copy yet.', 'warn'); return; }

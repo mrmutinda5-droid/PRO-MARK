@@ -202,7 +202,8 @@
 .zrc-notice.warn{background:#fdf5e8;border-color:#f0dcb6;color:#7c5508}
 .zrc-notice.error{background:#fdeeee;border-color:#f3c9c6;color:#8e1f18}
 .zrc-notice + .zrc-notice{margin-top:8px}
-.zrc-loading{padding:26px;text-align:center;color:var(--zrc-muted);font-size:13px}
+.zrc-loading{display:flex;align-items:center;justify-content:center;gap:11px;min-height:110px;padding:26px;text-align:center;color:var(--zrc-muted);font-size:13px}
+.zrc-loading::before{content:"";width:22px;height:22px;flex:0 0 22px;border:3px solid #dbe3ee;border-top-color:var(--zrc-gold);border-radius:50%;animation:zrc-spin .8s linear infinite}
 .zrc-empty{padding:26px;text-align:center;color:var(--zrc-muted);font-size:13px}
 
 /* Merit rail */
@@ -306,6 +307,12 @@
 .zrc-downloads-txt b{display:block;font-family:var(--zrc-serif);font-size:15px;color:var(--zrc-navy-deep)}
 .zrc-downloads-txt span{display:block;font-size:11.5px;color:var(--zrc-muted);margin-top:2px;max-width:64ch}
 .zrc-downloads-actions{display:flex;gap:8px;flex-wrap:wrap}
+.zrc-analytics-nav{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px;padding:5px;border:1px solid var(--zrc-line);border-radius:11px;background:#eef1f6}
+.zrc-analytics-tab{appearance:none;border:1px solid transparent;border-radius:8px;padding:9px 14px;background:transparent;color:var(--zrc-muted);font:700 12px var(--zrc-sans);cursor:pointer;transition:background .16s ease,color .16s ease,box-shadow .16s ease}
+.zrc-analytics-tab:hover{color:var(--zrc-navy);background:#fff}
+.zrc-analytics-tab.is-active{background:var(--zrc-navy);color:#fff;box-shadow:0 2px 6px rgba(16,35,60,.18)}
+.zrc-analytics-area[hidden]{display:none!important}
+.zrc-analytics-area:not([hidden]){animation:zrc-rise .3s ease both}
 
 /* Grade chips, band tables, class groups */
 .zrc-grade.mini{font-size:9.5px;padding:1px 5px;min-width:22px;border-radius:4px;margin-top:2px}
@@ -363,6 +370,7 @@
 @keyframes zrc-draw{to{stroke-dashoffset:0}}
 @keyframes zrc-fade{from{opacity:0}to{opacity:1}}
 @keyframes zrc-rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes zrc-spin{to{transform:rotate(360deg)}}
 .zrc-panel.is-active>.zrc-context,.zrc-panel.is-active>.zrc-kpis,.zrc-panel.is-active>.zrc-chips,
 .zrc-panel.is-active>.zrc-card,.zrc-panel.is-active>.zrc-chart-grid,.zrc-panel.is-active>.zrc-merit-layout,
 .zrc-panel.is-active>.zrc-doc-strip,.zrc-panel.is-active>.zrc-analytics-kpis,.zrc-panel.is-active>.zrc-notice,
@@ -395,6 +403,8 @@
   .zrc-doc-strip .zrc-doc-ref{text-align:left}
   .zrc-toppers{grid-template-columns:repeat(2,1fr)}
   .zrc-downloads{flex-direction:column;align-items:flex-start}
+  .zrc-analytics-nav{display:grid;grid-template-columns:1fr}
+  .zrc-analytics-tab{text-align:left}
 }
 
 /* Print */

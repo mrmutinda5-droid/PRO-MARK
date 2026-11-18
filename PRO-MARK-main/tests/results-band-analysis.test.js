@@ -11,7 +11,9 @@ const {
   buildClassBands,
   buildSubjectToppers,
   buildTeacherRows,
-  buildAnalysisCsv
+  buildAnalysisCsv,
+  systemForClass,
+  systemForSubject
 } = require('../backend/services/results-engine');
 
 const BANDS = [
@@ -88,6 +90,26 @@ test('bandFor rounds before matching the admin band ranges', () => {
   assert.equal(bandFor(undefined, BANDS), null);
 });
 
+test('subject grading overrides are scoped to that subject and class', () => {
+  const defaultSystem = { id: 'default', bands: BANDS };
+  const subjectSystem = { id: 'subject', bands: [{ label: 'EE1', min_mark: 85, max_mark: 100 }] };
+  const grading = {
+    defaultSystem,
+    systems: new Map([['default', defaultSystem], ['subject', subjectSystem]]),
+    configs: [
+      { class_id: 'class-east', grading_system_id: 'default' },
+      { class_id: 'class-east', subject_id: 'math', grading_system_id: 'subject' }
+    ]
+  };
+  const classRecord = { id: 'class-east', school_level_id: 'level-6', section_id: 'section-primary' };
+  assert.equal(systemForClass(grading, classRecord), defaultSystem);
+  assert.equal(systemForSubject(grading, classRecord, 'math'), subjectSystem);
+  assert.equal(bandFor(86, systemForSubject(grading, classRecord, 'math').bands).label, 'EE1');
+  assert.equal(bandFor(86, systemForClass(grading, classRecord).bands).label, 'EE2');
+  assert.equal(systemForSubject(grading, classRecord, 'english'), defaultSystem);
+  assert.equal(systemForSubject(grading, { ...classRecord, id: 'class-west' }, 'math'), defaultSystem);
+});
+
 test('bandLabelOrder keeps admin order and unions class systems without duplicates', () => {
   const alt = { bands: [{ label: 'A', min_mark: 80, max_mark: 100 }, { label: 'EE1', min_mark: 90, max_mark: 100 }] };
   const grading = {
@@ -129,6 +151,16 @@ test('buildSubjectAnalysis grades every subject and compares with the previous t
   assert.equal(math.delta, -27.75);
   const noPrior = buildSubjectAnalysis(currentRows, [], LABELS, BANDS, 50);
   assert.equal(noPrior[0].delta, null);
+});
+
+test('buildSubjectAnalysis applies a subject-specific grading scale', () => {
+  const subjectBands = new Map([
+    ['math', [{ label: 'EE1', min_mark: 50, max_mark: 100 }, { label: 'EE2', min_mark: 0, max_mark: 49 }]]
+  ]);
+  const analysis = buildSubjectAnalysis(currentRows, [], LABELS, BANDS, 50, subjectBands);
+  const math = analysis.find(row => row.subject_id === 'math');
+  assert.equal(math.mean, 50.75);
+  assert.equal(math.grade, 'EE1');
 });
 
 test('buildClassBands counts bands per class and subject plus the class average', () => {

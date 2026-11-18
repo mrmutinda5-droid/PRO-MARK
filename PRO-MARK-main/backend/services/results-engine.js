@@ -189,7 +189,7 @@ async function loadClasses(schoolId) {
   return cached(`classes|${schoolId}`, async () => {
     const rows = (await db.query(
       `SELECT c.id,c.name,c.stream,c.school_level_id,
-              sl.name level_name,sl.code level_code,
+              sl.name level_name,sl.code level_code,sl.school_section_id section_id,
               ss.name section_name
        FROM classes c
        LEFT JOIN school_levels sl ON sl.id=c.school_level_id
@@ -305,7 +305,7 @@ async function loadGrading(schoolId) {
       [schoolId]
     )).rows;
     const configs = (await db.query(
-      `SELECT class_id,level_id,section_id,grading_system_id
+      `SELECT class_id,level_id,section_id,subject_id,assessment_id,grading_system_id
        FROM assessment_configurations
        WHERE school_id=$1 AND grading_system_id IS NOT NULL
        ORDER BY (subject_id IS NOT NULL) DESC,(assessment_id IS NOT NULL) DESC,
@@ -349,16 +349,38 @@ function bandFor(average, bands) {
   return (bands || []).find(b => n >= Number(b.min_mark) && n <= Number(b.max_mark)) || null;
 }
 
-function systemForClass(grading, classRecord) {
+function systemForScope(grading, classRecord, subjectId = null) {
   if (!grading) return null;
   const configs = grading.configs || [];
-  const match = configs.find(c => c.class_id && String(c.class_id) === String(classRecord.id)) ||
-    (classRecord.school_level_id
-      ? configs.find(c => !c.class_id && c.level_id && String(c.level_id) === String(classRecord.school_level_id))
-      : null) ||
-    null;
+  const applicable = configs.filter(config => {
+    if (config.assessment_id) return false;
+    if (config.class_id && String(config.class_id) !== String(classRecord.id)) return false;
+    if (config.level_id && String(config.level_id) !== String(classRecord.school_level_id || '')) return false;
+    if (config.section_id && String(config.section_id) !== String(classRecord.section_id || '')) return false;
+    if (subjectId == null) {
+      if (config.subject_id != null) return false;
+    } else if (config.subject_id != null && String(config.subject_id) !== String(subjectId)) {
+      return false;
+    }
+    return true;
+  });
+  const score = config =>
+    (config.subject_id != null ? 100 : 0) +
+    (config.class_id != null ? 20 : 0) +
+    (config.level_id != null ? 10 : 0) +
+    (config.section_id != null ? 5 : 0);
+  applicable.sort((a, b) => score(b) - score(a));
+  const match = applicable[0] || null;
   const id = match ? String(match.grading_system_id) : null;
   return (id && grading.systems.get(id)) || grading.defaultSystem;
+}
+
+function systemForClass(grading, classRecord) {
+  return systemForScope(grading, classRecord);
+}
+
+function systemForSubject(grading, classRecord, subjectId) {
+  return systemForScope(grading, classRecord, subjectId);
 }
 
 async function loadSubjectMeta(schoolId) {
@@ -484,12 +506,13 @@ function subjectBucketsOf(rows) {
   return buckets;
 }
 
-function buildSubjectAnalysis(currentRows, previousRows, labels, scopeBands, passMark) {
+function buildSubjectAnalysis(currentRows, previousRows, labels, scopeBands, passMark, subjectBands = null) {
   const previous = subjectBucketsOf(previousRows);
   const pass = finite(passMark) ?? 50;
   return [...subjectBucketsOf(currentRows).values()].map(bucket => {
     const mean = averageOf(bucket.values);
-    const band = bandFor(mean, scopeBands);
+    const bands = subjectBands?.get(String(bucket.subject_id)) || scopeBands;
+    const band = bandFor(mean, bands);
     const prior = previous.get(String(bucket.subject_id));
     const priorMean = prior ? averageOf(prior.values) : null;
     return {
@@ -518,7 +541,8 @@ function buildClassBands(currentRows, classList, labels) {
     const band = mean == null ? null : bandFor(mean, entry.bands);
     const subjects = [...subjectBucketsOf(rows).values()].map(bucket => {
       const subjectMean = averageOf(bucket.values);
-      const subjectBand = bandFor(subjectMean, entry.bands);
+      const bands = entry.subjectBands?.get(String(bucket.subject_id)) || entry.bands;
+      const subjectBand = bandFor(subjectMean, bands);
       return {
         subject_id: bucket.subject_id,
         subject_code: bucket.subject_code,
@@ -999,6 +1023,12 @@ async function buildMerit(schoolId, query = {}, options = {}) {
     const subjectRows = [];
     for (const subject of computed.subjects) {
       const meta = subjectMeta.get(String(subject.subject_id)) || {};
+      const subjectSystem = systemForSubject(
+        grading,
+        classRecord || { id: computed.class_id },
+        subject.subject_id
+      ) || system;
+      const bands = subjectSystem ? subjectSystem.bands : [];
       const band = bandFor(subject.average, bands);
       const subjectRank = (computed.subject_ranks || {})[String(subject.subject_id)] || null;
       subjectRows.push({
@@ -1094,7 +1124,9 @@ async function buildMerit(schoolId, query = {}, options = {}) {
   }
   for (const bucket of subjectBuckets.values()) {
     const average = averageOf(bucket.values.map(v => v.average));
-    const band = bandFor(average, gradingSystem ? gradingSystem.bands : []);
+    const classRecord = selectedClass || { id: classId };
+    const subjectSystem = systemForSubject(grading, classRecord, bucket.subject_id) || gradingSystem;
+    const band = bandFor(average, subjectSystem ? subjectSystem.bands : []);
     subjectRankings.push({
       subject_id: bucket.subject_id,
       subject_code: bucket.subject_code,
@@ -1110,6 +1142,19 @@ async function buildMerit(schoolId, query = {}, options = {}) {
 
   const subjectColumns = [];
   const subjectColumnMap = new Map();
+  if (selectedClass) {
+    for (const assessment of scopedAssessments) {
+      if (!assessment.subject_id) continue;
+      if (assessment.class_id && String(assessment.class_id) !== String(selectedClass.id)) continue;
+      const meta = subjectMeta.get(String(assessment.subject_id)) || {};
+      subjectColumnMap.set(String(assessment.subject_id), {
+        subject_id: assessment.subject_id,
+        subject_code: meta.code || '',
+        subject_name: meta.name || 'Subject'
+      });
+    }
+    subjectColumns.push(...subjectColumnMap.values());
+  }
   for (const row of displayRows) {
     for (const subject of row.subjects) {
       if (!subjectColumnMap.has(String(subject.subject_id))) {
@@ -1667,14 +1712,26 @@ async function buildAnalytics(schoolId, query = {}) {
 
   const subjectAnalysis = buildSubjectAnalysis(
     currentStats.rows, previousStats ? previousStats.rows : [],
-    bandLabels, scopeBands, currentStats.passMark
+    bandLabels, scopeBands, currentStats.passMark,
+    query.class_id
+      ? new Map(currentStats.rows.flatMap(row => (row.subjects || []).map(subject => {
+          const classRecord = classRecords.find(item => String(item.id) === String(row.class_id));
+          const system = classRecord && systemForSubject(grading, classRecord, subject.subject_id);
+          return [String(subject.subject_id), system ? system.bands : scopeBands];
+        })))
+      : null
   );
   const classList = [...new Set(currentStats.rows.map(r => r.class_name || 'Unassigned'))]
     .sort((a, b) => a.localeCompare(b))
     .map(name => {
       const record = classRecords.find(c => c.label === name);
       const system = record ? systemForClass(grading, record) : grading.defaultSystem;
-      return { name, bands: system ? system.bands : [] };
+      const rows = currentStats.rows.filter(row => (row.class_name || 'Unassigned') === name);
+      const subjectBands = new Map(rows.flatMap(row => (row.subjects || []).map(subject => {
+        const subjectSystem = record && systemForSubject(grading, record, subject.subject_id);
+        return [String(subject.subject_id), subjectSystem ? subjectSystem.bands : system?.bands || []];
+      })));
+      return { name, bands: system ? system.bands : [], subjectBands };
     });
   const classBands = buildClassBands(currentStats.rows, classList, bandLabels);
 
@@ -1864,5 +1921,7 @@ module.exports = {
   buildClassBands,
   buildSubjectToppers,
   buildTeacherRows,
-  buildAnalysisCsv
+  buildAnalysisCsv,
+  systemForClass,
+  systemForSubject
 };

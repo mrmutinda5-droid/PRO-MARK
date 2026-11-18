@@ -142,3 +142,21 @@ test('ranks use the same scoring as the report subjects', () => {
   assert.equal(ranks.get('l1').subject_ranks[MATH].rank, 2);
   assert.equal(ranks.get('l1').subject_ranks[MATH].total, 2);
 });
+
+test('one learner retains marks entered across multiple subjects', () => {
+  const ranks = computeRanks({
+    learners: [{ learner_id: 'l1', class_id: CLASS_A }],
+    marks: [
+      { learner_id: 'l1', class_id: CLASS_A, subject_id: MATH, assessment_id: 'opener-math', mark: 95, max_mark: 100 },
+      { learner_id: 'l1', class_id: CLASS_A, subject_id: ENGLISH, assessment_id: 'opener-english', mark: 91, max_mark: 100 }
+    ],
+    assessments,
+    profilesByClass: new Map(),
+    classes: [{ id: CLASS_A, name: 'Grade 7' }]
+  });
+  assert.deepEqual(
+    ranks.get('l1').subjects.map(subject => subject.subject_id).sort(),
+    [ENGLISH, MATH].sort()
+  );
+  assert.equal(ranks.get('l1').subjects.length, 2);
+});
