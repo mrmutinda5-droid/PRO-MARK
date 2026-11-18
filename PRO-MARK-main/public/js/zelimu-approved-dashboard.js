@@ -214,7 +214,7 @@ function make(){
  function installHeaderControls(){
   const schoolSelect=$('z7SchoolSelect'), yearSelect=$('z7YearSelect'), termSelect=$('z7TermSelect');
   const schoolSource=$('ownerSchoolSwitch');
-  const yearSource=$('anYear')||$('reportYear')||$('mYear');
+  const yearSources=[$('reportYear'),$('resYear'),$('markYear'),$('anYear'),$('mYear')];
   const termSources=[$('anTerm'),$('resTerm'),$('markTerm'),$('reportTerm'),$('mTerm')];
   const periodStatus=$('z7PeriodStatus');
   function copyOptions(source,dest,placeholder){
@@ -236,8 +236,14 @@ function make(){
     schoolSelect.hidden=false;
     const label=document.querySelector('.z7-school-label');if(label)label.hidden=true;
    }
-   if(!yearSelect?.dataset.periodTouched)copyOptions(yearSource,yearSelect);
-   if(!termSelect?.dataset.periodTouched)copyOptions(termSources.find(source=>source?.options.length)||termSources.find(Boolean),termSelect);
+   if(!yearSelect?.dataset.periodTouched)copyOptions(
+    yearSources.find(source=>source&&[...source.options].some(option=>option.value))||yearSources.find(Boolean),
+    yearSelect
+   );
+   if(!termSelect?.dataset.periodTouched)copyOptions(
+    termSources.find(source=>source&&[...source.options].some(option=>option.value))||termSources.find(Boolean),
+    termSelect
+   );
    const account=(()=>{try{return JSON.parse(localStorage.getItem('user')||'{}')}catch{return {}}})();
    const fullName=[account.first_name,account.middle_name,account.last_name].filter(Boolean).join(' ').trim();
    const displayName=fullName||account.name||account.email||$('who')?.textContent?.split(' · ')[0]||'Signed-in user';
