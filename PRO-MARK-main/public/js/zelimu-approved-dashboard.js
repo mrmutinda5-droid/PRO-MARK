@@ -217,17 +217,18 @@ function make(){
   const yearSources=()=>[$('reportYear'),$('resYear'),$('markYear'),$('anYear'),$('mYear')];
   const termSources=()=>[$('anTerm'),$('resTerm'),$('markTerm'),$('reportTerm'),$('mTerm')];
   const periodStatus=$('z7PeriodStatus');
-  function copyOptions(source,dest,placeholder){
+  function copyOptions(source,dest,preserveCurrent=false){
    if(!source||!dest)return;
    const options=[...source.options];
    if(!options.length)return;
+   const current=preserveCurrent?dest.value:'';
    const fingerprint=options.map(x=>x.value+':'+x.textContent).join('|');
    if(dest.dataset.sourceFingerprint!==fingerprint){
     dest.innerHTML='';
     options.forEach(x=>dest.add(new Option(x.textContent,x.value,x.defaultSelected,x.selected)));
     dest.dataset.sourceFingerprint=fingerprint;
    }
-   dest.value=source.value;
+   dest.value=current&&options.some(option=>option.value===current)?current:source.value;
    if(!dest.value && !options.some(x=>x.value===''))dest.selectedIndex=source.selectedIndex;
   }
   function refresh(){
@@ -236,19 +237,22 @@ function make(){
     schoolSelect.hidden=false;
     const label=document.querySelector('.z7-school-label');if(label)label.hidden=true;
    }
-   if(!yearSelect?.dataset.periodTouched)copyOptions(
-    yearSources().find(source=>source&&[...source.options].some(option=>option.value))||yearSources().find(Boolean),
-    yearSelect
-   );
-   if(!termSelect?.dataset.periodTouched)copyOptions(
-    termSources().find(source=>source&&[...source.options].some(option=>option.value))||termSources().find(Boolean),
-    termSelect
-   );
+   const yearSource=yearSources().find(source=>source&&[...source.options].some(option=>option.value))||yearSources().find(Boolean);
+   if(yearSource){
+    if(yearSelect?.dataset.periodTouched&&![...yearSource.options].some(option=>option.value===yearSelect.value))delete yearSelect.dataset.periodTouched;
+    copyOptions(yearSource,yearSelect,Boolean(yearSelect?.dataset.periodTouched));
+   }
+   const termSource=termSources().find(source=>source&&[...source.options].some(option=>option.value))||termSources().find(Boolean);
+   if(termSource){
+    if(termSelect?.dataset.periodTouched&&![...termSource.options].some(option=>option.value===termSelect.value))delete termSelect.dataset.periodTouched;
+    copyOptions(termSource,termSelect,Boolean(termSelect?.dataset.periodTouched));
+   }
    const account=(()=>{try{return JSON.parse(localStorage.getItem('user')||'{}')}catch{return {}}})();
    const fullName=[account.first_name,account.middle_name,account.last_name].filter(Boolean).join(' ').trim();
    const displayName=fullName||account.name||account.email||$('who')?.textContent?.split(' · ')[0]||'Signed-in user';
-   if($('z7User'))$('z7User').textContent=displayName;
-   if($('z7Role'))$('z7Role').textContent=String(account.role||'School account').replaceAll('_',' ');
+   if($('z7User')&&$('z7User').textContent!==displayName)$('z7User').textContent=displayName;
+   const roleLabel=String(account.role||'School account').replaceAll('_',' ');
+   if($('z7Role')&&$('z7Role').textContent!==roleLabel)$('z7Role').textContent=roleLabel;
   }
   schoolSelect?.addEventListener('change',()=>{
    if(!schoolSource)return;
@@ -288,9 +292,9 @@ function make(){
    location.replace('/login.html');
   });
   refresh();
-  // Populate selectors after the original asynchronous dashboard data arrives.
-  let count=0;
-  const watch=setInterval(()=>{refresh();if(++count>=30)clearInterval(watch)},500);
+  window.addEventListener('zelimu:dashboard-data-loaded',refresh);
+  const legacyBridge=$('zelimuLegacyBridge');
+  if(legacyBridge)new MutationObserver(refresh).observe(legacyBridge,{childList:true,subtree:true});
   window.addEventListener('load',refresh,{once:true});
  }
  installHeaderControls();

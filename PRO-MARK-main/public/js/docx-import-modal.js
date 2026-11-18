@@ -244,7 +244,11 @@
           modal.classList.remove('open');
           reset();
 
-          if (typeof window.load === 'function') window.load();
+          if (typeof window.zelimuRefreshLearnerRoster === 'function') {
+            await window.zelimuRefreshLearnerRoster(classId);
+          } else if (typeof window.load === 'function') {
+            await window.load();
+          }
         } catch (err) {
           alert(`Enrollment error: ${err.message}`);
           commitBtn.disabled = false;

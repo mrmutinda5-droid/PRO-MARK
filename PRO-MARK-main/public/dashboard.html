@@ -433,8 +433,8 @@ body, main, .main-content, .dashboard-main {
 </head>
 <body><main class="page">
 <section class="zelimu-command zelimu-command-v1" aria-label="School Command Centre"></section>
-<script src="/js/zelimu-approved-dashboard.js?v=academic-period-20261118-2"></script>
-<script src="/js/docx-import-modal.js?v=1"></script>
+<script src="/js/zelimu-approved-dashboard.js?v=academic-period-20261118-3"></script>
+<script src="/js/docx-import-modal.js?v=2"></script>
 <script src="/js/learner-import-parser.js?v=1"></script>
 <div id="zelimuLegacyBridge" hidden style="display:none !important">
 <header><div class="brand-lockup"><div class="pm-brand"><img src="/assets/zelimu-cbc-logo.svg" alt="ZELIMU CBC logo"><div><strong>ZELIMU CBC</strong><div class="muted small">School Management Portal</div></div></div><div><div class="muted small" id="schoolTitle">School workspace</div><div class="small role-caption" id="roleCaption">Secure school portal</div></div></div><div class="header-actions"><select id="ownerSchoolSwitch" class="owner-school-switch" style="display:none"></select><span id="who"></span><button class="btn secondary" id="signOut">Sign out</button></div></header><section class="portal-hero card"><div><span class="eyebrow">SCHOOL MANAGEMENT PLATFORM</span><h1 id="portalHeading">School workspace</h1><p id="portalSubtitle">Manage academic operations with a clear, role-aware workspace.</p></div><div><div class="hero-badge" id="roleBadge">LOADING ROLE…</div><div class="user-greeting" id="userGreeting"></div></div></section><div id="announcementBanner" class="notice" style="display:none;margin-top:12px"></div><section id="passwordPanel" class="card password-panel"><div class="section-title"><h2>My Password</h2><span class="pill">Secure account</span></div><p class="muted small">Change your password at any time. ZELIMU CBC never displays existing passwords because they are securely stored as one-way hashes.</p><form id="passwordForm"><label>Current password<input id="currentPassword" type="password" autocomplete="current-password" required></label><label>New password<input id="newPassword" type="password" minlength="10" autocomplete="new-password" required></label><label>Confirm new password<input id="confirmPassword" type="password" minlength="10" autocomplete="new-password" required></label><button class="btn primary" type="submit">Change password</button></form><div id="passwordMessage" class="notice" style="display:none"></div></section><section id="teacherMarking" class="nav-managed-section card teacher-only">
@@ -1002,6 +1002,24 @@ function renderTeachers(list){const q=($('teacherSearch').value||'').toLowerCase
 function renderLearnerFilters(){opts($('learnerFilterYear'),state.years,x=>x.year_label);let classes=state.classes;if(isClassTeacher&&state.classTeacherAssignments?.length){const ids=new Set(state.classTeacherAssignments.map(x=>String(x.class_id)));classes=classes.filter(x=>ids.has(String(x.id)));}opts($('learnerFilterClass'),classes,x=>`${x.name} ${x.stream||''} · ${x.level_name||''}`,'Select a class');const levels=[...new Map(classes.map(x=>[x.school_level_id,{id:x.school_level_id,name:x.level_name}])).values()];opts($('learnerFilterLevel'),levels,x=>x.name,'All levels');if(isClassTeacher&&classes[0])$('learnerFilterClass').value=classes[0].id;}
 function renderLearners(){const cls=$('learnerFilterClass').value;if(!cls){$('learners').innerHTML='';$('learnerDirectoryHint').style.display='block';return;}$('learnerDirectoryHint').style.display='none';const q=($('learnerSearch').value||'').toLowerCase(),status=$('learnerFilterStatus').value;const fullName=x=>[x.first_name,x.middle_name,x.last_name].filter(Boolean).join(' ');const rows=state.learners.filter(x=>String(x.class_id)===String(cls)&&(!status||String(x.status||'ACTIVE').toUpperCase()===status)&&`${fullName(x)} ${x.admission_no||''}`.toLowerCase().includes(q)).sort((a,b)=>fullName(a).localeCompare(fullName(b),undefined,{sensitivity:'base',numeric:true}));$('learners').innerHTML=rows.map(x=>`<button type="button" class="item person-card" data-learner-id="${x.id}">${x.passport_photo_url?`<img class="passport-mini" src="${x.passport_photo_url}" alt="">`:`<span class="avatar">${(x.first_name||'?')[0]}${(x.last_name||'')[0]}</span>`}<span style="flex:1"><b>${fullName(x)}</b><br><span class="muted small">${x.admission_no||'Admission number not provided'} · ${x.status||'ACTIVE'}</span></span>${['SCHOOL_ADMIN','ADMIN','CLASS_TEACHER','SENIOR_TEACHER'].includes(user.role)?`<button type="button" class="btn mini danger learner-remove" data-learner-id="${x.id}">REMOVE FROM CLASS</button>`:''}</div>`).join('')||'<div class="notice">No learners match this class/filter.</div>';}
 
+async function refreshLearnerRoster(classId){
+ const currentYear=$('learnerFilterYear')?.value||'';
+ const currentClass=String(classId||$('learnerFilterClass')?.value||'');
+ const [classes,learners]=await Promise.all([
+  api(`/api/people/${sid}/classes`),
+  api(`/api/people/${sid}/learners`)
+ ]);
+ state.classes=classes;
+ state.learners=[...new Map(learners.map(learner=>[learner.id,learner])).values()];
+ renderLearnerFilters();
+ if(currentYear&&state.years.some(year=>String(year.id)===String(currentYear)))$('learnerFilterYear').value=currentYear;
+ if(currentClass&&state.classes.some(item=>String(item.id)===currentClass))$('learnerFilterClass').value=currentClass;
+ renderLearners();
+ await loadClassLists();
+ if(currentClass)await openClassList(currentClass);
+ window.dispatchEvent(new CustomEvent('zelimu:learners-updated',{detail:{classId:currentClass}}));
+}
+window.zelimuRefreshLearnerRoster=refreshLearnerRoster;
 async function loadUserControl(){
   const box=$('userControlList'); if(!box||!isAdmin)return;
   try{
@@ -1280,10 +1298,11 @@ document.addEventListener('click',async e=>{
     b.disabled=true;
     if(msg)msg.textContent=`Importing ${rows.length} learner(s) with CBC details…`;
     const r=await api(`/api/people/${sid}/learners/bulk`,{method:'POST',body:{academic_year_id:yearId,class_id:c.id,rows}});
-    if(msg)msg.textContent=`Imported: ${r.created} new, ${r.updated} updated, ${r.skipped} skipped.`;
+    const summary=`Imported: ${r.created} new, ${r.updated} updated, ${r.skipped} skipped.`;
     $('classBulkLearnerPaste').value='';
-    await load();
-    await openClassList(c.id);
+    await refreshLearnerRoster(c.id);
+    const refreshedMsg=$('classBulkLearnerMsg');
+    if(refreshedMsg)refreshedMsg.textContent=summary;
   }catch(x){
     if(msg)msg.textContent=x.message;
     alert(x.message);
@@ -3184,7 +3203,7 @@ async function renderExportModule(){const d=await api(`/api/operations/${sid}/ex
 async function renderAuditModule(){const d=await api(`/api/operations/${sid}/audit`);$('pm24Data').innerHTML=`<div class="table-wrap"><table><thead><tr><th>Time</th><th>User</th><th>Action</th><th>Entity</th><th>Details</th></tr></thead><tbody>${d.map(x=>`<tr><td>${esc(new Date(x.created_at).toLocaleString())}</td><td>${esc(x.email||'—')}</td><td>${esc(x.action)}</td><td>${esc(x.entity_type||'—')}</td><td>${esc(JSON.stringify(x.details||{}))}</td></tr>`).join('')||'<tr><td colspan="5">No audit events recorded.</td></tr>'}</tbody></table></div>`;}
 document.querySelectorAll('#navTabs button[data-target^="pm24_"]').forEach(b=>b.addEventListener('click',()=>openPM24(Number(b.dataset.target.split('_')[1]))));
 document.querySelectorAll('.pm-workflow-link[data-jump]').forEach(b=>b.addEventListener('click',()=>{const id=b.dataset.jump;showSection(id);setTimeout(()=>document.getElementById(id)?.scrollIntoView({behavior:'smooth',block:'start'}),40);}));
-wireAllCore();load().catch(e=>{console.error('Dashboard load error:',e);document.body.insertAdjacentHTML('afterbegin',`<div class="notice" style="margin:10px">Dashboard error: ${e.message}</div>`);});
+wireAllCore();load().then(()=>window.dispatchEvent(new CustomEvent('zelimu:dashboard-data-loaded'))).catch(e=>{console.error('Dashboard load error:',e);document.body.insertAdjacentHTML('afterbegin',`<div class="notice" style="margin:10px">Dashboard error: ${e.message}</div>`);});
 window.zelimuPortalContext={api,state,user};
 })();</script><footer class="pm-site-footer"><strong>ZELIMU CBC</strong><span>Secure School Management Platform</span><span id="siteContactEmail">School contact email</span></footer>
 <script id="zelimu-module-discovery">
