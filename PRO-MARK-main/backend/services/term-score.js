@@ -122,12 +122,31 @@ function candidateScore(assessment, classId, subjectId, marksById) {
   return score;
 }
 
-function subjectEntries(marks, assessments, classId, subjectId, columns, index) {
-  const columnList = columns || buildExamColumns(assessments, classId);
-  const assessmentIndex = index || buildAssessmentIndex(assessments, classId);
+function subjectEntries(marks, assessments, classId, subjectId, columns) {
+  const subjectMarks = (marks || []).filter(mark =>
+    subjectId == null || String(mark.subject_id) === String(subjectId)
+  );
+  const markAssessmentIds = new Set(subjectMarks.map(mark => String(mark.assessment_id)));
+  const scopedAssessments = [];
+  for (const assessment of assessments || []) {
+    const matchesClass = classMatches(assessment, classId);
+    if (matchesClass) scopedAssessments.push(assessment);
+    if (markAssessmentIds.has(String(assessment.id)) &&
+        (!matchesClass || String(assessment.subject_id) !== String(subjectId))) {
+      scopedAssessments.push({ ...assessment, class_id: classId, subject_id: subjectId });
+    }
+  }
+  const columnList = columns ? columns.slice() : buildExamColumns(scopedAssessments, classId);
+  const seenColumns = new Set(columnList.map(column => column.key));
+  for (const column of buildExamColumns(scopedAssessments, classId)) {
+    if (!seenColumns.has(column.key)) {
+      columnList.push(column);
+      seenColumns.add(column.key);
+    }
+  }
+  const assessmentIndex = buildAssessmentIndex(scopedAssessments, classId);
   const marksById = new Map();
-  for (const mark of marks || []) {
-    if (subjectId != null && String(mark.subject_id) !== String(subjectId)) continue;
+  for (const mark of subjectMarks) {
     const id = String(mark.assessment_id);
     const current = marksById.get(id);
     if (!current || markTime(mark) >= markTime(current)) marksById.set(id, mark);
@@ -273,17 +292,12 @@ function computeRanks({
   }
 
   const columnsByClass = new Map();
-  const indexByClass = new Map();
   const columnsFor = classId => {
     const key = String(classId);
     if (!columnsByClass.has(key)) {
       columnsByClass.set(key, buildExamColumns(assessments, classId));
-      indexByClass.set(key, buildAssessmentIndex(assessments, classId));
     }
-    return {
-      columns: columnsByClass.get(key),
-      index: indexByClass.get(key)
-    };
+    return columnsByClass.get(key);
   };
 
   const rows = [];
@@ -294,7 +308,7 @@ function computeRanks({
     const classId = learner.class_id ??
       (learnerMarks[0] && learnerMarks[0].class_id) ?? null;
     const classRecord = classRecords.get(String(classId));
-    const { columns, index } = columnsFor(classId);
+    const columns = columnsFor(classId);
     const marksBySubject = new Map();
     for (const mark of learnerMarks) {
       const key = String(mark.subject_id);
@@ -304,7 +318,7 @@ function computeRanks({
     const subjects = [];
     for (const [subjectId, subjectMarks] of marksBySubject) {
       const entries = subjectEntries(
-        subjectMarks, assessments, classId, subjectId, columns, index
+        subjectMarks, assessments, classId, subjectId, columns
       );
       const result = scoreSubject({
         entries,

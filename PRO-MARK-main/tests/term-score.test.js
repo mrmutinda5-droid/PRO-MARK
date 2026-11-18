@@ -160,3 +160,29 @@ test('one learner retains marks entered across multiple subjects', () => {
   );
   assert.equal(ranks.get('l1').subjects.length, 2);
 });
+
+test('saved marks remain attached to their subject when assessment setup is scoped elsewhere', () => {
+  const offScopeAssessment = assessment({
+    id: 'legacy-math-assessment',
+    class_id: CLASS_B,
+    subject_id: MATH,
+    name: 'Legacy Exam'
+  });
+  const ranks = computeRanks({
+    learners: [{ learner_id: 'l1', class_id: CLASS_A }],
+    marks: [{
+      learner_id: 'l1',
+      class_id: CLASS_A,
+      subject_id: ENGLISH,
+      assessment_id: offScopeAssessment.id,
+      mark: 72,
+      max_mark: 100
+    }],
+    assessments: [offScopeAssessment],
+    profilesByClass: new Map(),
+    classes: [{ id: CLASS_A, name: 'Grade 7' }]
+  });
+  assert.deepEqual(ranks.get('l1').subjects, [
+    { subject_id: ENGLISH, average: 72, basis: 'DEFAULT_MAIN_EXAMS' }
+  ]);
+});
