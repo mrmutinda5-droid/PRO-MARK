@@ -268,9 +268,34 @@ async function loadMarks(schoolId, yearId, termId, learnerIds) {
                  AND (ac.subject_id=m.subject_id OR ac.subject_id IS NULL)
                ORDER BY (ac.subject_id IS NOT NULL) DESC,(ac.class_id IS NOT NULL) DESC,
                         (ac.level_id IS NOT NULL) DESC,(ac.section_id IS NOT NULL) DESC
-               LIMIT 1),true) include_in_term_average
+               LIMIT 1),true) include_in_term_average,
+            COALESCE((SELECT ac.include_in_merit
+               FROM assessment_configurations ac
+               WHERE ac.school_id=m.school_id
+                 AND (ac.assessment_id=m.assessment_id OR ac.assessment_id IS NULL)
+                 AND (ac.subject_id=m.subject_id OR ac.subject_id IS NULL)
+                 AND (ac.class_id=COALESCE(m.class_id,me.class_id,l.class_id) OR ac.class_id IS NULL)
+                 AND (ac.level_id=mc.school_level_id OR ac.level_id IS NULL)
+                 AND (ac.section_id=ml.school_section_id OR ac.section_id IS NULL)
+               ORDER BY (ac.subject_id IS NOT NULL) DESC,(ac.assessment_id IS NOT NULL) DESC,
+                        (ac.class_id IS NOT NULL) DESC,(ac.level_id IS NOT NULL) DESC,
+                        (ac.section_id IS NOT NULL) DESC
+               LIMIT 1),true) include_in_merit
      FROM marks m
      JOIN assessments a ON a.id=m.assessment_id
+     LEFT JOIN learners l ON l.id=m.learner_id AND l.school_id=m.school_id
+     LEFT JOIN LATERAL (
+       SELECT e.class_id
+       FROM learner_enrollments e
+       WHERE e.school_id=m.school_id AND e.learner_id=m.learner_id
+         AND e.academic_year_id=m.academic_year_id
+         AND COALESCE(e.status,'ACTIVE') IN ('ACTIVE','COMPLETED')
+       ORDER BY (COALESCE(e.status,'ACTIVE')='ACTIVE') DESC,e.enrolled_at DESC
+       LIMIT 1
+     ) me ON true
+     LEFT JOIN classes mc
+       ON mc.id=COALESCE(m.class_id,me.class_id,l.class_id) AND mc.school_id=m.school_id
+     LEFT JOIN school_levels ml ON ml.id=mc.school_level_id
      WHERE m.school_id=$1 AND m.academic_year_id=$2 AND m.term_id=$3
        AND m.mark IS NOT NULL
        AND ($4::uuid[] IS NULL OR m.learner_id=ANY($4::uuid[]))`,
@@ -1057,6 +1082,7 @@ async function buildMerit(schoolId, query = {}, options = {}) {
     marks,
     assessments: scopedAssessments,
     profilesByClass: profiles,
+    inclusionField: 'include_in_merit',
     classes: classes.map(c => ({ id: c.id, name: c.label }))
   });
 
@@ -1285,7 +1311,7 @@ async function diagnoseEmpty(schoolId, yearId, termId, classRecord, assessmentId
     if (assessmentType) {
       return `Marks exist for this class, but none for the selected assessment type (${assessmentType === 'CAT' ? 'CATs' : assessmentType}). Choose "All assessments" above.`;
     }
-    return 'Marks exist for this class, but none produced a usable average. Check that every assessment used has a max mark greater than zero and that it is not excluded from the term average.';
+    return 'Marks exist for this class, but none produced a usable Merit average. Check that every assessment has a max mark greater than zero and is included in Merit.';
   } catch {
     return null;
   }

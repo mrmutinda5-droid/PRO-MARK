@@ -75,6 +75,40 @@ test('default term average uses main exams and ignores CATs', () => {
   assert.deepEqual(result.counted_keys, ['EXAM:OPENER EXAM', 'EXAM:END TERM']);
 });
 
+test('Merit includes marks by include_in_merit without changing term-average eligibility', () => {
+  const marks = [
+    {
+      learner_id: 'l1', subject_id: MATH, assessment_id: 'opener-math',
+      mark: 86, max_mark: 100, include_in_term_average: false, include_in_merit: true
+    },
+    {
+      learner_id: 'l1', subject_id: ENGLISH, assessment_id: 'opener-english',
+      mark: 78, max_mark: 100, include_in_term_average: true, include_in_merit: false
+    }
+  ];
+  const ranks = computeRanks({
+    learners: [{ learner_id: 'l1', class_id: CLASS_A }],
+    marks,
+    assessments,
+    profilesByClass: new Map(),
+    classes: [{ id: CLASS_A, name: 'Grade 7' }],
+    inclusionField: 'include_in_merit'
+  });
+  assert.deepEqual(ranks.get('l1').subjects, [
+    { subject_id: MATH, average: 86, basis: 'DEFAULT_MAIN_EXAMS' }
+  ]);
+  const reportRanks = computeRanks({
+    learners: [{ learner_id: 'l1', class_id: CLASS_A }],
+    marks,
+    assessments,
+    profilesByClass: new Map(),
+    classes: [{ id: CLASS_A, name: 'Grade 7' }]
+  });
+  assert.deepEqual(reportRanks.get('l1').subjects, [
+    { subject_id: ENGLISH, average: 78, basis: 'DEFAULT_MAIN_EXAMS' }
+  ]);
+});
+
 test('CAT group averages all selected CATs as one contribution', () => {
   const marks = [
     { learner_id: 'l1', subject_id: MATH, assessment_id: 'opener-math', mark: 50, max_mark: 100 },

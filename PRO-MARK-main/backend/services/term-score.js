@@ -174,6 +174,9 @@ function subjectEntries(marks, assessments, classId, subjectId, columns) {
     const includeInAverage =
       !(mark && mark.include_in_term_average === false) &&
       !(assessment && assessment.include_in_term_average === false);
+    const includeInMerit = mark && typeof mark.include_in_merit === 'boolean'
+      ? mark.include_in_merit
+      : !(assessment && assessment.include_in_merit === false);
     return {
       column_key: column.key,
       assessment_id: assessment ? assessment.id : null,
@@ -185,6 +188,7 @@ function subjectEntries(marks, assessments, classId, subjectId, columns) {
       percent,
       weight: finite(assessment && assessment.weight) ?? 0,
       include_in_term_average: includeInAverage,
+      include_in_merit: includeInMerit,
       include_in_final: !(assessment && assessment.include_in_final === false),
       assessment_order: assessmentOrder(assessment || column)
     };
@@ -200,9 +204,9 @@ function selectedProfileEntries(entries, profile) {
   );
 }
 
-function scoreSubject({ entries, profile }) {
+function scoreSubject({ entries, profile, inclusionField = 'include_in_term_average' }) {
   const available = (entries || []).filter(entry =>
-    entry.percent !== null && entry.include_in_term_average !== false
+    entry.percent !== null && entry[inclusionField] !== false
   );
   if (!available.length) {
     return { average: null, basis: 'NO_MARKS', counted_keys: [] };
@@ -276,7 +280,8 @@ function computeRanks({
   marks,
   assessments,
   profilesByClass,
-  classes
+  classes,
+  inclusionField = 'include_in_term_average'
 }) {
   const classRecords = new Map(
     (classes || []).map(item => [String(item.id), item])
@@ -322,7 +327,8 @@ function computeRanks({
       );
       const result = scoreSubject({
         entries,
-        profile: profiles.get(String(classId)) || null
+        profile: profiles.get(String(classId)) || null,
+        inclusionField
       });
       if (result.average !== null) {
         subjects.push({
