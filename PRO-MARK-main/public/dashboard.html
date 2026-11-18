@@ -715,14 +715,14 @@ body, main, .main-content, .dashboard-main {
 <div class="grid"><label>Academic year<select id="asYear" required></select></label><label>Term<select id="asTerm" required></select></label><label>Class<select id="asClass" required></select></label></div>
 <div id="assessmentSubjects" class="assessment-subjects"><div class="notice">Select academic year, term and class. The subjects assigned to the class will appear here.</div></div>
 <div class="card-subsection assessment-main-panel"><div class="section-title"><h3>Examinations and CATs</h3><span class="pill">Configure for this class and term</span></div>
-<p class="muted small">Add only the exams and CATs your school will use. Names are editable, and you can choose any number or order for each term. CATs remain available for their own merit lists; whether they count toward overall term merit is controlled below.</p>
+<p class="muted small">Add each exam or CAT once for the class. ZELIMU creates one combined assessment entry across the selected subjects while keeping each subject's marks separate. CATs remain available for their own merit lists; whether they count toward the term average is controlled below.</p>
 <div class="table-wrap"><table><thead><tr><th>Kind</th><th>Exam / CAT name</th><th>Maximum mark</th><th>Action</th></tr></thead><tbody id="assessmentDefinitionRows">
 <tr class="assessment-definition"><td><select class="assessment-kind"><option value="MAIN">Main exam</option><option value="CAT">CAT</option></select></td><td><input class="assessment-name" value="Opener" maxlength="60" required></td><td><input class="assessment-max" type="number" min="0.01" step="0.01" value="100" required></td><td><button class="btn danger mini remove-assessment-definition" type="button">Remove</button></td></tr>
 <tr class="assessment-definition"><td><select class="assessment-kind"><option value="MAIN">Main exam</option><option value="CAT">CAT</option></select></td><td><input class="assessment-name" value="End Term" maxlength="60" required></td><td><input class="assessment-max" type="number" min="0.01" step="0.01" value="100" required></td><td><button class="btn danger mini remove-assessment-definition" type="button">Remove</button></td></tr>
 </tbody></table></div>
 <div class="actions"><button class="btn secondary" id="addAssessmentDefinition" type="button">+ Add exam or CAT</button><button class="btn primary" id="createClassAssessments" type="button">Create selected exams for ALL subjects in this class</button></div>
 <div id="assessmentBulkMsg" class="notice">No changes made yet.</div>
-<div class="notice"><b>Important:</b> selecting a class applies the selected assessments to every subject already assigned to that class. No subject-by-subject repetition is required.</div>
+<div class="notice"><b>Important:</b> each selected exam appears once in this setup and applies across the selected subjects. Results still retain individual subject marks.</div>
 <h3>Configured assessments for this class / term</h3><div id="assessmentList"></div>
 <div class="card-subsection assessment-merit-settings" id="meritConfigurationPanel">
 <div class="section-title"><h3>Overall Term Merit Settings</h3><span class="pill">Configure once per class and term</span></div>
@@ -1418,10 +1418,33 @@ async function loadAssessmentClassSubjects(){
  }catch(e){box.innerHTML=`<div class="notice">Unable to load class subjects: ${esc(e.message)}</div>`;}
 }
 function localDateTimeValue(iso){ if(!iso)return ''; const d=new Date(iso); if(Number.isNaN(d.getTime()))return ''; const pad=n=>String(n).padStart(2,'0'); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function configuredAssessmentIdentity(a){
+ const type=String(a?.assessment_type||'').trim().toUpperCase().replace(/[-\s]+/g,'_'),name=String(a?.name||'').trim().toUpperCase().replace(/\s+/g,' ');
+ const standard=['OPENER','MID_TERM','END_TERM'].includes(type);
+ const scope=a?.class_id?String(a.class_id):(a?.subject_id?`subject:${a.subject_id}`:'school');
+ return `${scope}|${standard?type:`${type}|${name}`}`;
+}
+function configuredAssessmentLabel(a){
+ const type=String(a?.assessment_type||'').trim().toUpperCase().replace(/[-\s]+/g,'_');
+ return ({OPENER:'Opener',MID_TERM:'Mid Term',END_TERM:'End Term'})[type]||String(a?.name||'Assessment').trim();
+}
 async function loadConfiguredAssessments(){
  const y=$('asYear')?.value,t=$('asTerm')?.value,c=$('asClass')?.value,box=$('assessmentList'); if(!box||!y||!t)return;
  try{const rows=await api(`/api/assessments/${sid}/${y}/${t}`); const filtered=c?rows.filter(x=>!x.class_id||String(x.class_id)===String(c)):rows;
- box.innerHTML=filtered.length?`<div class="table-wrap"><table><thead><tr><th>Class</th><th>Subject</th><th>Assessment</th><th>Max</th><th>Status</th><th>Deadline</th><th>Action</th></tr></thead><tbody>${filtered.map(x=>`<tr><td>${esc(x.class_name||'Class-wide')}</td><td>${esc(x.subject_name||'All subjects')}</td><td><b>${esc(x.name)}</b><br><span class="muted small">${esc(x.assessment_type||'')}</span></td><td>${x.max_mark}</td><td><span class="pill">${esc(x.status||'OPEN')}</span></td><td><input class="admin-assessment-deadline" type="datetime-local" data-assessment-id="${esc(x.id)}" value="${localDateTimeValue(x.deadline_at)}"></td><td><button class="btn secondary edit-configured-assessment" type="button" data-assessment-id="${esc(x.id)}" data-year-id="${esc(y)}" data-term-id="${esc(t)}" data-name="${esc(x.name||'')}" data-max="${esc(x.max_mark)}" data-weight="${esc(x.weight||0)}">Edit</button> <button class="btn danger mini remove-configured-assessment" type="button" data-assessment-id="${esc(x.id)}" data-year-id="${esc(y)}" data-term-id="${esc(t)}">Remove</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="notice">No assessments have been configured for the selected class and term.</div>';
+ const groups=new Map();
+ for(const a of filtered){
+  const key=configuredAssessmentIdentity(a);
+  if(!groups.has(key))groups.set(key,[]);
+  groups.get(key).push(a);
+ }
+ const grouped=[...groups.values()].map(items=>{
+  const representative=items[0],subjects=new Set(items.filter(a=>a.subject_id).map(a=>String(a.subject_id)));
+  const maxima=[...new Set(items.map(a=>String(a.max_mark??100)))];
+  const statuses=[...new Set(items.map(a=>String(a.status||'OPEN').toUpperCase()))];
+  const deadlines=[...new Set(items.map(a=>a.deadline_at?new Date(a.deadline_at).toISOString():''))];
+  return {representative,items,subjects,maxima,statuses,deadlines};
+ }).sort((a,b)=>configuredAssessmentLabel(a.representative).localeCompare(configuredAssessmentLabel(b.representative)));
+ box.innerHTML=grouped.length?`<div class="table-wrap"><table><thead><tr><th>Class</th><th>Subjects combined</th><th>Assessment</th><th>Max mark</th><th>Status</th><th>Deadline</th><th>Action</th></tr></thead><tbody>${grouped.map(g=>{const x=g.representative,scopeClass=x.class_id||'',name=configuredAssessmentLabel(x),allDeadlines=g.deadlines.length===1;return `<tr><td>${esc(x.class_name||'Class-wide')}</td><td>${g.subjects.size?`${g.subjects.size} subject${g.subjects.size===1?'':'s'}`:'All subjects'}</td><td><b>${esc(name)}</b><br><span class="muted small">${esc(x.assessment_type||'')}</span></td><td>${g.maxima.length===1?esc(g.maxima[0]):'Varies by subject'}</td><td><span class="pill">${g.statuses.length===1?esc(g.statuses[0]):'Mixed'}</span></td><td><input class="admin-assessment-deadline" type="datetime-local" data-assessment-id="${esc(x.id)}" value="${localDateTimeValue(allDeadlines?g.deadlines[0]:'')}"></td><td><button class="btn secondary edit-configured-assessment" type="button" data-assessment-id="${esc(x.id)}" data-class-id="${esc(scopeClass)}" data-year-id="${esc(y)}" data-term-id="${esc(t)}" data-name="${esc(name)}" data-max="${esc(g.maxima.length===1?g.maxima[0]:x.max_mark)}" data-weight="${esc(x.weight||0)}">Edit</button> <button class="btn danger mini remove-configured-assessment" type="button" data-assessment-id="${esc(x.id)}" data-class-id="${esc(scopeClass)}" data-year-id="${esc(y)}" data-term-id="${esc(t)}">Remove</button></td></tr>`}).join('')}</tbody></table></div>`:'<div class="notice">No assessments have been configured for the selected class and term.</div>';
  if(c)await loadMeritConfiguration(y,t,c);else $('meritUnifiedMount').innerHTML='<div class="notice">Select a class to configure overall merit.</div>';
  }catch(e){box.innerHTML=`<div class="notice">Unable to load configured assessments: ${esc(e.message)}</div>`;}
 }
@@ -1435,9 +1458,12 @@ async function loadMeritConfiguration(yearId,termId,classId){
   const grouped=new Map();
   for(const a of setup.assessments||[]){
    const name=String(a.name||'').trim();if(!name)continue;
-   const cat=String(a.assessment_type||'').toUpperCase().startsWith('CAT')||/\bCAT\b|CONTINUOUS/i.test(name);
-   const key=(cat?'CAT:':'EXAM:')+name.toUpperCase().replace(/\s+/g,' ');
-   if(!grouped.has(key))grouped.set(key,{key,name,cat,ids:[],include:a.include_in_final!==false});
+   const type=String(a.assessment_type||'').trim().toUpperCase().replace(/[-\s]+/g,'_');
+   const standardNames={OPENER:'Opener',MID_TERM:'Mid Term',END_TERM:'End Term'};
+   const cat=type.startsWith('CAT')||/\bCAT\b|CONTINUOUS/i.test(name);
+   const displayName=standardNames[type]||name;
+   const key=standardNames[type]?`EXAM:${type}`:`${cat?'CAT':'EXAM'}:${name.toUpperCase().replace(/\s+/g,' ')}`;
+   if(!grouped.has(key))grouped.set(key,{key,name:displayName,cat,ids:[],include:a.include_in_final!==false});
    grouped.get(key).ids.push(String(a.id));
   }
   meritSetupGroups=[...grouped.values()].sort((a,b)=>a.cat===b.cat?a.name.localeCompare(b.name):a.cat?1:-1);
@@ -1447,7 +1473,7 @@ async function loadMeritConfiguration(yearId,termId,classId){
   const selectedGroups=meritSetupGroups.filter(g=>defaults.includes(g));
   const fallbackWeight=selectedGroups.length?100/selectedGroups.length:0;
   const mode=profile?.cat_group_mode||'INDIVIDUAL';
-  box.innerHTML=`<p class="muted small">Choose which exams count in <b>overall term merit</b> and the term average on report cards. Every configured exam and CAT is still printed as its own report-card column. CATs not selected here remain available for separate CAT merit lists.</p><div class="table-wrap"><table><thead><tr><th>Include in overall merit</th><th>Exam / CAT</th><th>Type</th><th>Weight (%)</th></tr></thead><tbody>${meritSetupGroups.map((g,i)=>{const checked=profile?g.ids.some(id=>selectedIds.has(id)):!g.cat&&g.include;const weight=Number(currentWeights[g.ids.find(id=>currentWeights[id]!==undefined)]??fallbackWeight);return `<tr><td><input type="checkbox" class="merit-assessment-selected" data-group="${i}" ${checked?'checked':''} aria-label="Include ${esc(g.name)} in overall merit"></td><td><b>${esc(g.name)}</b></td><td>${g.cat?'CAT':'Main exam'}</td><td><input type="number" class="merit-assessment-weight" data-group="${i}" min="0" max="100" step="0.01" value="${weight.toFixed(2)}"></td></tr>`}).join('')||'<tr><td colspan="4">No exams or CATs are configured for this class and term.</td></tr>'}</tbody></table></div><div class="grid"><label>Overall merit calculation<select id="meritCalculationMode"><option value="INDIVIDUAL">Equal contribution for each selected exam</option><option value="CAT_GROUP">Treat all selected CATs as one averaged group</option><option value="CUSTOM">Use custom percentage weights</option></select></label></div><p id="meritConfigurationStatus" class="notice" aria-live="polite">${profile?'Saved merit configuration loaded.':'Default: include main exams and keep CATs separate from overall merit.'}</p><button class="btn primary" id="saveMeritConfiguration" type="button">Save overall merit settings</button>`;
+  box.innerHTML=`<p class="muted small">Approve the exams that count in <b>overall term merit</b> and the report-card term average. Only approved exams with recorded marks are averaged; unfinished exams and exams you leave unchecked do not count. Every configured exam and CAT still appears in the subject results, while unapproved CATs remain available for separate CAT merit lists.</p><div class="table-wrap"><table><thead><tr><th>Approved for term average</th><th>Exam / CAT</th><th>Type</th><th>Weight (%)</th></tr></thead><tbody>${meritSetupGroups.map((g,i)=>{const checked=profile?g.ids.some(id=>selectedIds.has(id)):!g.cat&&g.include;const weight=Number(currentWeights[g.ids.find(id=>currentWeights[id]!==undefined)]??fallbackWeight);return `<tr><td><input type="checkbox" class="merit-assessment-selected" data-group="${i}" ${checked?'checked':''} aria-label="Approve ${esc(g.name)} for the term average"></td><td><b>${esc(g.name)}</b></td><td>${g.cat?'CAT':'Main exam'}</td><td><input type="number" class="merit-assessment-weight" data-group="${i}" min="0" max="100" step="0.01" value="${weight.toFixed(2)}"></td></tr>`}).join('')||'<tr><td colspan="4">No exams or CATs are configured for this class and term.</td></tr>'}</tbody></table></div><div class="grid"><label>Overall merit calculation<select id="meritCalculationMode"><option value="INDIVIDUAL">Equal contribution for each selected exam</option><option value="CAT_GROUP">Treat all selected CATs as one averaged group</option><option value="CUSTOM">Use custom percentage weights</option></select></label></div><p id="meritConfigurationStatus" class="notice" aria-live="polite">${profile?'Saved merit configuration loaded.':'Default: include main exams and keep CATs separate from overall merit.'}</p><button class="btn primary" id="saveMeritConfiguration" type="button">Save approved exams and term average</button>`;
   $('meritCalculationMode').value=mode;
   const setWeightInputs=()=>box.querySelectorAll('.merit-assessment-weight').forEach(input=>input.disabled=$('meritCalculationMode').value!=='CUSTOM');
   $('meritCalculationMode').addEventListener('change',setWeightInputs);setWeightInputs();
@@ -1480,14 +1506,15 @@ document.addEventListener('click',async e=>{
  const edit=e.target.closest('.edit-configured-assessment');
  if(edit){
    const name=prompt('Assessment name:',edit.dataset.name||''); if(name===null)return;
-   const max=prompt('Maximum mark (e.g. 30, 50, 100):',edit.dataset.max||'100'); if(max===null)return;
-   try{await api(`/api/assessments/${sid}/${edit.dataset.yearId}/${edit.dataset.termId}/${edit.dataset.assessmentId}`,{method:'PATCH',body:{name:name.trim(),max_mark:Number(max),class_id:$('asClass').value||undefined}});$('assessmentBulkMsg').textContent='Assessment updated successfully across the selected class and all its subjects.';await loadConfiguredAssessments();await loadControlAssessments();}catch(x){alert(x.message);}
+  const max=prompt('Maximum mark for this exam across the selected subjects (e.g. 30, 50, 100):',edit.dataset.max||'100'); if(max===null)return;
+  try{await api(`/api/assessments/${sid}/${edit.dataset.yearId}/${edit.dataset.termId}/${edit.dataset.assessmentId}`,{method:'PATCH',body:{name:name.trim(),max_mark:Number(max),class_id:edit.dataset.classId||$('asClass').value||undefined}});$('assessmentBulkMsg').textContent='Assessment updated successfully across the selected class and its subjects.';await loadConfiguredAssessments();await loadControlAssessments();}catch(x){alert(x.message);}
    return;
  }
  const rem=e.target.closest('.remove-configured-assessment');
  if(rem){
-   if(!confirm('Remove this assessment assignment from the selected class/subject? If marks already exist, ZELIMU CBC will protect the recorded marks and refuse the removal.'))return;
-   try{await api(`/api/assessments/${sid}/${rem.dataset.yearId}/${rem.dataset.termId}/${rem.dataset.assessmentId}`,{method:'DELETE'});$('assessmentBulkMsg').textContent='Assessment assignment removed.';await loadConfiguredAssessments();await loadControlAssessments();}catch(x){alert(x.message);}
+   if(!confirm('Remove this combined assessment from the class and all its subjects? Removal is refused if any subject has recorded marks.'))return;
+   const classQuery=rem.dataset.classId?`?class_id=${encodeURIComponent(rem.dataset.classId)}`:'';
+   try{const result=await api(`/api/assessments/${sid}/${rem.dataset.yearId}/${rem.dataset.termId}/${rem.dataset.assessmentId}${classQuery}`,{method:'DELETE'});$('assessmentBulkMsg').textContent=`Combined assessment removed from ${result.removed_count||1} subject record(s).`;await loadConfiguredAssessments();await loadControlAssessments();}catch(x){alert(x.message);}
  }
 });
 function defaultGradingRows(){return [
@@ -2107,7 +2134,7 @@ $('userControlList')?.addEventListener('click',async e=>{
  }catch(x){alert(x.message);}
 });
 async function setupAnalytics(){try{const year=$('anYear'),previousYear=year?.value;opts(year,state.years,x=>x.year_label);if(year)year.value=state.years.some(x=>String(x.id)===String(previousYear))?previousYear:(state.years[0]?.id||'');if(state.years[0]){await Promise.all(['mcTerm','pubTerm'].map(id=>terms(state.years[0].id,$(id))));await loadControlAssessments();}loadPublishAssessments();loadClassOverview();await loadPublicationHistory();}catch(e){console.error('Mark control centre could not be initialized:',e);const msg=$('publishMsg');if(msg){msg.style.display='block';msg.textContent=`Unable to initialize publishing controls: ${e.message}`;}}}
-async function loadControlAssessments(refreshTerm=true){const y=$('mcYear').value;if(!y)return;const previousTerm=$('mcTerm').value;if(refreshTerm)await terms(y,$('mcTerm'));if(previousTerm&&[...$('mcTerm').options].some(o=>o.value===previousTerm))$('mcTerm').value=previousTerm;if(!$('mcTerm').value)return;const classId=String($('mcClass')?.value||'');const qs=classId?`?class_id=${encodeURIComponent(classId)}`:'';const all=await api(`/api/assessments/${sid}/${y}/${$('mcTerm').value}${qs}`);const a=Array.isArray(all)?all:[];const previousAssessment=$('mcAssessment').value;opts($('mcAssessment'),a,x=>`${x.name} · ${x.assessment_type}`,'Select assessment…');const chosen=a.find(v=>String(v.id)===String(previousAssessment))||a[0];if(chosen){$('mcAssessment').value=chosen.id;$('mcDeadline').value=chosen.deadline_at?new Date(chosen.deadline_at).toISOString().slice(0,16):'';}else $('mcDeadline').value='';}
+async function loadControlAssessments(refreshTerm=true){const y=$('mcYear').value;if(!y)return;const previousTerm=$('mcTerm').value;if(refreshTerm)await terms(y,$('mcTerm'));if(previousTerm&&[...$('mcTerm').options].some(o=>o.value===previousTerm))$('mcTerm').value=previousTerm;if(!$('mcTerm').value)return;const classId=String($('mcClass')?.value||'');const qs=classId?`?class_id=${encodeURIComponent(classId)}`:'';const all=await api(`/api/assessments/${sid}/${y}/${$('mcTerm').value}${qs}`);const a=Array.isArray(all)?all:[];const filtered=a.filter(x=>!classId||!x.class_id||String(x.class_id)===classId),groups=new Map();filtered.forEach(x=>{const key=configuredAssessmentIdentity(x);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(x);});const choices=[...groups.values()].map(rows=>rows.find(x=>classId&&String(x.class_id)===classId)||rows[0]);const previousAssessment=$('mcAssessment').value,previous=filtered.find(x=>String(x.id)===String(previousAssessment));opts($('mcAssessment'),choices,x=>`${configuredAssessmentLabel(x)} · ${x.assessment_type}`,'Select assessment…');const chosen=previous?choices.find(x=>configuredAssessmentIdentity(x)===configuredAssessmentIdentity(previous)):null;if(chosen)$('mcAssessment').value=chosen.id;else if(choices[0])$('mcAssessment').value=choices[0].id;const selected=choices.find(x=>String(x.id)===$('mcAssessment').value);if(selected)$('mcDeadline').value=selected.deadline_at?new Date(selected.deadline_at).toISOString().slice(0,16):'';else $('mcDeadline').value='';}
 let classOverviewSelection=new Set();
 let publicationClasses=[];
 let selectedPublicationClass=null;

@@ -75,7 +75,28 @@ test('default term average includes exactly assessments enabled by the admin', (
   const result = scoreSubject({ entries, profile: null });
   assert.equal(result.average, 65);
   assert.equal(result.basis, 'INCLUDED_ASSESSMENTS');
-  assert.deepEqual(result.counted_keys, ['EXAM:OPENER', 'EXAM:END TERM']);
+  assert.deepEqual(result.counted_keys, ['EXAM:OPENER', 'EXAM:END_TERM']);
+});
+
+test('a saved admin selection does not fall back to unselected exam marks', () => {
+  const marks = [
+    { learner_id: 'l1', subject_id: MATH, assessment_id: 'opener-math', mark: 70, max_mark: 100 },
+    { learner_id: 'l1', subject_id: MATH, assessment_id: 'end-all', mark: 90, max_mark: 100 }
+  ];
+  const entries = subjectEntries(marks, assessments, CLASS_A, MATH, columns);
+  const result = scoreSubject({
+    entries,
+    profile: { selected_assessment_ids: ['opener-english'], cat_group_mode: 'INDIVIDUAL' }
+  });
+  assert.equal(result.average, null);
+  assert.equal(result.basis, 'NO_APPROVED_MARKS');
+  assert.deepEqual(result.counted_keys, []);
+  const selectedExam = scoreSubject({
+    entries,
+    profile: { selected_assessment_ids: ['opener-math'], cat_group_mode: 'INDIVIDUAL' }
+  });
+  assert.equal(selectedExam.average, 70);
+  assert.deepEqual(selectedExam.counted_keys, ['EXAM:OPENER']);
 });
 
 test('admin-included CATs contribute to term average even when not final exams', () => {
@@ -88,7 +109,7 @@ test('admin-included CATs contribute to term average even when not final exams',
   const result = scoreSubject({ entries, profile: null });
   assert.equal(result.average, 60);
   assert.equal(result.basis, 'INCLUDED_ASSESSMENTS');
-  assert.deepEqual(result.counted_keys, ['EXAM:OPENER', 'CAT:CAT 1', 'EXAM:END TERM']);
+  assert.deepEqual(result.counted_keys, ['EXAM:OPENER', 'CAT:CAT 1', 'EXAM:END_TERM']);
 });
 
 test('mark-specific inclusion overrides broader assessment inclusion', () => {
@@ -229,6 +250,27 @@ test('one learner retains subject marks under a single opener column', () => {
     'opener-english',
     'opener-math'
   ]);
+});
+
+test('standard End Term records across subjects use one canonical exam column', () => {
+  const subjectAssessments = [
+    assessment({ id: 'end-math', name: 'End Term Mathematics', assessment_type: 'END_TERM', subject_id: MATH }),
+    assessment({ id: 'end-english', name: 'English Final', assessment_type: 'END_TERM', subject_id: ENGLISH })
+  ];
+  const endColumns = buildExamColumns(subjectAssessments, CLASS_A);
+  assert.equal(endColumns.length, 1);
+  assert.equal(endColumns[0].name, 'End Term');
+
+  const entries = subjectEntries(
+    [{ subject_id: ENGLISH, assessment_id: 'end-english', mark: 82, max_mark: 100 }],
+    subjectAssessments,
+    CLASS_A,
+    ENGLISH,
+    endColumns
+  );
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].assessment_id, 'end-english');
+  assert.equal(entries[0].name, 'End Term');
 });
 
 test('saved marks remain attached to their subject when assessment setup is scoped elsewhere', () => {

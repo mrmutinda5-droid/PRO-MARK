@@ -532,6 +532,7 @@ router.patch('/:schoolId/:yearId/:termId/:assessmentId',schoolBoundary,roles('SC
     if(requestedClassId&&current.class_id&&String(current.class_id)!==requestedClassId)
       return res.status(400).json({error:'Selected assessment does not belong to the requested class.'});
     const classWide=Boolean(requestedClassId&&current.class_id&&String(current.class_id)===requestedClassId);
+    const standardAssessment=['OPENER','MID_TERM','END_TERM'].includes(String(current.assessment_type||'').toUpperCase());
     if(b.max_mark!==undefined){
       const excessive=classWide
         ?(await db.query(`
@@ -539,8 +540,8 @@ router.patch('/:schoolId/:yearId/:termId/:assessmentId',schoolBoundary,roles('SC
           JOIN assessments a ON a.id=m.assessment_id
           WHERE a.school_id=$1 AND a.academic_year_id=$2 AND a.term_id=$3
             AND a.class_id=$4 AND a.assessment_type=$5
-            AND lower(a.name)=lower($6) AND m.mark>$7
-        `,[sid,yearId,termId,requestedClassId,current.assessment_type,current.name,nextMax])).rows[0]
+            AND ($7::boolean OR lower(a.name)=lower($6)) AND m.mark>$8
+        `,[sid,yearId,termId,requestedClassId,current.assessment_type,current.name,standardAssessment,nextMax])).rows[0]
         :(await db.query('SELECT COUNT(*)::int count FROM marks WHERE assessment_id=$1 AND mark>$2',[assessmentId,nextMax])).rows[0];
       if(Number(excessive?.count)>0)return res.status(409).json({error:`The new maximum mark is below ${excessive.count} existing mark(s). Correct those marks before lowering the maximum.`});
     }
@@ -583,7 +584,7 @@ router.patch('/:schoolId/:yearId/:termId/:assessmentId',schoolBoundary,roles('SC
             assessment_order=$5,deadline_at=$6,status=$7
         WHERE school_id=$8 AND academic_year_id=$9 AND term_id=$10
           AND class_id=$11 AND assessment_type=$12
-          AND lower(name)=lower($13)
+          AND ($14::boolean OR lower(name)=lower($13))
         RETURNING *
       `:`
         UPDATE assessments
@@ -593,7 +594,7 @@ router.patch('/:schoolId/:yearId/:termId/:assessmentId',schoolBoundary,roles('SC
         RETURNING *
       `;
       const params=classWide
-        ?[nextName,nextMax,nextWeight,nextInclude,nextOrder,deadline,status,sid,yearId,termId,requestedClassId,current.assessment_type,current.name]
+        ?[nextName,nextMax,nextWeight,nextInclude,nextOrder,deadline,status,sid,yearId,termId,requestedClassId,current.assessment_type,current.name,standardAssessment]
         :[nextName,nextMax,nextWeight,nextInclude,nextOrder,deadline,status,assessmentId,sid,yearId,termId];
       const q=await client.query(updateSql,params);
       let updatedCount=q.rowCount;
@@ -627,15 +628,36 @@ router.delete('/:schoolId/:yearId/:termId/:assessmentId',schoolBoundary,roles('S
   const c=await db.pool.connect();
   try{
     await assertBelongs('academic_years',yearId,sid); await assertBelongs('terms',termId,sid);
-    const a=(await c.query(`SELECT id,name,(SELECT COUNT(*)::int FROM marks m WHERE m.assessment_id=assessments.id) mark_count FROM assessments WHERE id=$1 AND school_id=$2 AND academic_year_id=$3 AND term_id=$4`,[assessmentId,sid,yearId,termId])).rows[0];
-    if(!a)return res.status(404).json({error:'Assessment not found.'});
-    if(Number(a.mark_count)>0)return res.status(409).json({error:`Cannot remove ${a.name} because ${a.mark_count} mark(s) are already recorded. Close it instead so existing results are preserved.`});
+    const requestedClassId=String(req.query.class_id||'').trim();
+    if(requestedClassId)await assertBelongs('classes',requestedClassId,sid);
     await c.query('BEGIN');
-    await c.query('DELETE FROM assessment_configurations WHERE school_id=$1 AND assessment_id=$2',[sid,assessmentId]);
-    const q=await c.query('DELETE FROM assessments WHERE id=$1 AND school_id=$2 AND academic_year_id=$3 AND term_id=$4 RETURNING id,name',[assessmentId,sid,yearId,termId]);
+    const a=(await c.query(`SELECT id,name,assessment_type,class_id FROM assessments WHERE id=$1 AND school_id=$2 AND academic_year_id=$3 AND term_id=$4 FOR UPDATE`,[assessmentId,sid,yearId,termId])).rows[0];
+    if(!a){await c.query('ROLLBACK');return res.status(404).json({error:'Assessment not found.'});}
+    if(requestedClassId&&String(a.class_id)!==requestedClassId){await c.query('ROLLBACK');return res.status(400).json({error:'Selected assessment does not belong to the requested class.'});}
+    const standardAssessment=['OPENER','MID_TERM','END_TERM'].includes(String(a.assessment_type||'').toUpperCase());
+    const targets=requestedClassId
+      ?(await c.query(`
+        SELECT id,name FROM assessments
+        WHERE school_id=$1 AND academic_year_id=$2 AND term_id=$3
+          AND class_id=$4 AND assessment_type=$5
+          AND ($7::boolean OR lower(name)=lower($6))
+        FOR UPDATE
+      `,[sid,yearId,termId,requestedClassId,a.assessment_type,a.name,standardAssessment])).rows
+      :[{id:a.id,name:a.name}];
+    const targetIds=targets.map(row=>row.id);
+    const marked=(await c.query(
+      'SELECT COUNT(*)::int count FROM marks WHERE assessment_id=ANY($1::uuid[])',
+      [targetIds]
+    )).rows[0];
+    if(Number(marked.count)>0){
+      await c.query('ROLLBACK');
+      return res.status(409).json({error:`Cannot remove this assessment because ${marked.count} mark(s) are already recorded. Close it instead so existing results are preserved.`});
+    }
+    await c.query('DELETE FROM assessment_configurations WHERE school_id=$1 AND assessment_id=ANY($2::uuid[])',[sid,targetIds]);
+    const q=await c.query('DELETE FROM assessments WHERE id=ANY($1::uuid[]) AND school_id=$2 AND academic_year_id=$3 AND term_id=$4 RETURNING id,name',[targetIds,sid,yearId,termId]);
     await c.query('COMMIT');
     invalidateReportCaches(); invalidateReportPdfCache(); invalidateResultsCaches();
-    res.json({ok:true,removed:q.rows[0]});
+    res.json({ok:true,removed:q.rows,removed_count:q.rowCount});
   }catch(e){try{await c.query('ROLLBACK')}catch{}res.status(e.status||400).json({error:e.message||'Unable to remove assessment.'});}finally{c.release();}
 });
 

@@ -23,8 +23,9 @@ function isCatAssessment(assessment) {
 }
 
 function assessmentKey(assessment) {
-  const type = normalizeLabel(assessment && assessment.assessment_type);
-  if (type === 'OPENER' || type.startsWith('OPENER ')) return 'EXAM:OPENER';
+  const type = normalizeLabel(assessment && assessment.assessment_type)
+    .replace(/[-\s]+/g, '_');
+  if (['OPENER', 'MID_TERM', 'END_TERM'].includes(type)) return `EXAM:${type}`;
   const name = normalizeLabel(assessment && assessment.name);
   return `${isCatAssessment(assessment) ? 'CAT' : 'EXAM'}:${name}`;
 }
@@ -73,9 +74,14 @@ function buildExamColumns(assessments, classId) {
       (min, row) => Math.min(min, assessmentOrder(row)),
       Number.MAX_SAFE_INTEGER
     );
+    const standardNames = {
+      'EXAM:OPENER': 'Opener',
+      'EXAM:MID_TERM': 'Mid Term',
+      'EXAM:END_TERM': 'End Term'
+    };
     columns.push({
       key,
-      name: key === 'EXAM:OPENER' ? 'Opener' : String(representative.name || '').trim(),
+      name: standardNames[key] || String(representative.name || '').trim(),
       type: normalizeLabel(representative.assessment_type) ||
         (isCatAssessment(representative) ? 'CAT' : 'EXAM'),
       cat: isCatAssessment(representative),
@@ -183,9 +189,7 @@ function subjectEntries(marks, assessments, classId, subjectId, columns) {
     return {
       column_key: column.key,
       assessment_id: assessment ? assessment.id : null,
-      name: column.key === 'EXAM:OPENER'
-        ? 'Opener'
-        : assessment ? assessment.name : column.name,
+      name: column.name,
       type: normalizeLabel(assessment && assessment.assessment_type) || column.type,
       cat: column.cat,
       max_mark: maxMark,
@@ -218,6 +222,9 @@ function scoreSubject({ entries, profile, inclusionField = 'include_in_term_aver
   }
 
   const chosen = profile ? selectedProfileEntries(available, profile) : [];
+  if (profile && !chosen.length) {
+    return { average: null, basis: 'NO_APPROVED_MARKS', counted_keys: [] };
+  }
   if (chosen.length) {
     const mode = String(profile.cat_group_mode || 'INDIVIDUAL').toUpperCase();
     if (mode === 'CUSTOM') {
