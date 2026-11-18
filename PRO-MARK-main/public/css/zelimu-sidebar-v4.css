@@ -1,0 +1,134 @@
+
+/* ZELIMU CBC — CONSOLIDATED EMERALD SIDEBAR */
+
+@media(min-width:761px){
+  body main.page>.pm-workflow-intro{
+    position:fixed!important;
+    left:0!important;
+    top:0!important;
+    bottom:0!important;
+    width:254px!important;
+    max-width:254px!important;
+    height:100vh!important;
+    padding:14px 12px!important;
+    margin:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:#064a37!important;
+    box-shadow:3px 0 15px rgba(0,0,0,.12)!important;
+    overflow-y:auto!important;
+    z-index:100!important;
+  }
+}
+
+body .pm-workflow-intro .zc-sidebar-home{
+  background:#17634e!important;
+  padding:12px!important;
+  border-radius:10px!important;
+  margin-bottom:12px!important;
+}
+
+body .pm-workflow-intro .zc-home-link{
+  background:#e8b847!important;
+  color:#153d31!important;
+  font-size:12px!important;
+  font-weight:800!important;
+  padding:12px!important;
+  border:0!important;
+  border-radius:8px!important;
+  margin-bottom:15px!important;
+}
+
+body .pm-workflow-intro>.section-title{
+  color:#a8cdbd!important;
+  font-size:10px!important;
+  font-weight:700!important;
+  letter-spacing:.06em!important;
+  margin:7px 0!important;
+}
+
+body .pm-workflow-intro #navTabs{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:3px!important;
+  grid-template-columns:none!important;
+  background:transparent!important;
+}
+
+body .pm-workflow-intro #navTabs .pm-module-group{
+  background:transparent!important;
+  border:0!important;
+  border-radius:0!important;
+  padding:0!important;
+  margin:0!important;
+  box-shadow:none!important;
+}
+
+body .pm-workflow-intro #navTabs .pm-module-group h3{
+  background:#064a37!important;
+  background-image:none!important;
+  color:#a9d2c0!important;
+  font-size:10px!important;
+  font-weight:750!important;
+  line-height:1.4!important;
+  letter-spacing:.04em!important;
+  padding:10px!important;
+  margin:3px 0!important;
+  min-height:32px!important;
+  border:0!important;
+  border-radius:7px!important;
+  box-shadow:none!important;
+  text-shadow:none!important;
+}
+
+body .pm-workflow-intro #navTabs .pm-module-group h3:hover{
+  background:#175f4b!important;
+  color:#fff!important;
+}
+
+body .pm-workflow-intro #navTabs .pm-admin-menu{
+  background:transparent!important;
+  border:0!important;
+  padding:0 0 5px 5px!important;
+  margin:0!important;
+  box-shadow:none!important;
+}
+
+body .pm-workflow-intro #navTabs .pm-admin-menu button{
+  background:transparent!important;
+  background-image:none!important;
+  color:#e6f4ed!important;
+  border:0!important;
+  border-radius:7px!important;
+  box-shadow:none!important;
+  text-shadow:none!important;
+  font-size:11px!important;
+  font-weight:500!important;
+  line-height:1.35!important;
+  min-height:36px!important;
+  padding:7px 9px!important;
+  margin:1px 0!important;
+  text-align:left!important;
+}
+
+body .pm-workflow-intro #navTabs .pm-admin-menu button:hover,
+body .pm-workflow-intro #navTabs .pm-admin-menu button.zc-selected{
+  background:#216c56!important;
+  color:#fff!important;
+}
+
+body .pm-workflow-intro .zelimu-module-toolbar input{
+  background:#fff!important;
+  color:#24483c!important;
+  border:0!important;
+  border-radius:8px!important;
+  font-size:12px!important;
+  min-height:38px!important;
+}
+
+@media(max-width:760px){
+  body main.page>.pm-workflow-intro{
+    background:#064a37!important;
+    border-radius:12px!important;
+  }
+}

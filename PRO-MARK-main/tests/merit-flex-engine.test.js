@@ -1,0 +1,12 @@
+'use strict';const assert=require('node:assert/strict');const {subjectResult,calculate}=require('../backend/services/merit-flex-engine');
+const marks=[{assessment_id:'op',percent:75},{assessment_id:'c1',percent:70},{assessment_id:'c5',percent:90},{assessment_id:'mid',percent:80},{assessment_id:'end',percent:85}];
+assert.equal(subjectResult(marks,['op','mid','end'],'INDIVIDUAL',[]).score,80);
+assert.equal(subjectResult(marks,['op','c1','c5','mid','end'],'CAT_GROUP',['c1','c5']).score,80);
+assert.equal(subjectResult(marks,['op','c1','c5','mid','end'],'INDIVIDUAL',['c1','c5']).score,80);
+assert.equal(subjectResult(marks,['c1'],'INDIVIDUAL',['c1']).score,70);
+assert.equal(subjectResult(marks,['op','mid','end'],'CUSTOM',[],{op:20,mid:30,end:50}).score,81.5);
+assert.equal(subjectResult(marks,['op','c1','mid','end'],'CUSTOM',['c1'],{op:10,c1:20,mid:30,end:40}).score,79.5);
+assert.equal(subjectResult(marks,['op','c1','mid'],'INDIVIDUAL',['c1']).score,75);
+assert.equal(subjectResult(marks,['op','c2'],'INDIVIDUAL',['c2']).complete,false);
+assert.equal(subjectResult([...marks,{assessment_id:'op',percent:80}],['op'],'INDIVIDUAL',[]).reason,'DUPLICATE_MARK');
+console.log('Flexible merit tests passed');

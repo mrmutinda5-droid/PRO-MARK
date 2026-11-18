@@ -1,0 +1,151 @@
+{
+  "platform": "ZELIMU CBC",
+  "deployment_policy": "One final deployment after verification",
+  "database_policy": "Preserve existing Supabase data",
+  "modules": {
+    "01_administration": [
+      "Admissions",
+      "Learner registration",
+      "Parent profiles",
+      "Transfers",
+      "Promotion",
+      "Leaving certificates"
+    ],
+    "02_academics": [
+      "Academic years",
+      "Terms",
+      "Levels",
+      "Classes",
+      "Streams",
+      "Subjects",
+      "Teacher assignments"
+    ],
+    "03_assessments": [
+      "Assessment setup",
+      "Mark entry",
+      "Grading",
+      "Results approval",
+      "Report cards",
+      "Merit lists"
+    ],
+    "04_timetable": [
+      "Class timetable",
+      "Teacher timetable",
+      "Room allocation",
+      "Automatic scheduling"
+    ],
+    "05_staff_hr": [
+      "Staff profiles",
+      "Attendance",
+      "Leave",
+      "Payroll records"
+    ],
+    "06_finance": [
+      "Fee structures",
+      "Invoices",
+      "Payments",
+      "Receipts",
+      "Balances",
+      "Arrears",
+      "Financial reports"
+    ],
+    "07_attendance": [
+      "Learner attendance",
+      "Staff attendance",
+      "Absence reports",
+      "Biometric integration"
+    ],
+    "08_communication": [
+      "SMS",
+      "Announcements",
+      "Fee reminders",
+      "Results notifications"
+    ],
+    "09_transport": [
+      "Vehicles",
+      "Routes",
+      "Drivers",
+      "Learner allocation",
+      "Transport charges"
+    ],
+    "10_boarding": [
+      "Dormitories",
+      "Beds",
+      "Learner allocation",
+      "Boarding attendance",
+      "Boarding fees"
+    ],
+    "11_resources": [
+      "Books",
+      "Equipment",
+      "Stock",
+      "Issuance",
+      "Returns",
+      "Reports"
+    ],
+    "12_analytics": [
+      "Academic performance",
+      "Attendance analysis",
+      "Financial analysis",
+      "School-wide reports"
+    ],
+    "13_system": [
+      "User accounts",
+      "Roles",
+      "Permissions",
+      "School branding",
+      "Security",
+      "Audit records"
+    ]
+  },
+  "existing_backend_routes": [
+    "assessments.js",
+    "auth.js",
+    "billing.js",
+    "biometrics.js",
+    "communications.js",
+    "documents.js",
+    "extended.js",
+    "finance.js",
+    "grading.js",
+    "merit.js",
+    "operations.js",
+    "people.js",
+    "platform.js",
+    "reports.js",
+    "resources.js",
+    "school-documents.js",
+    "school.js",
+    "settings.js",
+    "timetable-generator.js"
+  ],
+  "existing_migrations": [
+    "001_hardening.sql",
+    "002_production_documents_lifecycle.sql",
+    "003_leadership_and_learner_authority.sql",
+    "004_academic_terms_and_promotion.sql",
+    "005_billing_and_subscriptions.sql",
+    "006_mark_entry_control_and_announcements.sql",
+    "007_teacher_workflow_deadlines_parent_publish_analytics.sql",
+    "008_assessment_context_and_portal_sms.sql",
+    "009_sms_delivery_tracking.sql",
+    "010_assessment_class_bulk_setup.sql",
+    "011_assessment_workflow_columns_repair.sql",
+    "012_teacher_mark_entry_unlocked_compat.sql",
+    "013_unified_user_mark_entry_and_role_control.sql",
+    "014_billing_activation_and_school_duplicates.sql",
+    "015_full_workflow_compatibility.sql",
+    "016_analytics_and_report_card_designation.sql",
+    "017_full_operations_and_term3_repair.sql",
+    "018_term3_integrity_final.sql",
+    "019_class_teacher_master_import_resources_report_design.sql",
+    "019_report_card_accuracy_and_term3.sql",
+    "020_resource_catalog_and_class_report_download.sql",
+    "021_parent_publish_and_duplicate_guard.sql",
+    "022_imported_teacher_roles.sql",
+    "023_class_grading_school_calendar_accuracy.sql",
+    "028_school_finance_core.sql",
+    "schema.sql",
+    "seed_grading_examples.sql"
+  ]
+}

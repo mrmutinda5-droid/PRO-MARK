@@ -1,0 +1,34 @@
+
+/* ZELIMU CBC — UNIFORM EMERALD SIDEBAR */
+/* Visual styling only. No JavaScript observers. */
+
+#navTabs .pm-module-group > h3,
+.pm-workflow-intro #navTabs .pm-module-group > h3,
+body #navTabs .pm-module-group > h3,
+body .pm-workflow-intro .pm-module-group > h3 {
+    background: #07513e !important;
+    background-color: #07513e !important;
+    background-image: none !important;
+    color: #ffffff !important;
+    border: 1px solid #176c53 !important;
+    border-left: 4px solid #d9ad42 !important;
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+}
+
+#navTabs .pm-module-group > h3 *,
+.pm-workflow-intro #navTabs .pm-module-group > h3 * {
+    color: #ffffff !important;
+    background-image: none !important;
+}
+
+#navTabs .pm-module-group > h3:hover {
+    background: #09684e !important;
+    background-color: #09684e !important;
+}
+
+#navTabs .pm-module-group > h3:focus-visible {
+    outline: 2px solid #e8bf52 !important;
+    outline-offset: 2px !important;
+}

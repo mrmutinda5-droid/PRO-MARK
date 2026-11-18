@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1120" viewBox="0 0 1600 1120" role="img" aria-labelledby="title description">
+  <title id="title">Certificate and learner ID card template concepts</title>
+  <desc id="description">Three printable certificate concepts and three matching learner ID card concepts, shown with sample school and learner details.</desc>
+  <defs>
+    <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10264b"/>
+      <stop offset="1" stop-color="#244b78"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4d58b"/>
+      <stop offset="1" stop-color="#c99435"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0e7490"/>
+      <stop offset="1" stop-color="#164e63"/>
+    </linearGradient>
+    <linearGradient id="plum" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6b315d"/>
+      <stop offset="1" stop-color="#3e315f"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#10243c" flood-opacity=".14"/>
+    </filter>
+    <style>
+      .sans{font-family:Arial,Helvetica,sans-serif}
+      .serif{font-family:Georgia,'Times New Roman',serif}
+      .title{font:700 29px Arial,Helvetica,sans-serif;fill:#17365d}
+      .sub{font:15px Arial,Helvetica,sans-serif;fill:#63748b}
+      .school{font:700 14px Arial,Helvetica,sans-serif;letter-spacing:1.6px}
+      .small{font:12px Arial,Helvetica,sans-serif}
+      .tiny{font:10px Arial,Helvetica,sans-serif}
+      .cert-name{font:italic 24px Georgia,'Times New Roman',serif}
+      .cert-title{font:700 23px Georgia,'Times New Roman',serif;letter-spacing:2px}
+      .card-name{font:700 16px Arial,Helvetica,sans-serif}
+      .card-meta{font:11px Arial,Helvetica,sans-serif}
+    </style>
+  </defs>
+  <rect width="1600" height="1120" fill="#f3f6fa"/>
+  <text x="54" y="52" class="title">Document Centre · Design proposals</text>
+  <text x="54" y="79" class="sub">Print-ready concepts for school-branded certificates and learner ID cards · Sample content only</text>
+  <text x="54" y="119" class="sans" font-size="16" font-weight="700" fill="#17365d">CERTIFICATES · A4 LANDSCAPE</text>
+
+  <!-- Certificate 1: Classic formal -->
+  <g transform="translate(54 141)" filter="url(#shadow)">
+    <rect width="472" height="326" rx="8" fill="#fff"/>
+    <rect x="10" y="10" width="452" height="306" rx="5" fill="none" stroke="#17365d" stroke-width="2"/>
+    <rect x="17" y="17" width="438" height="292" rx="3" fill="none" stroke="#d1a34b" stroke-width="1"/>
+    <path d="M22 22h45v4H26v41h-4zM450 22h-45v4h41v41h4zM22 304h45v-4H26v-41h-4zM450 304h-45v-4h41v-41h4z" fill="#d1a34b"/>
+    <circle cx="236" cy="48" r="20" fill="#17365d"/>
+    <path d="M236 34l4 9 10 1-7 7 2 10-9-5-9 5 2-10-7-7 10-1z" fill="#f1d48b"/>
+    <text x="236" y="83" text-anchor="middle" class="school" fill="#17365d">YOUR SCHOOL NAME</text>
+    <text x="236" y="101" text-anchor="middle" class="tiny" fill="#65748a">LEARN · LEAD · ACHIEVE</text>
+    <line x1="75" y1="117" x2="397" y2="117" stroke="#d1a34b"/>
+    <text x="236" y="150" text-anchor="middle" class="cert-title" fill="#17365d">CERTIFICATE</text>
+    <text x="236" y="169" text-anchor="middle" class="tiny" letter-spacing="2" fill="#a17728">OF ACADEMIC ACHIEVEMENT</text>
+    <text x="236" y="193" text-anchor="middle" class="small" fill="#526176">This certificate is proudly presented to</text>
+    <text x="236" y="225" text-anchor="middle" class="cert-name" fill="#17365d">Learner Name</text>
+    <line x1="117" y1="233" x2="355" y2="233" stroke="#d1a34b"/>
+    <text x="236" y="252" text-anchor="middle" class="tiny" fill="#526176">For outstanding dedication and achievement</text>
+    <text x="236" y="267" text-anchor="middle" class="tiny" fill="#526176">in the 2026 academic year.</text>
+    <line x1="82" y1="291" x2="165" y2="291" stroke="#9aa7b7"/>
+    <line x1="306" y1="291" x2="389" y2="291" stroke="#9aa7b7"/>
+    <text x="123" y="304" text-anchor="middle" class="tiny" fill="#526176">Headteacher</text>
+    <text x="347" y="304" text-anchor="middle" class="tiny" fill="#526176">Date · School seal</text>
+    <circle cx="236" cy="285" r="15" fill="#fff" stroke="#d1a34b" stroke-width="2"/>
+    <path d="M236 274l3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1z" fill="#d1a34b"/>
+  </g>
+  <text x="290" y="489" text-anchor="middle" class="sans" font-size="14" font-weight="700" fill="#17365d">01 · CLASSIC FORMAL</text>
+  <text x="290" y="508" text-anchor="middle" class="small" fill="#63748b">Navy · gold · ornamental frame</text>
+
+  <!-- Certificate 2: Modern -->
+  <g transform="translate(564 141)" filter="url(#shadow)">
+    <rect width="472" height="326" rx="8" fill="#fff"/>
+    <rect width="100" height="326" rx="8" fill="url(#teal)"/>
+    <path d="M88 0h15v326H88z" fill="#d6b66e"/>
+    <circle cx="50" cy="61" r="25" fill="#fff" fill-opacity=".12" stroke="#fff" stroke-opacity=".7"/>
+    <path d="M50 42l5 12 13 1-10 8 3 13-11-7-11 7 3-13-10-8 13-1z" fill="#e7ce8c"/>
+    <text x="50" y="115" text-anchor="middle" class="tiny" fill="#fff" letter-spacing="1.5">SCHOOL</text>
+    <text x="50" y="132" text-anchor="middle" class="tiny" fill="#fff" letter-spacing="1.5">SEAL</text>
+    <text x="126" y="47" class="school" fill="#0e6479">YOUR SCHOOL NAME</text>
+    <text x="126" y="66" class="tiny" fill="#77879a">LEARN · LEAD · ACHIEVE</text>
+    <text x="126" y="113" class="sans" font-size="12" font-weight="700" letter-spacing="2" fill="#0e7490">RECOGNITION</text>
+    <text x="126" y="149" class="sans" font-size="30" font-weight="700" fill="#17365d">Certificate</text>
+    <text x="126" y="171" class="sans" font-size="15" fill="#17365d">of Academic Achievement</text>
+    <line x1="126" y1="187" x2="426" y2="187" stroke="#d9e3eb"/>
+    <text x="126" y="211" class="small" fill="#607186">Presented to</text>
+    <text x="126" y="244" class="serif" font-size="27" font-style="italic" fill="#0e6479">Learner Name</text>
+    <text x="126" y="267" class="small" fill="#526176">For outstanding dedication and achievement</text>
+    <text x="126" y="284" class="small" fill="#526176">in the 2026 academic year.</text>
+    <line x1="126" y1="302" x2="220" y2="302" stroke="#9aa7b7"/>
+    <line x1="335" y1="302" x2="427" y2="302" stroke="#9aa7b7"/>
+    <text x="126" y="316" class="tiny" fill="#63748b">Headteacher</text>
+    <text x="335" y="316" class="tiny" fill="#63748b">Date · Seal</text>
+  </g>
+  <text x="800" y="489" text-anchor="middle" class="sans" font-size="14" font-weight="700" fill="#17365d">02 · MODERN CLEAN</text>
+  <text x="800" y="508" text-anchor="middle" class="small" fill="#63748b">Teal · ivory · bold clean layout</text>
+
+  <!-- Certificate 3: Academic laurel -->
+  <g transform="translate(1074 141)" filter="url(#shadow)">
+    <rect width="472" height="326" rx="8" fill="#fffdf8"/>
+    <path d="M0 0h472v18H0zM0 308h472v18H0z" fill="url(#plum)"/>
+    <path d="M17 29c26 0 44 14 49 37M17 29c-2 23 5 39 22 50M455 29c-26 0-44 14-49 37M455 29c2 23-5 39-22 50" fill="none" stroke="#9d8245" stroke-width="2"/>
+    <path d="M28 43l18 3-9 9zM35 60l17-4-7 11zM444 43l-18 3 9 9zM437 60l-17-4 7 11z" fill="#9d8245"/>
+    <circle cx="236" cy="57" r="21" fill="url(#plum)"/>
+    <path d="M236 42l4 9 10 1-7 6 2 10-9-5-9 5 2-10-7-6 10-1z" fill="#e8d39b"/>
+    <text x="236" y="96" text-anchor="middle" class="school" fill="#583556">YOUR SCHOOL NAME</text>
+    <text x="236" y="114" text-anchor="middle" class="tiny" fill="#8a748a">LEARN · LEAD · ACHIEVE</text>
+    <text x="236" y="151" text-anchor="middle" class="serif" font-size="25" font-weight="700" letter-spacing="1.5" fill="#583556">HONOUR AWARD</text>
+    <text x="236" y="174" text-anchor="middle" class="small" fill="#796879">is proudly presented to</text>
+    <text x="236" y="210" text-anchor="middle" class="serif" font-size="27" font-style="italic" fill="#6b315d">Learner Name</text>
+    <path d="M139 218q-16-12-20-32M333 218q16-12 20-32" fill="none" stroke="#9d8245" stroke-width="2"/>
+    <path d="M129 196l15 7-11 2zM124 184l14 9-12 1zM343 196l-15 7 11 2zM348 184l-14 9 12 1z" fill="#9d8245"/>
+    <text x="236" y="241" text-anchor="middle" class="tiny" fill="#665b68">For outstanding dedication and achievement</text>
+    <text x="236" y="257" text-anchor="middle" class="tiny" fill="#665b68">in the 2026 academic year.</text>
+    <line x1="76" y1="283" x2="158" y2="283" stroke="#a99aa5"/>
+    <line x1="314" y1="283" x2="396" y2="283" stroke="#a99aa5"/>
+    <text x="117" y="298" text-anchor="middle" class="tiny" fill="#796879">Headteacher</text>
+    <text x="355" y="298" text-anchor="middle" class="tiny" fill="#796879">Date · School seal</text>
+    <circle cx="236" cy="281" r="15" fill="#fffdf8" stroke="#9d8245" stroke-width="2"/>
+    <text x="236" y="285" text-anchor="middle" class="tiny" font-weight="700" fill="#583556">HONOUR</text>
+  </g>
+  <text x="1310" y="489" text-anchor="middle" class="sans" font-size="14" font-weight="700" fill="#17365d">03 · ACADEMIC HONOUR</text>
+  <text x="1310" y="508" text-anchor="middle" class="small" fill="#63748b">Plum · laurel · ceremonial seal</text>
+
+  <text x="54" y="561" class="sans" font-size="16" font-weight="700" fill="#17365d">LEARNER ID CARDS · WALLET-SIZE LANDSCAPE · FRONT SIDE</text>
+
+  <!-- ID 1 Classic -->
+  <g transform="translate(54 582)" filter="url(#shadow)">
+    <rect width="472" height="270" rx="18" fill="#fff" stroke="#17365d" stroke-width="3"/>
+    <path d="M18 0h436a18 18 0 0 1 18 18v48H0V18A18 18 0 0 1 18 0z" fill="url(#navy)"/>
+    <circle cx="42" cy="33" r="20" fill="#fff" fill-opacity=".12" stroke="#e1c277" stroke-width="1.5"/>
+    <path d="M42 20l4 8 9 1-7 6 2 9-8-4-8 4 2-9-7-6 9-1z" fill="#e4ca86"/>
+    <text x="74" y="31" class="school" fill="#fff">YOUR SCHOOL NAME</text>
+    <text x="74" y="49" class="tiny" fill="#e2e8f0">OFFICIAL LEARNER IDENTIFICATION</text>
+    <rect x="26" y="84" width="112" height="140" rx="8" fill="#e9eef4"/>
+    <circle cx="82" cy="132" r="27" fill="#c5cfdb"/>
+    <path d="M39 211c4-37 20-55 43-55s39 18 43 55" fill="#c5cfdb"/>
+    <text x="166" y="105" class="tiny" font-weight="700" fill="#9a742c">LEARNER NAME</text>
+    <text x="166" y="130" class="card-name" fill="#17365d">Learner Name</text>
+    <line x1="166" y1="141" x2="438" y2="141" stroke="#e2e8f0"/>
+    <text x="166" y="162" class="tiny" font-weight="700" fill="#9a742c">ADMISSION NO.</text>
+    <text x="166" y="179" class="card-meta" fill="#334155">ADM-2026-001</text>
+    <text x="166" y="201" class="tiny" font-weight="700" fill="#9a742c">CLASS · YEAR</text>
+    <text x="166" y="218" class="card-meta" fill="#334155">Grade 7 · 2026</text>
+    <rect x="0" y="239" width="472" height="31" rx="0" fill="#f3ead4"/>
+    <text x="236" y="259" text-anchor="middle" class="tiny" fill="#73581f">If found, please return to the school office</text>
+  </g>
+  <text x="290" y="877" text-anchor="middle" class="sans" font-size="14" font-weight="700" fill="#17365d">01 · CLASSIC SCHOOL ID</text>
+
+  <!-- ID 2 Modern -->
+  <g transform="translate(564 582)" filter="url(#shadow)">
+    <rect width="472" height="270" rx="18" fill="#fff"/>
+    <path d="M18 0h436a18 18 0 0 1 18 18v234a18 18 0 0 1-18 18H18A18 18 0 0 1 0 252V18A18 18 0 0 1 18 0z" fill="#fff" stroke="#d9e4eb" stroke-width="2"/>
+    <path d="M0 18A18 18 0 0 1 18 0h436a18 18 0 0 1 18 18v50H0z" fill="url(#teal)"/>
+    <path d="M438 0h34v67h-69z" fill="#d4b768" opacity=".9"/>
+    <circle cx="40" cy="34" r="19" fill="#fff" fill-opacity=".14" stroke="#fff" stroke-opacity=".75"/>
+    <path d="M40 22l4 7 8 1-6 6 1 8-7-4-7 4 1-8-6-6 8-1z" fill="#fff"/>
+    <text x="70" y="32" class="school" fill="#fff">YOUR SCHOOL NAME</text>
+    <text x="70" y="49" class="tiny" fill="#d9eef2">LEARNER ID · 2026</text>
+    <rect x="28" y="91" width="123" height="140" rx="12" fill="#e1f1f3"/>
+    <circle cx="89" cy="137" r="26" fill="#a9cbd0"/>
+    <path d="M42 218c5-35 22-53 47-53s42 18 47 53" fill="#a9cbd0"/>
+    <text x="174" y="113" class="tiny" font-weight="700" fill="#0e7490">STUDENT</text>
+    <text x="174" y="140" class="card-name" fill="#17365d">Learner Name</text>
+    <text x="174" y="163" class="card-meta" fill="#526176">ADM-2026-001</text>
+    <rect x="174" y="178" width="248" height="33" rx="7" fill="#eff7f8"/>
+    <text x="187" y="199" class="card-meta" fill="#0e6479">Grade 7  ·  2026</text>
+    <text x="174" y="232" class="tiny" fill="#718096">Return to the school office if found</text>
+  </g>
+  <text x="800" y="877" text-anchor="middle" class="sans" font-size="14" font-weight="700" fill="#17365d">02 · MODERN COLOR-BLOCK</text>
+
+  <!-- ID 3 Academic -->
+  <g transform="translate(1074 582)" filter="url(#shadow)">
+    <rect width="472" height="270" rx="18" fill="#fffdf8" stroke="#6b315d" stroke-width="2"/>
+    <path d="M18 0h436a18 18 0 0 1 18 18v55H0V18A18 18 0 0 1 18 0z" fill="url(#plum)"/>
+    <circle cx="42" cy="36" r="20" fill="#fff" fill-opacity=".12" stroke="#e4d29a" stroke-width="1.5"/>
+    <path d="M42 23l4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" fill="#e4d29a"/>
+    <text x="75" y="33" class="school" fill="#fff">YOUR SCHOOL NAME</text>
+    <text x="75" y="51" class="tiny" fill="#f0e5ef">LEARNER IDENTIFICATION CARD</text>
+    <rect x="25" y="94" width="114" height="135" rx="8" fill="#efe9ef"/>
+    <circle cx="82" cy="137" r="26" fill="#d1bfd0"/>
+    <path d="M39 216c4-35 20-52 43-52s39 17 43 52" fill="#d1bfd0"/>
+    <text x="164" y="112" class="tiny" font-weight="700" fill="#8a5b7f">LEARNER</text>
+    <text x="164" y="139" class="card-name" fill="#583556">Learner Name</text>
+    <text x="164" y="164" class="card-meta" fill="#5b5360">ADM-2026-001</text>
+    <line x1="164" y1="177" x2="437" y2="177" stroke="#ded4dc"/>
+    <text x="164" y="199" class="card-meta" fill="#583556">Grade 7  ·  2026</text>
+    <text x="164" y="219" class="tiny" fill="#766b76">School office: return if found</text>
+    <rect x="0" y="246" width="472" height="24" rx="0" fill="#f1e7ef"/>
+    <text x="236" y="262" text-anchor="middle" class="tiny" fill="#6b315d">OFFICIAL SCHOOL IDENTIFICATION</text>
+  </g>
+  <text x="1310" y="877" text-anchor="middle" class="sans" font-size="14" font-weight="700" fill="#17365d">03 · ACADEMIC CREST</text>
+
+  <rect x="54" y="930" width="1492" height="104" rx="12" fill="#fff" stroke="#e2e8f0"/>
+  <text x="80" y="965" class="sans" font-size="15" font-weight="700" fill="#17365d">Template behavior proposed</text>
+  <text x="80" y="991" class="small" fill="#526176">Choose a design before previewing or downloading. Templates use the school name, logo, colors and authorized stamp/signature assets.</text>
+  <text x="80" y="1013" class="small" fill="#526176">Certificate PDFs: A4 landscape, print-ready. ID PDFs: wallet-size landscape, print-ready. Sample portrait and learner details above are placeholders.</text>
+  <text x="54" y="1080" class="tiny" fill="#8492a6">DESIGN CONCEPTS · NOT YET ADDED TO THE LIVE PORTAL</text>
+</svg>

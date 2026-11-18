@@ -1,0 +1,124 @@
+
+/* ZELIMU CBC — PROFESSIONAL HEADER BRANDING */
+
+body main.page > header {
+    background: #064b38 !important;
+    color: #ffffff !important;
+    border: 1px solid #12684e !important;
+    border-radius: 16px !important;
+    padding: 14px 22px !important;
+    box-shadow: 0 6px 20px rgba(0, 50, 35, .12) !important;
+}
+
+body main.page > header .brand-lockup {
+    display: flex !important;
+    align-items: center !important;
+    gap: 18px !important;
+    min-width: 0;
+}
+
+body main.page > header .pm-brand {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+body main.page > header .pm-brand img {
+    width: 54px !important;
+    height: 54px !important;
+    object-fit: contain !important;
+}
+
+body main.page > header .pm-brand strong {
+    color: #f1c65b !important;
+    font-size: 19px !important;
+    font-weight: 800 !important;
+}
+
+body main.page > header #schoolTitle {
+    color: #ffffff !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+}
+
+body main.page > header #roleCaption {
+    color: #c8e9dc !important;
+    font-size: 12px !important;
+}
+
+body main.page > header #who {
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    white-space: normal !important;
+}
+
+body main.page > header #signOut {
+    background: #e5b744 !important;
+    color: #123b2c !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 800 !important;
+}
+
+@media (max-width: 760px) {
+    body main.page > header {
+        padding: 12px !important;
+    }
+
+    body main.page > header .brand-lockup {
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+    }
+
+    body main.page > header .header-actions {
+        flex-wrap: wrap !important;
+    }
+}
+
+
+/* ZELIMU HEADER VISIBILITY FIX V2 */
+
+body main.page > header {
+    background: #064b38 !important;
+    background-color: #064b38 !important;
+    background-image: none !important;
+    border: 1px solid #12684e !important;
+    border-image: none !important;
+}
+
+body main.page > header .header-actions #who {
+    display: inline-flex !important;
+    align-items: center !important;
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+body main.page > header #schoolTitle {
+    display: block !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+body main.page > header .pm-brand strong {
+    color: #f1c65b !important;
+}
+
+body main.page > header .role-caption {
+    color: #c8e9dc !important;
+}
+
+body main.page > header .header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+}
+
+body main.page > header #signOut {
+    background: #e5b744 !important;
+    color: #123b2c !important;
+}

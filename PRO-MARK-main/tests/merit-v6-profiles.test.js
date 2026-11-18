@@ -1,0 +1,11 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict');
+const {parseProfileInput}=require('../backend/services/merit-v6-profiles');
+const uuid='11111111-1111-4111-8111-111111111111';
+const base={academic_year_id:uuid,term_id:uuid,weights:[{assessment_type:'CAT1',weight:20},{assessment_type:'END_TERM',weight:80}]};
+test('valid school default normalizes CAT1',()=>{const x=parseProfileInput(base);assert.equal(x.class_id,null);assert.equal(x.weights[0].assessment_type,'CAT_1');});
+test('valid class override',()=>assert.equal(parseProfileInput({...base,class_id:uuid}).class_id,uuid));
+test('rejects missing term',()=>assert.throws(()=>parseProfileInput({...base,term_id:null}))); 
+test('rejects malformed identifiers',()=>assert.throws(()=>parseProfileInput({...base,class_id:'other-school'})));
+test('rejects weights not summing to 100',()=>assert.throws(()=>parseProfileInput({...base,weights:[{assessment_type:'CAT1',weight:20}]})));
+test('rejects duplicate assessment type',()=>assert.throws(()=>parseProfileInput({...base,weights:[{assessment_type:'CAT1',weight:50},{assessment_type:'CAT_1',weight:50}]})));

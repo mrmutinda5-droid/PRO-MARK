@@ -1,0 +1,22 @@
+/* ZELIMU CBC: green/white academic-portal appearance, original ZELIMU identity. */
+:root{--zelimu-green:#16854a;--zelimu-green-deep:#075a37;--zelimu-green-soft:#e7f5ec;--zelimu-ink:#172d24;--zelimu-border:#d7e5db;--zelimu-paper:#fff;--zelimu-canvas:#f1f7f2}
+html,body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Arial,sans-serif!important;color:var(--zelimu-ink)!important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{background:linear-gradient(180deg,#eaf5ed 0,#f5faf6 260px,#f5faf6 100%)!important}
+h1,h2,h3,h4,.section-title,.brand-title{color:#123c2b!important;font-weight:750!important;letter-spacing:-.025em;text-shadow:none!important;filter:none!important;opacity:1!important}
+p,span,label,td,th,small,input,select,textarea,button{font-synthesis:none;text-shadow:none;filter:none}
+#navTabs{background:linear-gradient(180deg,#075a37,#0c7444)!important;border-color:#075a37!important;box-shadow:0 8px 28px #084e3026!important}
+#navTabs button,#navTabs a{color:#fff!important;font-weight:650!important;opacity:1!important;text-shadow:none!important}
+#navTabs button:hover,#navTabs button.active{background:#ffffff24!important;color:#fff!important;box-shadow:inset 3px 0 0 #a6e8b4!important}
+.card,.panel,.tile,.stat-card,.metric-card,.module-card,.nav-managed-section{background:#fff!important;border:1px solid var(--zelimu-border)!important;box-shadow:0 3px 18px #164b2b0b!important;border-radius:15px!important}
+.card:hover,.module-card:hover{box-shadow:0 9px 26px #164b2b16!important}
+button.btn,button.primary,.btn.primary,button[type=submit]{background:#16854a!important;color:white!important;border:1px solid #13753f!important;border-radius:10px!important;font-weight:700!important}
+button.secondary,.btn.secondary{background:#eaf6ee!important;color:#0b673b!important;border:1px solid #b9dec5!important}
+input,select,textarea{background:#fff!important;color:#182d24!important;border:1px solid #bfcfc4!important;border-radius:9px!important;font-size:15px!important;line-height:1.45!important}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid #8bd4a5!important;outline-offset:2px!important}
+th{background:#eaf5ed!important;color:#125c39!important;font-weight:750!important}
+td{color:#20382a!important}
+tr:nth-child(even){background:#f8fbf9!important}
+a{color:#087643}
+.pill,.badge{font-weight:700!important}
+.pm-icon{filter:none!important;opacity:1!important}
+@media(max-width:760px){#navTabs{border-radius:12px!important}h1{font-size:clamp(1.4rem,5vw,2rem)!important}}

@@ -1,0 +1,37 @@
+
+/* ZELIMU CBC interior visual system — additive; no form IDs or API wiring changed */
+:root{--zelimu-ink:#172b47;--zelimu-navy:#142f52;--zelimu-sky:#eaf3fb;--zelimu-border:#dce6f1;--zelimu-radius:18px}
+body{background:#f3f7fc;color:var(--zelimu-ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.page{max-width:1480px;margin-inline:auto;padding:22px clamp(12px,2vw,30px) 70px}
+header{background:#fff;border:1px solid var(--zelimu-border);border-radius:18px;padding:14px 20px;box-shadow:0 8px 24px rgba(21,47,82,.055);margin-bottom:20px}
+header .pm-brand strong{letter-spacing:.02em}
+.portal-hero{background:linear-gradient(110deg,#142f52,#245b8a 72%,#147b91)!important;color:#fff!important;border:0!important;border-radius:22px!important;box-shadow:0 16px 32px rgba(20,47,82,.15)!important;padding:26px 30px!important}
+.portal-hero h1,.portal-hero p,.portal-hero .eyebrow,.portal-hero .user-greeting{color:#fff!important}
+.portal-hero .hero-badge{background:rgba(255,255,255,.16)!important;border:1px solid rgba(255,255,255,.4)!important;color:#fff!important}
+.grid.three{margin-top:20px;gap:15px}
+.grid.three .stat{background:#fff!important;border:1px solid var(--zelimu-border)!important;border-radius:16px!important;box-shadow:0 5px 18px rgba(21,47,82,.04)!important;padding:22px!important}
+.grid.three .stat b{font-size:clamp(24px,3vw,34px)!important;color:var(--zelimu-navy)!important}
+.zelimu-command{background:#fff;border:1px solid var(--zelimu-border);border-radius:20px;padding:24px;margin:22px 0;box-shadow:0 7px 22px rgba(21,47,82,.045)}
+.zelimu-command-heading{display:flex;justify-content:space-between;gap:15px;align-items:start;margin-bottom:20px}
+.zelimu-command-heading h2{font-size:1.35rem;letter-spacing:-.02em;margin:5px 0 4px;color:var(--zelimu-navy)}
+.zelimu-command-heading p{margin:0;color:#64748b;font-size:.9rem}
+.zelimu-kicker{font-size:.7rem;letter-spacing:.12em;font-weight:800;color:#237b9d}
+.zelimu-status{background:#eaf7f0;border:1px solid #c5e8d6;border-radius:999px;color:#176647;padding:8px 12px;font-size:.78rem;font-weight:700;white-space:nowrap}
+.zelimu-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.zelimu-shortcuts button{cursor:pointer;text-align:left;display:flex;flex-direction:column;align-items:flex-start;gap:6px;border:1px solid #e1e9f3;background:#f8fbff;padding:19px;border-radius:16px;color:var(--zelimu-ink);transition:transform .15s,border-color .15s,box-shadow .15s;font:inherit}
+.zelimu-shortcuts button:hover,.zelimu-shortcuts button:focus-visible{transform:translateY(-2px);border-color:#7cb5d8;box-shadow:0 10px 22px rgba(21,47,82,.09)}
+.zelimu-shortcuts strong{font-size:.95rem}.zelimu-shortcuts small{font-size:.76rem;color:#667b91}.zelimu-shortcut-icon{font-size:1.5rem;margin-bottom:4px}
+.admin-menu-shell{background:#fff!important;border:1px solid var(--zelimu-border)!important;border-radius:20px!important;padding:24px!important;box-shadow:0 8px 24px rgba(21,47,82,.045)!important}
+.pm-module-groups{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px!important}
+.pm-module-group{background:#fbfdff!important;border:1px solid #dce6f1!important;border-radius:16px!important;padding:18px!important;min-width:0}
+.pm-module-group h3{color:#1a4c75!important;font-size:.83rem!important;letter-spacing:.075em!important;margin:0 0 14px!important}
+.pm-admin-menu{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px!important}
+.pm-admin-menu button,.pm-admin-menu .zelimu-owner-link{background:#fff!important;color:#243e59!important;border:1px solid #e1e8f1!important;border-radius:11px!important;text-align:left!important;min-height:53px!important;padding:11px!important;display:flex!important;align-items:center!important;gap:9px!important;font-size:.85rem!important;line-height:1.35!important;box-shadow:none!important}
+.pm-admin-menu button:hover,.pm-admin-menu button:focus-visible{background:#edf6fd!important;border-color:#8fbddc!important}
+.pm-admin-menu .notice{grid-column:1/-1;border-radius:10px!important}
+.zelimu-module-toolbar{background:#f5f9fd;padding:13px;border-radius:12px;margin-bottom:19px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.zelimu-module-toolbar input{flex:1;min-width:190px;background:#fff;border:1px solid #cad9e7;border-radius:10px;padding:11px}
+#pm24_workspace{scroll-margin-top:18px;background:#fff;border:1px solid var(--zelimu-border);border-radius:18px;box-shadow:0 8px 22px rgba(21,47,82,.04)}
+input,select,textarea{max-width:100%}button,a,input,select{touch-action:manipulation}
+@media(max-width:900px){.pm-module-groups{grid-template-columns:1fr!important}.zelimu-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:540px){.page{padding:10px 10px 48px}.portal-hero{padding:20px!important}.zelimu-command,.admin-menu-shell{padding:15px!important}.zelimu-command-heading{flex-direction:column}.pm-admin-menu{grid-template-columns:1fr!important}.zelimu-shortcuts{gap:8px}.zelimu-shortcuts button{padding:13px}.zelimu-status{font-size:.7rem}header{padding:12px}}

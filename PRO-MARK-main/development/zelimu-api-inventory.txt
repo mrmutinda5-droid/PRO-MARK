@@ -1,0 +1,186 @@
+
+=== assessments.js ===
+GET     /:schoolId/:yearId/:termId
+GET     /:schoolId/:yearId/:termId/class/:classId/subjects
+POST    /:schoolId/:yearId/:termId/class-bulk
+POST    /:schoolId/marks
+POST    /:schoolId/marks/save
+POST    /:schoolId/:yearId/:termId
+PATCH   /:schoolId/:yearId/:termId/:assessmentId
+DELETE  /:schoolId/:yearId/:termId/:assessmentId
+GET     /:schoolId/marks
+GET     /:schoolId/assignment/:assignmentId/roster
+GET     /:schoolId/assignment/:assignmentId/marks-pdf
+
+=== auth.js ===
+POST    /login
+POST    /forgot-password
+POST    /reset-password
+POST    /change-password
+
+=== billing.js ===
+GET     /owner/overview
+POST    /owner/plans
+PATCH   /owner/plans/:id
+PATCH   /owner/payment-methods/:id
+POST    /owner/schools/:schoolId/subscription
+POST    /owner/invoices
+POST    /owner/invoices/:invoiceId/payment
+POST    /owner/invoices/:invoiceId/alert
+GET     /:schoolId/summary
+POST    /:schoolId/invoices/:invoiceId/payment-request
+PATCH   /:schoolId/notifications/:id/read
+
+=== biometrics.js ===
+GET     /:schoolId/summary
+POST    /:schoolId/devices
+PATCH   /:schoolId/devices/:deviceId
+DELETE  /:schoolId/devices/:deviceId
+POST    /:schoolId/manual-attendance
+
+=== communications.js ===
+GET     /:schoolId/parents
+POST    /:schoolId/parents
+POST    /:schoolId/publish-class-results
+POST    /:schoolId/link
+GET     /:schoolId/learner/:learnerId/parents
+POST    /:schoolId/send
+POST    /:schoolId/results-ready
+GET     /:schoolId/history
+GET     /:schoolId/grade-roster
+GET     /:schoolId/grade-learners
+POST    /:schoolId/publish-grade-results
+GET     /:schoolId/analytics
+
+=== documents.js ===
+POST    /:schoolId/learner/:learnerId/photo
+POST    /:schoolId/teacher/:teacherId/signature
+POST    /:schoolId/stamp
+GET     /:schoolId/assets
+GET     /:schoolId/announcements
+POST    /:schoolId/announcements
+
+=== extended.js ===
+GET     /:schoolId/:type
+POST    /:schoolId/:type
+PATCH   /:schoolId/:type/:id
+DELETE  /:schoolId/:type/:id
+
+=== finance.js ===
+GET     /:schoolId/overview
+POST    /:schoolId/structures
+POST    /:schoolId/structures/:structureId/assign
+POST    /:schoolId/payments
+
+=== grading.js ===
+GET     /:schoolId/systems
+POST    /:schoolId/systems
+PATCH   /:schoolId/systems/:systemId
+POST    /:schoolId/configurations
+
+=== merit.js ===
+GET     /:schoolId
+POST    /:schoolId/runs
+GET     /:schoolId/pdf
+
+=== operations.js ===
+GET     /:schoolId/overview
+GET     /:schoolId/mark-progress
+GET     /:schoolId/attendance
+POST    /:schoolId/attendance/bulk
+GET     /:schoolId/discipline
+POST    /:schoolId/discipline
+GET     /:schoolId/inventory
+POST    /:schoolId/inventory
+GET     /:schoolId/timetable
+POST    /:schoolId/timetable
+GET     /:schoolId/audit
+GET     /:schoolId/export/summary
+
+=== people.js ===
+GET     /:schoolId/user-roles
+PATCH   /:schoolId/user-roles/:roleId
+DELETE  /:schoolId/user-roles/:roleId
+POST    /:schoolId/user-roles/:roleId/reset-password
+GET     /:schoolId/leadership
+POST    /:schoolId/leadership
+GET     /:schoolId/teachers
+POST    /:schoolId/teachers
+POST    /:schoolId/teacher-accounts
+PATCH   /:schoolId/learners/:learnerId/identifiers
+POST    /:schoolId/promote
+PATCH   /:schoolId/learners/:learnerId
+POST    /:schoolId/learners/bulk
+POST    /:schoolId/learners/:learnerId/remove-from-class
+GET     /:schoolId/learners
+POST    /:schoolId/learners
+GET     /:schoolId/classes
+POST    /:schoolId/classes
+PATCH   /:schoolId/classes/:classId
+DELETE  /:schoolId/classes/:classId
+PATCH   /:schoolId/classes/:classId/status
+GET     /:schoolId/subjects
+POST    /:schoolId/subjects
+GET     /:schoolId/assignments
+POST    /:schoolId/assignments
+GET     /:schoolId/class-teachers
+POST    /:schoolId/class-teachers
+GET     /:schoolId/my-class-teacher-assignments
+GET     /:schoolId/teacher-assignments/:teacherId
+GET     /:schoolId/classes/:classId/pdf
+
+=== platform.js ===
+GET     /users
+PATCH   /users/:roleId
+DELETE  /users/:roleId
+POST    /users/:roleId/reset-password
+POST    /schools/import/preview
+POST    /schools/import/commit
+GET     /schools/import/jobs/:jobId
+GET     /templates
+GET     /templates
+GET     /schools
+POST    /schools
+PATCH   /schools/:schoolId/status
+DELETE  /schools/:schoolId
+POST    /schools/:schoolId/admin
+
+=== reports.js ===
+GET     /:schoolId/term/:learnerId/:yearId/:termId
+GET     /:schoolId/term/:learnerId/:yearId/:termId/pdf
+GET     /:schoolId/year/:learnerId/:yearId
+GET     /:schoolId/year/:learnerId/:yearId/pdf
+GET     /:schoolId/class/:classId/:yearId/:termId/pdf
+GET     /:schoolId/class/:classId/:yearId/:termId/learners
+GET     /:schoolId/comments/:learnerId/:yearId/:termId
+POST    /:schoolId/comments
+GET     /:schoolId/designation/:learnerId/:yearId/:termId
+PUT     /:schoolId/designation
+
+=== resources.js ===
+GET     /:schoolId
+POST    /:schoolId
+GET     /:schoolId/:id/file
+DELETE  /:schoolId/:id
+
+=== school-documents.js ===
+GET     /:schoolId/fee-structures/:id/pdf
+GET     /:schoolId/leaving-certificates
+POST    /:schoolId/leaving-certificates
+GET     /:schoolId/leaving-certificates/:id/pdf
+
+=== school.js ===
+GET     /:schoolId/overview
+GET     /:schoolId/structure
+GET     /:schoolId/academic-years
+POST    /:schoolId/academic-years
+PUT     /:schoolId/terms/:termId
+GET     /:schoolId/terms/:yearId
+
+=== settings.js ===
+GET     /:schoolId/identity
+PUT     /:schoolId/identity
+POST    /:schoolId/logo
+
+=== timetable-generator.js ===
+POST    /:schoolId/generate

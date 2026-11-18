@@ -1,0 +1,1 @@
+Stage 2C preview: modifies public/dashboard.html only. Requires V6 Stage 1,2A,2B and migration 029 on test database. No official PDFs/report card changes. Back up dashboard before install. Run npm run check. Do not deploy to production without database and browser testing.

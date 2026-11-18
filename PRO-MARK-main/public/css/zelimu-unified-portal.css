@@ -1,0 +1,30 @@
+/* ZELIMU CBC unified portal visual language — applied across real workspaces */
+:root{--z-blue:#245acb;--z-teal:#008d86;--z-purple:#7043c7;--z-gold:#b77814;--z-text:#152a46;--z-muted:#526782;--z-line:#cddcf0;--z-surface:#fff}
+html{font-size:16px!important;text-rendering:geometricPrecision!important;-webkit-font-smoothing:auto!important}
+body{color:var(--z-text)!important;background:radial-gradient(ellipse at 95% 0%,#dbebff 0,transparent 35%),radial-gradient(ellipse at 0% 90%,#d9f7ec 0,transparent 32%),#edf3fa!important;font-family:system-ui,-apple-system,'Segoe UI',Arial,sans-serif!important}
+body main.page{max-width:none!important}
+body header{background:linear-gradient(100deg,#14336d 0%,#245acb 58%,#047e86 100%)!important;color:white!important;border:0!important;border-radius:17px!important;box-shadow:0 10px 26px #133c7d36!important}
+body header *,body header .muted,body header .small,body header strong{color:#fff!important}
+body header button,body header select{color:#14336d!important;background:#fff!important;border:1px solid #b8d7f6!important}
+.portal-hero{background:linear-gradient(115deg,#1c4ba8 0%,#3a70cf 50%,#009c95 100%)!important;color:#fff!important;border:0!important;box-shadow:0 12px 28px #153e7b2d!important}
+.portal-hero h1,.portal-hero p,.portal-hero span,.portal-hero div{color:#fff!important;text-shadow:none!important}
+.pm-workflow-intro{background:#fff!important;border:1px solid #cbdcf2!important;box-shadow:0 12px 26px #1640771c!important}
+#navTabs .pm-module-group{border-radius:13px!important;box-shadow:0 3px 12px #1640770d!important}
+#navTabs .pm-module-group>h3{font-size:.86rem!important;line-height:1.35!important;letter-spacing:0!important}
+#navTabs .pm-admin-menu button{font-size:.9rem!important;font-weight:700!important;letter-spacing:0!important;color:#173454!important;text-align:left!important}
+#navTabs .pm-admin-menu button.active{background:#dceaff!important;color:#133e8e!important;border-left:4px solid #245acb!important}
+.nav-managed-section.nav-active,.card,.analytics-panel{background:#fff!important;border:1px solid #d3e0f0!important;box-shadow:0 7px 24px #123c7611!important;border-radius:17px!important}
+.nav-managed-section .section-title h2{font-size:clamp(1.18rem,2vw,1.55rem)!important;color:#193c76!important}
+body h1,body h2,body h3,body h4{font-weight:780!important;letter-spacing:-.015em!important;text-shadow:none!important;opacity:1!important}
+body p,body label,body td,body th,body button,body input,body select{filter:none!important;text-shadow:none!important;opacity:1!important}
+body table{border-collapse:separate!important;border-spacing:0!important;overflow:hidden;border-radius:10px!important}
+body th{background:#e6effe!important;color:#1a427e!important;font-weight:800!important;border-color:#c8d9ed!important}
+body td{color:#1b3656!important;border-color:#e1e9f3!important}
+body input,body select,body textarea{font-size:15px!important;color:#172d4b!important;border:1.5px solid #b5c9e4!important;background:#fff!important;min-height:39px}
+body input:focus,body select:focus,body textarea:focus{outline:3px solid #08a59a3b!important;border-color:#008f8b!important}
+body button{cursor:pointer}body button:focus-visible{outline:3px solid #e7a637!important;outline-offset:2px}
+.analytics-kpi{border:1px solid #d2e1f3!important;border-left:5px solid #245acb!important;background:linear-gradient(135deg,#fff,#eaf2ff)!important}
+.analytics-kpi:nth-child(2){border-left-color:#008f83!important;background:linear-gradient(135deg,#fff,#e6faf2)!important}
+.analytics-kpi:nth-child(3){border-left-color:#a46bd9!important;background:linear-gradient(135deg,#fff,#f1eaff)!important}
+.analytics-kpi:nth-child(4){border-left-color:#d99428!important;background:linear-gradient(135deg,#fff,#fff2db)!important}
+@media(max-width:760px){body header{border-radius:10px!important}.portal-hero{border-radius:13px!important}body .nav-managed-section.nav-active{border-radius:12px!important}body table{font-size:.85rem!important}}
